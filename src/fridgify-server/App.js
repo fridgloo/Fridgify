@@ -42,7 +42,7 @@ const setupServer = async () => {
   require("./api")(app);
 
   app.get("/", (req, res) => {
-    res.status(200).json({ message: "FRIDGFY SERVER WORKS" });
+    res.status(200).json({ message: "FRIDGIFY SERVER WORKS" });
   });
 };
 

@@ -1,22 +1,22 @@
+const path = require("path");
 const express = require("express");
+const session = require("express-session");
 const cors = require("cors");
-const app = express();
 const bodyparser = require("body-parser");
 const mongoose = require("mongoose");
 
 const port = process.env.PORT || 3200;
 
 const setupServer = async () => {
+
+  let app = express();
+
   app.use(cors());
   // middleware
   app.use(cors({ origin: "http://localhost:19006" }));
 
   app.use(bodyparser.json());
   app.use(bodyparser.urlencoded({ extended: false }));
-
-  app.listen(port, () => {
-    console.log(`running at port ${port}`);
-  });
 
   // Connect to MongoDB
   try {
@@ -43,6 +43,10 @@ const setupServer = async () => {
 
   app.get("/", (req, res) => {
     res.status(200).json({ message: "FRIDGIFY SERVER WORKS" });
+  });
+
+  let server = app.listen(port, () => {
+    console.log(`running at port ${server.address().port}`);
   });
 };
 

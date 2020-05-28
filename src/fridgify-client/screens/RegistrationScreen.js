@@ -72,7 +72,7 @@ export default function RegistrationScreen({ navigation }) {
         value={state.last_name}
         onChangeText={value => onChange('last_name', value)}
       />
-      <Button title="Register" onPress={() => { signUp(state); navigation.navigate('SignIn'); }} />
+      <Button title="Register" onPress={() => { signUp(state); }} />
     </View>
   );
 }

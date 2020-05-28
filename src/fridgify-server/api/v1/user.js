@@ -1,7 +1,7 @@
 "use strict";
 
 const Joi = require("@hapi/joi");
-const { validPassword } = require("../shared");
+const { validPassword } = require("../../../shared");
 const mongoose = require("mongoose");
 
 module.exports = (app) => {
@@ -15,7 +15,7 @@ module.exports = (app) => {
    * @param {req.body.password} Password for the user
    * @return {201, {username, email}} Return username and others
    */
-  app.post("/user", async (req, res) => {
+  app.post("/v1/user", async (req, res) => {
     // Schema for user info validation
     let data;
     try {
@@ -69,7 +69,7 @@ module.exports = (app) => {
    * @param {req.params.username} Username of the user to query for
    * @return {200 || 404}
    */
-  app.head("/user/:username", async (req, res) => {
+  app.head("/v1/user/:username", async (req, res) => {
     let user = await app.models.User.findOne({
       username: req.params.username.toLowerCase(),
     });
@@ -84,7 +84,7 @@ module.exports = (app) => {
    * @param {req.params.username} Username of the user to query for
    * @return {200, {username, primary_email, first_name, last_name}}
    */
-  app.get("/user/:username", async (req, res) => {
+  app.get("/v1/user/:username", async (req, res) => {
     let user = await app.models.User.findOne({
       username: req.params.username.toLowerCase(),
     });
@@ -108,7 +108,7 @@ module.exports = (app) => {
    * @param {req.body.last_name} Last name of the user - optional
    * @return {204, no body content} Return status only
    */
-  app.put("/user", async (req, res) => {
+  app.put("/v1/user", async (req, res) => {
     // Ensure the user is logged in
     if (!req.session.user)
       return res.status(401).send({ error: "unauthorized" });

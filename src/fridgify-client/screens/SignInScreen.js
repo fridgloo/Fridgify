@@ -2,7 +2,7 @@ import React from "react";
 import { Button, TextInput, View } from "react-native";
 import { AuthContext } from "../App";
 
-export default function SignInScreen() {
+export default function SignInScreen({ navigation }) {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
 
@@ -21,6 +21,7 @@ export default function SignInScreen() {
         secureTextEntry
       />
       <Button title="Sign in" onPress={() => signIn({ username, password })} />
+      <Button title="Create account" onPress={() => navigation.navigate('Registration')} />
     </View>
   );
 }

@@ -1,13 +1,14 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as React from "react";
-import { Platform, StatusBar, StyleSheet, View } from "react-native";
+import { ActivityIndicator, Platform, StatusBar, StyleSheet, View } from "react-native";
 
 import useCachedResources from "./hooks/useCachedResources";
-import BottomTabNavigator from "./navigation/BottomTabNavigator";
+
 import LinkingConfiguration from "./navigation/LinkingConfiguration";
-import SecureStore from "expo-secure-store";
-import SignInScreen from "./screens/SignInScreen";
+import * as SecureStore from "expo-secure-store";
+import RootStackNavigator from "./navigation/RootStackNavigator";
+
 const Stack = createStackNavigator();
 export const AuthContext = React.createContext();
 // TODO: Reference website to fix things like the dummytoken, etc
@@ -52,6 +53,7 @@ export default function App({ navigation }) {
 
       try {
         userToken = await SecureStore.getItemAsync("userToken");
+        useCachedResources();
       } catch (e) {
         // Restoring token failed
       }
@@ -83,42 +85,24 @@ export default function App({ navigation }) {
         // After getting token, we need to persist the token using `AsyncStorage`
         // In the example, we'll use a dummy token
 
-        dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
+        //dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
       },
     }),
     []
   );
 
-  const isLoadingComplete = useCachedResources();
-  // TODO: might not need
-  if (!isLoadingComplete) {
-    return null;
-  } else {
-    return (
-      <View style={styles.container}>
-        {Platform.OS === "ios" && <StatusBar barStyle="dark-content" />}
-        <AuthContext.Provider value={authContext}>
-          <NavigationContainer linking={LinkingConfiguration}>
-            <Stack.Navigator>
-              {state.userToken == null ? (
-                <Stack.Screen
-                  name="SignIn"
-                  component={SignInScreen}
-                  options={{
-                    title: "Sign in",
-                    // When logging out, a pop animation feels intuitive
-                    animationTypeForReplace: state.isSignout ? "pop" : "push",
-                  }}
-                />
-              ) : (
-                <Stack.Screen name="Root" component={BottomTabNavigator} />
-              )}
-            </Stack.Navigator>
-          </NavigationContainer>
-        </AuthContext.Provider>
-      </View>
-    );
-  }
+
+  return (
+    <View style={styles.container}>
+      {Platform.OS === "ios" && <StatusBar barStyle="dark-content" />}
+      <AuthContext.Provider value={authContext}>
+        <NavigationContainer linking={LinkingConfiguration}>
+          <RootStackNavigator userToken={state.userToken} isLoading={state.isLoading} />
+        </NavigationContainer>
+      </AuthContext.Provider>
+    </View>
+  );
+  
 }
 
 const styles = StyleSheet.create({

@@ -79,21 +79,22 @@ export default function App({ navigation }) {
         dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
       },
       signOut: () => dispatch({ type: "SIGN_OUT" }),
-      signUp: async (state) => {
+      signUp: async (data) => {
         // In a production app, we need to send user data to server and get a token
         // We will also need to handle errors if sign up failed
         // After getting token, we need to persist the token using `AsyncStorage`
         // In the example, we'll use a dummy token
-        if (state !== undefined && state.username !== '' && state.password !== '' && state.email !== '') {
+        if (data !== undefined && data.username !== '' && data.password !== '' && data.email !== '') {
+          console.log(data)
           const res = await fetch('http://localhost:3200/v1/user', {
             method: 'POST',
-            mode: 'no-cors',
-            url: 'http://localhost:3200',
-            body: state,
-            credentials: 'include',
             headers: {
-              'content-type': 'application/json'
-            }
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+            // mode: "no-cors",
+            // url: "http://localhost:3200"     
           });
           console.log(res);
           if (res.ok) {

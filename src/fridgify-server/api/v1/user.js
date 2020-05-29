@@ -17,6 +17,10 @@ module.exports = (app) => {
    */
   app.post("/v1/user", async (req, res) => {
     // Schema for user info validation
+    console.log("REQ:")
+    console.log(req.body)
+    //console.log("RES:")
+    // console.log(res)
     let data;
     try {
       // Validate user input

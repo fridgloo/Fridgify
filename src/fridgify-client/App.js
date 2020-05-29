@@ -75,8 +75,17 @@ export default function App({ navigation }) {
         // We will also need to handle errors if sign in failed
         // After getting token, we need to persist the token using `AsyncStorage`
         // In the example, we'll use a dummy token
-
-        dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
+        const res = await fetch('http://localhost:3200/v1/session', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        if (res.ok) {
+          dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
+        }
       },
       signOut: () => dispatch({ type: "SIGN_OUT" }),
       signUp: async (data) => {
@@ -92,20 +101,16 @@ export default function App({ navigation }) {
               Accept: 'application/json',
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
-            // mode: "no-cors",
-            // url: "http://localhost:3200"     
+            body: JSON.stringify(data)
           });
           console.log(res);
           if (res.ok) {
-            // Notify users
-           // setNotify(`${state.username} registered.  You will now need to log in.`);
             dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
           } else {
             console.log("awefawef");
             //const err = await res.json();
           }
-        }
+        } 
       },
     }),
     []

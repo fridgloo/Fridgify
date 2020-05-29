@@ -1,5 +1,5 @@
 "use strict";
-
+const jwt = require('jsonwebtoken');
 let Joi = require("@hapi/joi");
 
 module.exports = app => {
@@ -29,10 +29,12 @@ module.exports = app => {
         // Regenerate session when signing in to prevent fixation
         // console.log(`Session.login success: ${req.session.user.username}`);
           // If a match, return 201:{ username, email }
-          res.status(200).send({
-            username: user.username,
-            email: user.email
-          });
+          jwt.sign({ user }, 'secretkey', (err, token) => {
+            res.status(200).send({
+              token: token
+            });
+          })
+          
       } else {
         // If not a match, return 401:unauthorized
         console.log(`Session.login failed.  Incorrect credentials.`);

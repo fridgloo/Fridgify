@@ -1,7 +1,8 @@
 "use strict";
 
+const jwt = require('jsonwebtoken');
 const Joi = require("@hapi/joi");
-const { validPassword } = require("../../../shared");
+const { validPassword } = require("../../util/Validation");
 const mongoose = require("mongoose");
 
 module.exports = (app) => {
@@ -50,11 +51,15 @@ module.exports = (app) => {
       let user = new app.models.User(data);
       await user.save();
       // Send the happy response back
-      res.status(201).send({
-        username: data.username,
-        email: data.email,
+      jwt.sign({user}, 'secretkey', (err, token) => {
+        res.status(201).send({
+          token: token
+        });
       });
+
+      
     } catch (err) {
+      console.log(err)
       // Error if username is already in use
       if (err.code === 11000) {
         if (err.message.indexOf("username_1") !== -1)

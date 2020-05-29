@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, TextInput, View } from "react-native";
 import { AuthContext } from "../App";
-import { validPassword, validUsername } from '../../shared';
+import { validPassword, validUsername } from '../util/Validation';
 
 
 export default function RegistrationScreen({ navigation }) {

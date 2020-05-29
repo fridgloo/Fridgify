@@ -11,6 +11,7 @@ import RootStackNavigator from "./navigation/RootStackNavigator";
 
 const Stack = createStackNavigator();
 export const AuthContext = React.createContext();
+
 // TODO: Reference website to fix things like the dummytoken, etc
 // We used SecureStorage instead of AsyncStorage
 // https://reactnavigation.org/docs/auth-flow/
@@ -20,12 +21,14 @@ export default function App({ navigation }) {
     (prevState, action) => {
       switch (action.type) {
         case "RESTORE_TOKEN":
+          console.log("asdnklasdnalksndlnlaksdn")
           return {
             ...prevState,
             userToken: action.token,
             isLoading: false,
           };
         case "SIGN_IN":
+          console.log("REDUCER: ", action)
           return {
             ...prevState,
             isSignout: false,
@@ -50,20 +53,27 @@ export default function App({ navigation }) {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
       let userToken;
+      console.log("line 53")
 
       try {
-        userToken = await SecureStore.getItemAsync("userToken");
-        useCachedResources();
+        //useCachedResources();
+        console.log("line 59")
+        SecureStore.getItemAsync('user_token')
+          .then(userToken => {
+            // This will switch to the App screen or Auth screen and this loading
+            // screen will be unmounted and thrown away.
+            console.log("HELLLLO?");
+            dispatch({ type: "RESTORE_TOKEN", token: userToken });
+          })
       } catch (e) {
         // Restoring token failed
       }
 
       // After restoring token, we may need to validate it in production apps
 
-      // This will switch to the App screen or Auth screen and this loading
-      // screen will be unmounted and thrown away.
-      dispatch({ type: "RESTORE_TOKEN", token: userToken });
+      
     };
+    console.log("line 51")
 
     bootstrapAsync();
   }, []);
@@ -71,19 +81,25 @@ export default function App({ navigation }) {
   const authContext = React.useMemo(
     () => ({
       signIn: async (data) => {
-        // In a production app, we need to send some data (usually username, password) to server and get a token
-        // We will also need to handle errors if sign in failed
-        // After getting token, we need to persist the token using `AsyncStorage`
-        // In the example, we'll use a dummy token
-
-        dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
+        const res = await fetch('http://localhost:3200/v1/auth', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+        data = await res.json();
+        if (res.ok) {
+          SecureStore.setItemAsync("user_token", data.token);
+          dispatch({ type: "SIGN_IN", token: data.token });
+        }
       },
-      signOut: () => dispatch({ type: "SIGN_OUT" }),
+      signOut: async () => {
+        SecureStore.deleteItemAsync("user_token");
+        dispatch({ type: "SIGN_OUT" });
+      },
       signUp: async (data) => {
-        // In a production app, we need to send user data to server and get a token
-        // We will also need to handle errors if sign up failed
-        // After getting token, we need to persist the token using `AsyncStorage`
-        // In the example, we'll use a dummy token
         if (data !== undefined && data.username !== '' && data.password !== '' && data.email !== '') {
           console.log(data)
           const res = await fetch('http://localhost:3200/v1/user', {
@@ -92,25 +108,18 @@ export default function App({ navigation }) {
               Accept: 'application/json',
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(data),
-            // mode: "no-cors",
-            // url: "http://localhost:3200"     
+            body: JSON.stringify(data)
           });
-          console.log(res);
+          data = await res.json()
           if (res.ok) {
-            // Notify users
-           // setNotify(`${state.username} registered.  You will now need to log in.`);
-            dispatch({ type: "SIGN_IN", token: "dummy-auth-token" });
-          } else {
-            console.log("awefawef");
-            //const err = await res.json();
+            SecureStore.setItemAsync("user_token", data.token);
+            dispatch({ type: "SIGN_IN", token: data.token });
           }
-        }
+        } 
       },
     }),
     []
   );
-
 
   return (
     <View style={styles.container}>

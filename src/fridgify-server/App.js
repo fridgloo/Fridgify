@@ -4,16 +4,20 @@ const session = require("express-session");
 const cors = require("cors");
 const bodyparser = require("body-parser");
 const mongoose = require("mongoose");
+const envConfig = require("simple-env-config");
 
-const port = process.env.PORT || 3200;
+const env = process.env.NODE_ENV ? process.env.NODE_ENV : "dev";
 
 const setupServer = async () => {
+  const conf = await envConfig("../../config/config.json", env);
+  const port = process.env.PORT ? process.env.PORT : conf.port;
 
+  // Setup our Express pipeline
   let app = express();
 
   app.use(cors());
   // middleware
-  app.use(cors({ origin: "http://localhost:19006" }));
+  app.use(cors({ origin: `${conf.url}:${port}` }));
 
   app.use(bodyparser.json());
   app.use(bodyparser.urlencoded({ extended: false }));
@@ -26,8 +30,8 @@ const setupServer = async () => {
     mongoose.set("useCreateIndex", true);
     mongoose.set("useUnifiedTopology", true);
     // Connect to the DB server
-    await mongoose.connect("mongodb://localhost:32768");
-    console.log(`MongoDB connected: mongodb://localhost:32768`);
+    await mongoose.connect(conf.mongodb);
+    console.log(`MongoDB connected: ${conf.mongodb}`);
   } catch (err) {
     console.log(err);
     process.exit(-1);
@@ -46,7 +50,7 @@ const setupServer = async () => {
   });
 
   let server = app.listen(port, () => {
-    console.log(`running at port ${server.address().port}`);
+    console.log(`${env} listening on: ${server.address().port}`);
   });
 };
 

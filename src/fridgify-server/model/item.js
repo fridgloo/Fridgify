@@ -3,17 +3,20 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/***************** User Model *******************/
+
+/***************** Item Model *******************/
+[ ]
 
 let Item = new Schema({
-    owner: { type: Schema.ObjectId, ref: "Fridge" },
+    fridge_id: { type: Schema.ObjectId, ref: "Fridge" },
     name: { type: String, required: true },
-    bought: { type: Date, required: true},
-    exp: { type: Date },
-    true_exp: { type: Date }
+    //quantity: { type: [Quantity] },
+    bought_date: { type: Date, required: true},
+    exp_date: { type: Date },
+    note: { type: String }
 });
 
-User.pre("validate", function (next) {
+Item.pre("validate", function (next) {
   next();
 });
 

@@ -68,7 +68,7 @@ To stop the server: ctrl + c
 
 ### Frontend server:
 
-Enter fridgify-client directoory: (from fridgify-server directory)
+Enter fridgify-client directory: (from fridgify-server directory)
 
     cd ../fridgify-client
 

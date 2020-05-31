@@ -20,13 +20,15 @@ Express : 3200
 2. install [kitematic](https://github.com/docker/kitematic/releases)
    (choose between top 3 distributions)
 
-3. open kitematic. search and create 'mongo'
+3. run docker.
 
-4. start Mongo container from the left bar if not running.
+4. open kitematic. search and create 'mongo' (make sure docker is running)
 
-5. With Mongo container selected, click on settings in top right corner.
+5. start Mongo container from the left bar if not running.
 
-6. Check the published IP:PORT is **localhost:32768**
+6. With Mongo container selected, click on settings in top right corner.
+
+7. Check the published IP:PORT is **localhost:32768**
 
 ---
 

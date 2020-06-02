@@ -81,7 +81,7 @@ Different methods of opening the client:
 
 1. Run on simulator
 2. web browser
-3. install 'expo' from the App Store & scan the QR code. _(Recommended)_
+3. install 'expo client' from the App Store & scan the QR code. _(Recommended)_
 
 ---
 

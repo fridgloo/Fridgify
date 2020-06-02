@@ -39,7 +39,7 @@ Go to a directory you want to install the project.
 
 Using terminal, clone the code. (recommended via git clone)
 
-    git clone https://github.com/daseyun/Fridgify.git
+    git clone https://github.com/fridgloo/Fridgify.git
 
 ---
 

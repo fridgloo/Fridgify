@@ -17,7 +17,7 @@ const setupServer = async () => {
 
   app.use(cors());
   // middleware
-  app.use(cors({ origin: `${conf.url}:${port}` }));
+  app.use(cors({ origin: `${conf.url}:${conf.expo_port}` }));
 
   app.use(bodyparser.json());
   app.use(bodyparser.urlencoded({ extended: false }));

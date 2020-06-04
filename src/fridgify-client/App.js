@@ -1,7 +1,13 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import * as React from "react";
-import { ActivityIndicator, Platform, StatusBar, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  View,
+} from "react-native";
 
 import useCachedResources from "./hooks/useCachedResources";
 
@@ -21,14 +27,13 @@ export default function App({ navigation }) {
     (prevState, action) => {
       switch (action.type) {
         case "RESTORE_TOKEN":
-          console.log("asdnklasdnalksndlnlaksdn")
           return {
             ...prevState,
             userToken: action.token,
             isLoading: false,
           };
         case "SIGN_IN":
-          console.log("REDUCER: ", action)
+          console.log("REDUCER: ", action);
           return {
             ...prevState,
             isSignout: false,
@@ -53,27 +58,20 @@ export default function App({ navigation }) {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
       let userToken;
-      console.log("line 53")
 
       try {
         //useCachedResources();
-        console.log("line 59")
-        SecureStore.getItemAsync('user_token')
-          .then(userToken => {
-            // This will switch to the App screen or Auth screen and this loading
-            // screen will be unmounted and thrown away.
-            console.log("HELLLLO?");
-            dispatch({ type: "RESTORE_TOKEN", token: userToken });
-          })
+        SecureStore.getItemAsync("user_token").then((userToken) => {
+          // This will switch to the App screen or Auth screen and this loading
+          // screen will be unmounted and thrown away.
+          dispatch({ type: "RESTORE_TOKEN", token: userToken });
+        });
       } catch (e) {
         // Restoring token failed
       }
 
       // After restoring token, we may need to validate it in production apps
-
-      
     };
-    console.log("line 51")
 
     bootstrapAsync();
   }, []);
@@ -81,14 +79,14 @@ export default function App({ navigation }) {
   const authContext = React.useMemo(
     () => ({
       signIn: async (data) => {
-        const res = await fetch('http://localhost:3200/v1/auth', {
-          method: 'POST',
+        const res = await fetch("http://localhost:3200/v1/auth", {
+          method: "POST",
           headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json'
+            Accept: "application/json",
+            "Content-Type": "application/json",
           },
-          body: JSON.stringify(data)
-        })
+          body: JSON.stringify(data),
+        });
         data = await res.json();
         if (res.ok) {
           SecureStore.setItemAsync("user_token", data.token);
@@ -100,22 +98,27 @@ export default function App({ navigation }) {
         dispatch({ type: "SIGN_OUT" });
       },
       signUp: async (data) => {
-        if (data !== undefined && data.username !== '' && data.password !== '' && data.email !== '') {
-          console.log(data)
-          const res = await fetch('http://localhost:3200/v1/user', {
-            method: 'POST',
+        if (
+          data !== undefined &&
+          data.username !== "" &&
+          data.password !== "" &&
+          data.email !== ""
+        ) {
+          console.log(data);
+          const res = await fetch("http://localhost:3200/v1/user", {
+            method: "POST",
             headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
+              Accept: "application/json",
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
           });
-          data = await res.json()
+          data = await res.json();
           if (res.ok) {
             SecureStore.setItemAsync("user_token", data.token);
             dispatch({ type: "SIGN_IN", token: data.token });
           }
-        } 
+        }
       },
     }),
     []
@@ -126,12 +129,14 @@ export default function App({ navigation }) {
       {Platform.OS === "ios" && <StatusBar barStyle="dark-content" />}
       <AuthContext.Provider value={authContext}>
         <NavigationContainer linking={LinkingConfiguration}>
-          <RootStackNavigator userToken={state.userToken} isLoading={state.isLoading} />
+          <RootStackNavigator
+            userToken={state.userToken}
+            isLoading={state.isLoading}
+          />
         </NavigationContainer>
       </AuthContext.Provider>
     </View>
   );
-  
 }
 
 const styles = StyleSheet.create({

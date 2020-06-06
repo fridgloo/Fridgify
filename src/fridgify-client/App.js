@@ -9,8 +9,6 @@ import {
   View,
 } from "react-native";
 
-import useCachedResources from "./hooks/useCachedResources";
-
 import LinkingConfiguration from "./navigation/LinkingConfiguration";
 import * as SecureStore from "expo-secure-store";
 import RootStackNavigator from "./navigation/RootStackNavigator";
@@ -58,14 +56,13 @@ export default function App({ navigation }) {
     // Fetch the token from storage then navigate to our appropriate place
     const bootstrapAsync = async () => {
       let userToken;
-
       try {
-        //useCachedResources();
-        SecureStore.getItemAsync("user_token").then((userToken) => {
+        SecureStore.getItemAsync("user_token")
+          .then((userToken) => {
           // This will switch to the App screen or Auth screen and this loading
           // screen will be unmounted and thrown away.
-          dispatch({ type: "RESTORE_TOKEN", token: userToken });
-        });
+            dispatch({ type: "RESTORE_TOKEN", token: userToken });
+          });
       } catch (e) {
         // Restoring token failed
       }

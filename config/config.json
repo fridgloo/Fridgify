@@ -2,7 +2,7 @@
     "url": "http://localhost",
     "api_version": "/v1",
     "mongodb": "mongodb://localhost:32768",
-    "expo_port": 19006,
+    "expo_port": 19002,
     "port": 3200,
     "environments" : {
       "test": {

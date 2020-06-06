@@ -25,7 +25,6 @@ export default function useCachedResources() {
         SplashScreen.hideAsync();
       }
     }
-
     loadResourcesAndDataAsync();
   }, []);
 

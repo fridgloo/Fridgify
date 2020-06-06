@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, TextInput, View } from "react-native";
-import { AuthContext } from "../App";
+import { AuthContext } from "../providers/AuthContextProvider";
 import { validPassword, validUsername } from '../util/Validation';
 
 

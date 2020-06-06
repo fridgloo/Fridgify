@@ -3,15 +3,15 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-
 /***************** Item Model *******************/
 [ ]
 
 let Item = new Schema({
-    fridge_id: { type: Schema.ObjectId, ref: "Fridge" },
+    fridge: { type: Schema.ObjectId, ref: "Fridge" },
+    glist: { type: Schema.ObjectId, ref: "Glist" },
     name: { type: String, required: true },
     //quantity: { type: [Quantity] },
-    bought_date: { type: Date, required: true},
+    bought_date: { type: Date },
     exp_date: { type: Date },
     note: { type: String }
 });

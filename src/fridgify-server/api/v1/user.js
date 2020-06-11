@@ -17,10 +17,6 @@ module.exports = (app) => {
    */
   app.post("/v1/user", async (req, res) => {
     // Schema for user info validation
-    console.log("REQ:");
-    console.log(req.body);
-    //console.log("RES:")
-    // console.log(res)
     let data;
     try {
       // Validate user input
@@ -100,9 +96,11 @@ module.exports = (app) => {
     else {
       res.status(200).send({
         username: user.username,
-        primary_email: user.primary_email,
+        email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
+        fridges: user.fridges,
+        glist: user.glists
       });
     }
   });

@@ -5,9 +5,12 @@ import TabBarIcon from "../components/TabBarIcon";
 import HomeScreen from "../screens/HomeScreen";
 import LinksScreen from "../screens/LinksScreen";
 import DemoScreen from "../screens/DemoScreen";
+import GlistScreen from "../screens/GlistScreen";
+import FridgeHubScreen from "../screens/FridgeHubScreen";
+import FridgeRootStackNavigator from "./FridgeRootStackNavigator";
 
 const AppTab = createBottomTabNavigator();
-const INITIAL_ROUTE_NAME = "Home";
+const INITIAL_ROUTE_NAME = "Fridge";
 
 export default function AppTabNavigator({ navigation, route }) {
   // Set the header title on the parent stack navigator depending on the
@@ -17,32 +20,32 @@ export default function AppTabNavigator({ navigation, route }) {
   return (
     <AppTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
       <AppTab.Screen
-        name="Home"
-        component={HomeScreen}
+        name="Grocery"
+        component={GlistScreen}
         options={{
-          title: "Get Started",
+          title: "Grocery",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-code-working" />
+            <TabBarIcon focused={focused} name="md-basket" />
           ),
         }}
       />
       <AppTab.Screen
-        name="Links"
-        component={LinksScreen}
+        name="Fridge"
+        component={FridgeRootStackNavigator}
         options={{
-          title: "Resources",
+          title: "Fridge",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-book" />
+            <TabBarIcon focused={focused} name="md-journal" />
           ),
         }}
       />
       <AppTab.Screen
-        name="Demo"
+        name="Profile"
         component={DemoScreen}
         options={{
-          title: "Demo",
+          title: "Profile",
           tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-code-working" />
+            <TabBarIcon focused={focused} name="md-person" />
           ),
         }}
       />
@@ -55,11 +58,11 @@ function getHeaderTitle(route) {
     route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
 
   switch (routeName) {
-    case "Home":
-      return "How to get started";
-    case "Links":
-      return "Links to learn more";
-    case "Demo":
-      return "police, open up"
+    case "Grocery":
+      return "Grocery List";
+    case "Fridge":
+      return "Fridge";
+    case "Profile":
+      return "Profile"
   }
 }

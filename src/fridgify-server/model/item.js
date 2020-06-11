@@ -13,6 +13,7 @@ let Item = new Schema({
     //quantity: { type: [Quantity] },
     bought_date: { type: Date },
     exp_date: { type: Date },
+    type: { type: String },
     note: { type: String }
 });
 

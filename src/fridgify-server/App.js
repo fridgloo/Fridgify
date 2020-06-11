@@ -40,6 +40,9 @@ const setupServer = async () => {
   // Import our Data Models
   app.models = {
     User: require("./model/user"),
+    Fridge: require("./model/fridge"),
+    Item: require("./model/item"),
+    Glist: require("./model/glist")
   };
 
   // Import our routes

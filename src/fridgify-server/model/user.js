@@ -20,6 +20,8 @@ let User = new Schema({
   last_name: { type: String, default: "" },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
+  fridges: [{ type: Schema.Types.ObjectId, ref: "Fridge" }],
+  glists: [{ type: Schema.Types.ObjectId, ref: "Glist" }]
 });
 
 User.path("username").validate(function (value) {

@@ -1,9 +1,8 @@
 "use strict";
 
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const Joi = require("@hapi/joi");
 const { validPassword } = require("../../util/Validation");
-const mongoose = require("mongoose");
 
 module.exports = (app) => {
   /**
@@ -18,10 +17,6 @@ module.exports = (app) => {
    */
   app.post("/v1/user", async (req, res) => {
     // Schema for user info validation
-    console.log("REQ:")
-    console.log(req.body)
-    //console.log("RES:")
-    // console.log(res)
     let data;
     try {
       // Validate user input
@@ -51,15 +46,13 @@ module.exports = (app) => {
       let user = new app.models.User(data);
       await user.save();
       // Send the happy response back
-      jwt.sign({user}, 'secretkey', (err, token) => {
+      jwt.sign({ user }, "secretkey", (err, token) => {
         res.status(201).send({
-          token: token
+          token: token,
         });
       });
-
-      
     } catch (err) {
-      console.log(err)
+      console.log(err);
       // Error if username is already in use
       if (err.code === 11000) {
         if (err.message.indexOf("username_1") !== -1)
@@ -103,9 +96,11 @@ module.exports = (app) => {
     else {
       res.status(200).send({
         username: user.username,
-        primary_email: user.primary_email,
+        email: user.email,
         first_name: user.first_name,
         last_name: user.last_name,
+        fridges: user.fridges,
+        glist: user.glists
       });
     }
   });

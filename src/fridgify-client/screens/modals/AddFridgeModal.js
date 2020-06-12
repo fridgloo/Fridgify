@@ -15,8 +15,8 @@ export default function AddFridgeModal({ navigation, route }) {
       },
       body: JSON.stringify({ name: name }),
     });
-    const data = await res.json();
     if (res.ok) {
+      const data = await res.json();
       resetName();
       navigation.navigate("FridgeHubStack", {
         screen: "FridgeHub",

@@ -6,8 +6,6 @@ module.exports = (app) => {
   /**
    * Create a fridge
    *
-   * @param {req.body.name} Username of user trying to log in
-   * @return { 200, {username, primary_email} }
    */
   app.post("/v1/fridge/:token", async (req, res) => {
     // TODO: Try to add more validation / type check / error check
@@ -57,8 +55,6 @@ module.exports = (app) => {
   /**
    * Get the fridge by id
    *
-   * @param {req.body.name} Username of user trying to log in
-   * @return { 200, {username, primary_email} }
    */
   app.get("/v1/fridge/id/:id", async (req, res) => {
     try {
@@ -145,4 +141,10 @@ module.exports = (app) => {
       res.status(400).send({ error: "fridge.get failed" });
     }
   });
+  
+  /**
+   * Edit the fridge
+   * 
+   */
+  // app.put("/v1/fridge/:token")
 };

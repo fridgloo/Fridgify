@@ -6,8 +6,6 @@ module.exports = (app) => {
   /**
    * Create grocery item from fridge
    *
-   * @param {req.body.name} Username of user trying to log in
-   * @return { 200, {username, primary_email} }
    */
   app.post("/v1/item/fridge/:token", async (req, res) => {
     // Try to create the item

@@ -1,5 +1,6 @@
 config/
-node_modules/
+src/fridgify-client/node_modules
+src/fridgify-server/node_modules
 .expo/
 npm-debug.*
 *.jks

@@ -14,11 +14,15 @@ module.exports = (app) => {
     try {
       jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
         if (err) {
-          return res.status(400).send({ error: "fridge.post jwt verify error" });
+          return res
+            .status(400)
+            .send({ error: "fridge.post jwt verify error" });
         }
-        const fridgeCheck = await app.models.Fridge.findOne({ name: req.body.name});
+        const fridgeCheck = await app.models.Fridge.findOne({
+          name: req.body.name,
+        });
         if (fridgeCheck) {
-          return res.status(400).send({ error: "Fridge name already used"});
+          return res.status(400).send({ error: "Fridge name already used" });
         }
 
         let newFridge = {
@@ -97,7 +101,9 @@ module.exports = (app) => {
         const fridges = await app.models.Fridge.find({ owner: user._id });
         // If not found, return 401:unauthorized
         if (!fridges) {
-          return res.status(404).send({ error: "fridge.get - Fridge not found" });
+          return res
+            .status(404)
+            .send({ error: "fridge.get - Fridge not found" });
         }
         // If found, compare hashed passwords
         else {
@@ -141,10 +147,10 @@ module.exports = (app) => {
       res.status(400).send({ error: "fridge.get failed" });
     }
   });
-  
+
   /**
    * Edit the fridge
-   * 
+   *
    */
   // app.put("/v1/fridge/:token")
 };

@@ -22,10 +22,11 @@ const Schema = mongoose.Schema;
 let Quantity = new Schema({
   multiplier_to_gram: { type: mongoose.Types.Decimal128, required: true },
   weight_unit: { type: String, required: true },
+  symbol: { type: String, required: true },
 });
 
-Item.pre("validate", function (next) {
+Quantity.pre("validate", function (next) {
   next();
 });
 
-module.exports = mongoose.model("Item", Item);
+module.exports = mongoose.model("Quantity", Quantity);

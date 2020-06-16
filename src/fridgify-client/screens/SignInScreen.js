@@ -1,9 +1,9 @@
 import React from "react";
-import { Image, View, Text, StyleSheet } from "react-native";
+import { View, SafeAreaView, Image, Text, StyleSheet} from "react-native"; 
 import { AuthContext } from "../providers/AuthContextProvider";
-import AppButton from "../components/AppButton";
+import AuthButton from "../components/AuthButton";
 import AppTextInput from "../components/AppTextInput";
-import AppText from "../components/AppText";
+import LogoText from "../components/LogoText";
 
 export default function SignInScreen({ navigation }) {
   const [username, setUsername] = React.useState("");
@@ -11,14 +11,15 @@ export default function SignInScreen({ navigation }) {
 
   const { signIn } = React.useContext(AuthContext);
   return (
-    <View style={{ backgroundColor: "white", flex: 1 }}>
-      <AppText style={styles.title}>Fridgloo</AppText>
+    <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
+      <LogoText style={styles.title}>Fridgloo </LogoText>
       <View style={styles.logoContainer}>
         <Image
           style={styles.logo}
           source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
         />
       </View>
+
       <Text style={styles.loginIndicator}>Login</Text>
 
       <AppTextInput
@@ -32,19 +33,22 @@ export default function SignInScreen({ navigation }) {
         onChangeText={(text) => setPassword(text)}
         secureTextEntry
       />
-
-      <AppButton title="Login" onPress={() => signIn({ username, password })} />
-      <AppButton
+      <View>
+        <AuthButton title="Login" onPress={() => signIn({ username, password })} />
+      </View>
+      <View>
+        <AuthButton
         title="Register"
         onPress={() => navigation.navigate("Registration")}
       />
+      </View>
       <Text
         onPress={() => navigation.navigate("Registration")}
         style={{ textAlign: "center" }}
       >
         Forgot Password?
       </Text>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -60,16 +64,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: "10%",
+    marginBottom: "5%",
   },
   logo: {
     width: 50,
     height: 50,
   },
   loginIndicator: {
-    fontFamily: "Roboto",
+    fontFamily: "Avenir",
     fontSize: 15,
     marginLeft: "10%",
-    marginTop: "30%",
     marginBottom: 5,
   },
 });

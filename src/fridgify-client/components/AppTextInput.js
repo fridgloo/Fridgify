@@ -25,7 +25,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 20,
   },
-  inputBox: {},
+  inputBox: {
+    padding: 0,
+    borderWidth: 0,
+    height: 20,
+  },
 });
 
 export default AppTextInput;

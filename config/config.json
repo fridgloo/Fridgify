@@ -1,12 +1,12 @@
 {
   "url": "http://localhost",
   "api_version": "/v1",
-  "mongodb": "mongodb://localhost:27017",
+  "mongodb": "mongodb://localhost:32768",
   "expo_port": 19002,
   "port": 3200,
-  "environments": {
+  "environments" : {
     "test": {
-      "mongodb": "mongodb://localhost:27017",
+      "mongodb": "mongodb://localhost:32768/jeons1",
       "port": 8081
     },
     "travis": {
@@ -14,3 +14,4 @@
     }
   }
 }
+

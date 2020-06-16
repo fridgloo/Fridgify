@@ -22,7 +22,7 @@ module.exports = (app) => {
           bought_date: req.body.data.bought_date,
           exp_date: req.body.data.exp_date,
           type: req.body.data.type,
-          note: req.body.data.note
+          note: req.body.data.note,
         };
         let item = new app.models.Item(newItem);
         await item.save();
@@ -34,7 +34,7 @@ module.exports = (app) => {
           bought_date: item.bought_date,
           exp_date: item.exp_date,
           type: item.type,
-          note: item.note
+          note: item.note,
         });
       });
     } catch (err) {
@@ -54,7 +54,9 @@ module.exports = (app) => {
     try {
       jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
         if (err) {
-          return res.status(400).send({ error: "item.fridge.get jwt verify error" });
+          return res
+            .status(400)
+            .send({ error: "item.fridge.get jwt verify error" });
         }
         const fridge = await app.models.Fridge.findOne({
           _id: req.params.id,
@@ -63,7 +65,9 @@ module.exports = (app) => {
         const items = await app.models.Item.find({ fridge: fridge._id });
         // If not found, return 401:unauthorized
         if (!items) {
-          return res.status(404).send({ error: "item.fridge.get - items not found" });
+          return res
+            .status(404)
+            .send({ error: "item.fridge.get - items not found" });
         }
         // If found, compare hashed passwords
         else {
@@ -77,4 +81,27 @@ module.exports = (app) => {
       res.status(400).send({ error: "item.fridge.get failed" });
     }
   });
-}
+
+  /**
+   * Edit the item
+   *
+   */
+  app.put("/v1/item/:token", async (req, res) => {
+    try {
+      jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
+        if (err) {
+          return res.status(400).send({ error: "fridge.put jwt verify error" });
+        }
+        const item = await app.models.Item.findOne({ _id: req.body.id });
+        const editElements = req.body.data;
+        Object.keys(editElements).map((key, index) => {
+          item[key] = editElements[key];
+        });
+        await item.save();
+        return res.status(202).end();
+      });
+    } catch (err) {
+      res.status(400).send({ error: "fridge.put failed " });
+    }
+  });
+};

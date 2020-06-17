@@ -12,7 +12,8 @@ import {
   Dimensions,
 } from "react-native";
 import Modal from "react-native-modal";
-import { Picker } from "@react-native-community/picker";
+import RNPickerSelect from "react-native-picker-select";
+import DatePicker from 'react-native-date-picker'
 import { SwipeListView } from "react-native-swipe-list-view";
 import * as SecureStore from "expo-secure-store";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -194,6 +195,8 @@ export default function FridgeScreen({ navigation, route }) {
 
   const loadModalByOption = (option, value) => {
     let newValue = "";
+    let newDate = new Date("2020/12/30");
+    value = value.toLowerCase();
     return (
       <View
         style={{
@@ -214,35 +217,77 @@ export default function FridgeScreen({ navigation, route }) {
           <View
             style={{
               width: "80%",
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "#CBCBCB",
-              paddingHorizontal: 10,
-              paddingVertical: 6,
-              flexDirection: "row",
             }}
           >
             {option === "name" ? (
-              <TextInput
+              <View
                 style={{
-                  fontSize: 16,
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: "#CBCBCB",
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
                 }}
-                numberOfLines={1}
-                placeholder={value}
-                onChangeText={(val) => (newValue = val)}
-              />
-            ) : option === "type" ? (
-              <Picker
-                style={{ height: 50, width: 100 }}
-                selectedValue={newValue}
-                onValueChange={(itemValue, itemIndex) => (newValue = itemValue)}
               >
-                <Picker.Item label="Meat" value="meat" />
-                <Picker.Item label="Fruit" value="fruit" />
-                <Picker.Item label="Vegetable" value="vegetable" />
-              </Picker>
+                <TextInput
+                  style={{
+                    fontSize: 16,
+                  }}
+                  numberOfLines={1}
+                  placeholder={value}
+                  onChangeText={(val) => (newValue = val)}
+                />
+              </View>
+            ) : option === "type" ? (
+              <View
+                style={{
+                  borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: "#CBCBCB",
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                }}
+              >
+                <RNPickerSelect
+                  onValueChange={(value) => (newValue = value)}
+                  items={[
+                    { label: "Meat", value: "meat", key: "meat" },
+                    { label: "Fruit", value: "fruit", key: "fruit" },
+                    {
+                      label: "Vegetable",
+                      value: "vegetable",
+                      key: "vegetable",
+                    },
+                  ]}
+                  placeholder={{
+                    label: "Select a type...",
+                    value: null,
+                    color: "#A8A8AF",
+                  }}
+                  itemKey={value}
+                  InputAccessoryView={() => null}
+                />
+              </View>
             ) : (
-              ""
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-evenly",
+                }}
+              >
+                <View
+                  style={{
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    backgroundColor: "yellow"
+                  }}
+                >
+                  <DatePicker
+      date={newDate}
+      onDateChange={value => newDate = value}
+    />
+                </View>
+              </View>
             )}
           </View>
           <View
@@ -706,7 +751,15 @@ export default function FridgeScreen({ navigation, route }) {
                     alignItems: "flex-start",
                   }}
                 >
-                  <TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setModal({
+                        visible: true,
+                        style: "exp_date",
+                        value: data.item.exp_date,
+                      })
+                    }
+                  >
                     <Text numberOfLines={1} style={{}}>
                       {data.item.exp_date ? formatDate(data.item.exp_date) : ""}
                     </Text>

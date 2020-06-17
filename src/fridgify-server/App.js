@@ -53,23 +53,19 @@ const setupServer = async () => {
 
   async function initQuantity() {
     // fridge check length
-    var itemCount = 0;
-    const countQuery = app.models.Quantity.countDocuments({}, function (
-      err,
-      count
-    ) {
-      console.log("Number of items:", count);
-      itemCount = count;
+    var resp;
+    // await app.models.Quantity.deleteMany({}, function (err) {});
+    // return;
+    await app.models.Quantity.countDocuments({}, function (err, count) {
+      console.log("[DEV]Quantity is:", count);
     });
-    // change to total length
-    await countQuery;
-    if (itemCount > 8) {
-      app.models.Quantity.deleteMany({}, function (err) {});
-    }
-    if (itemCount === 8) {
+    await app.models.Quantity.findOne({ symbol: "g" }, function (err, res) {
+      resp = res;
+    });
+    if (resp != null) {
       return;
-    } else {
-      // if not insert
+    }
+    if (resp == null) {
       const arr = [
         { multiplier_to_gram: 1, weight_unit: "gram", symbol: "g" },
         { multiplier_to_gram: 1000, weight_unit: "kilogram", symbol: "kg" },
@@ -84,10 +80,14 @@ const setupServer = async () => {
         { multiplier_to_gram: 946.352946, weight_unit: "quart", symbol: "qt" },
         { multiplier_to_gram: 200, weight_unit: "cup", symbol: "cup" },
       ];
-      app.models.Quantity.collection.insertMany(arr, function (error, docs) {});
+      await app.models.Quantity.collection.insertMany(arr, function (
+        error,
+        docs
+      ) {});
+      return;
     }
-    await countQuery;
   }
+
   await initQuantity();
 
   app.get("/", (req, res) => {

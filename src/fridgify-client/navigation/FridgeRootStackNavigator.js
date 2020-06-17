@@ -40,33 +40,14 @@ function FridgeHubStackNavigator({ navigation }) {
         name="FridgeHub"
         component={FridgeHubScreen}
         options={{
-          title: "The Fridge Hub",
-          headerTintColor: "#177AEE",
-          headerTitleStyle: {
-            fontWeight: "bold",
-            fontSize: 50,
-            marginBottom: -20,
-          },
-          headerStyle: {
-            borderBottomWidth: 0,
-            shadowOpacity: 0,
-          },
-
-          safeAreaInsets: {
-            top: Constants.statusBarHeight,
-          },
+          headerShown: false
         }}
       />
       <FridgeHubStack.Screen
         name="FridgeScreenStack"
         component={FridgeScreenStackNavigator}
         options={{
-          title: "",
-          headerStyle: {
-            borderBottomWidth: 0,
-            shadowOpacity: 0,
-          },
-          headerBackTitleVisible: false,
+          headerShown: false
         }}
       />
     </FridgeHubStack.Navigator>

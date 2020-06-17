@@ -104,4 +104,33 @@ module.exports = (app) => {
       res.status(400).send({ error: "fridge.put failed " });
     }
   });
+
+  /**
+   * Delete the item(s) from fridge
+   */
+  app.delete("/v1/item/fridge/:token", async (req, res) => {
+    try {
+      jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
+        if (err) {
+          return res
+            .status(400)
+            .send({ error: "item.delete jwt verify error" });
+        }
+
+        req.body.items.map(async (item) => {
+          await app.models.Fridge.updateOne(
+            { _id: req.body.fridge },
+            { $pull: { items: item._id } }
+          );
+          await app.models.Item.deleteOne({
+            _id: item._id,
+          });
+        });
+
+        res.status(200).end();
+      });
+    } catch (err) {
+      res.status(400).send({ error: "item.get failed" });
+    }
+  });
 };

@@ -148,6 +148,8 @@ module.exports = (app) => {
             );
           }
         }
+
+        await app.models.Item.deleteMany({ fridge: req.body.id });
         res.status(200).end();
       });
     } catch (err) {
@@ -165,12 +167,19 @@ module.exports = (app) => {
         if (err) {
           return res.status(400).send({ error: "fridge.put jwt verify error" });
         }
-        const fridge = await app.models.Fridge.findOne({ _id: req.body.id });
         const editElements = req.body.data;
-        Object.keys(editElements).map((key, index) => {
-          fridge[key] = editElements[key];
+        Object.keys(editElements).map(async (key, index) => {
+          if (key === "primary") {
+            await app.models.Fridge.findOneAndUpdate(
+              { primary: true },
+              { primary: false }
+            );
+          }
+          await app.models.Fridge.updateOne(
+            { _id: req.body.id },
+            { $set: { [key]: editElements[key] } }
+          );
         });
-        await fridge.save();
         return res.status(202).end();
       });
     } catch (err) {

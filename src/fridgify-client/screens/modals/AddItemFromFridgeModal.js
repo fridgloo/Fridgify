@@ -41,10 +41,9 @@ export default function AddItemFromFridgeModal({ navigation, route }) {
   const onChange = (name, value) => {
     setState({
       ...state,
-      [name]: value
+      [name]: value,
     });
-
-  }
+  };
 
   return (
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
@@ -53,14 +52,14 @@ export default function AddItemFromFridgeModal({ navigation, route }) {
         id="name"
         name="name"
         value={state.name}
-        onChangeText={value => onChange('name', value)}
+        onChangeText={(value) => onChange("name", value)}
       />
       <TextInput
         placeholder="Bought Date"
         id="bought_date"
         name="bought_date"
         value={state.bought_date}
-        onChangeText={value => onChange('bought_date', value)}
+        onChangeText={(value) => onChange("bought_date", value)}
         secureTextEntry
       />
       <TextInput
@@ -68,21 +67,21 @@ export default function AddItemFromFridgeModal({ navigation, route }) {
         id="exp_date"
         name="exp_date"
         value={state.exp_date}
-        onChangeText={value => onChange('exp_date', value)}
+        onChangeText={(value) => onChange("exp_date", value)}
       />
       <TextInput
         placeholder="Type"
         id="type"
         name="type"
         value={state.type}
-        onChangeText={value => onChange('type', value)}
+        onChangeText={(value) => onChange("type", value)}
       />
       <TextInput
         placeholder="Note"
         id="note"
         name="note"
         value={state.note}
-        onChangeText={value => onChange('note', value)}
+        onChangeText={(value) => onChange("note", value)}
       />
       <Button
         title="Add Item"

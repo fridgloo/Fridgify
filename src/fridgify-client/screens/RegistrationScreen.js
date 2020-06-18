@@ -60,14 +60,14 @@ export default function RegistrationScreen({ navigation }) {
       />
       
       {/* Section for Confirm Password */}
-      {/* <AppTextInput
+      <AppTextInput
         placeholder="Confirm Password"
         id="confirm_password"
         name="confirm_password"
         value={state.confirm_password}
         onChangeText={value => onChange('confirm_password', value)}
         secureTextEntry
-      /> */} 
+      /> 
 
       <AppTextInput
         placeholder="Email"
@@ -76,6 +76,7 @@ export default function RegistrationScreen({ navigation }) {
         value={state.email}
         onChangeText={value => onChange('email', value)}
       />
+      {/*
       <AppTextInput
         placeholder="First Name"
         id="first_name"
@@ -90,6 +91,8 @@ export default function RegistrationScreen({ navigation }) {
         value={state.last_name}
         onChangeText={value => onChange('last_name', value)}
       />
+      */}
+      
       <AuthButton title="Register" onPress={() => { signUp(state); }} />
     </SafeAreaView>
   );

@@ -59,7 +59,7 @@ export default function RegistrationScreen({ navigation }) {
         secureTextEntry
       />
       
-      {/* Section for Confirm Password */}
+      {/* Added Section for Confirm Password */}
       <AppTextInput
         placeholder="Confirm Password"
         id="confirm_password"

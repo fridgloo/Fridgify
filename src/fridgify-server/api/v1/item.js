@@ -18,23 +18,18 @@ module.exports = (app) => {
         }
         const newItem = {
           fridge: req.body.fridge,
-          name: req.body.data.name,
-          bought_date: req.body.data.bought_date,
-          exp_date: req.body.data.exp_date,
-          type: req.body.data.type,
-          note: req.body.data.note,
+          name: req.body.data?.name,
+          bought_date: req.body.data?.bought_date,
+          exp_date: req.body.data?.exp_date,
+          type: req.body.data?.type,
+          note: req.body.data?.note,
         };
         let item = new app.models.Item(newItem);
         await item.save();
         const query = { $push: { items: item._id } };
         await app.models.Fridge.updateOne({ _id: req.body.fridge }, query);
         res.status(201).send({
-          id: item._id,
-          name: item.name,
-          bought_date: item.bought_date,
-          exp_date: item.exp_date,
-          type: item.type,
-          note: item.note,
+          item: item
         });
       });
     } catch (err) {
@@ -92,16 +87,47 @@ module.exports = (app) => {
         if (err) {
           return res.status(400).send({ error: "fridge.put jwt verify error" });
         }
-        const item = await app.models.Item.findOne({ _id: req.body.id });
         const editElements = req.body.data;
-        Object.keys(editElements).map((key, index) => {
-          item[key] = editElements[key];
+        Object.keys(editElements).map(async (key, index) => {
+          await app.models.Item.updateOne(
+            { _id: req.body.id },
+            { $set: { [key]: editElements[key] } }
+          );
         });
-        await item.save();
-        return res.status(202).end();
+        const item = await app.models.Item.findById(req.body.id);
+        return res.status(202).send({ item: item });
       });
     } catch (err) {
       res.status(400).send({ error: "fridge.put failed " });
+    }
+  });
+
+  /**
+   * Delete the item(s) from fridge
+   */
+  app.delete("/v1/item/fridge/:token", async (req, res) => {
+    try {
+      jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
+        if (err) {
+          return res
+            .status(400)
+            .send({ error: "item.delete jwt verify error" });
+        }
+
+        req.body.items.map(async (item) => {
+          await app.models.Fridge.updateOne(
+            { _id: req.body.fridge },
+            { $pull: { items: item._id } }
+          );
+          await app.models.Item.deleteOne({
+            _id: item._id,
+          });
+        });
+
+        res.status(200).end();
+      });
+    } catch (err) {
+      res.status(400).send({ error: "item.get failed" });
     }
   });
 };

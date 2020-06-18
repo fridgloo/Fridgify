@@ -2,7 +2,7 @@ import React from "react";
 import {
   TouchableOpacity,
   TouchableHighlight,
-  FlatList,
+  Picker,
   Button,
   TextInput,
   StyleSheet,
@@ -12,8 +12,7 @@ import {
   Dimensions,
 } from "react-native";
 import Modal from "react-native-modal";
-import RNPickerSelect from "react-native-picker-select";
-import DatePicker from 'react-native-date-picker'
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { SwipeListView } from "react-native-swipe-list-view";
 import * as SecureStore from "expo-secure-store";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
@@ -34,6 +33,10 @@ export default function FridgeScreen({ navigation, route }) {
     visible: false,
     style: "",
     value: "",
+    newValue: "",
+    newType: "",
+    newDate: new Date(),
+    changed: false,
   });
 
   React.useEffect(() => {
@@ -107,7 +110,26 @@ export default function FridgeScreen({ navigation, route }) {
       .then(() => setState((prevState) => ({ ...prevState, items: [] })));
   };
 
-  const setPrimary = async () => {
+  const addItem = async (data) => {
+    let token = await SecureStore.getItemAsync("user_token");
+    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: data, fridge: state.id }),
+    }).then(() => fillFridgeState(state));
+    // .then((response) => response.json())
+    // .then((data) => {
+    //     setState((prevState) => ({
+    //       ...prevState,
+    //       items: [...prevState.items, data.item],
+    //     }));
+    //   });
+  };
+
+  const setItemPrimary = async () => {
     let token = await SecureStore.getItemAsync("user_token");
     await fetch(`http://localhost:3200/v1/fridge/${token}`, {
       method: "PUT",
@@ -119,6 +141,26 @@ export default function FridgeScreen({ navigation, route }) {
     }).then(() =>
       setState((prevState) => ({ ...prevState, primary: true, changed: true }))
     );
+  };
+
+  const setItemElement = async (option, value, id) => {
+    let token = await SecureStore.getItemAsync("user_token");
+    await fetch(`http://localhost:3200/v1/item/${token}`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ data: { [option]: value }, id: id }),
+    }).then(() => {
+      const itemIndex = state.items.findIndex((element) => element._id == id);
+      let newArray = [...state.items];
+      newArray[itemIndex] = { ...newArray[itemIndex], [option]: value };
+      setState((prevState) => ({
+        ...prevState,
+        items: newArray,
+      }));
+    });
   };
 
   const closeRow = (rowMap, rowKey) => {
@@ -135,8 +177,18 @@ export default function FridgeScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fridge: state.id, items: item }),
-    }).then(() => fillFridgeState(state));
+      body: JSON.stringify({ fridge: state.id, items: [item] }),
+    }).then(() => {
+      const itemIndex = state.items.findIndex(
+        (element) => element._id == item._id
+      );
+      let newArray = [...state.items];
+      newArray.splice(itemIndex, 1);
+      setState((prevState) => ({
+        ...prevState,
+        items: newArray,
+      }));
+    });
   };
 
   const formatDate = (date) => {
@@ -172,31 +224,28 @@ export default function FridgeScreen({ navigation, route }) {
   };
 
   const getItemType = (type) => {
-    switch (type.toLowerCase()) {
+    switch (type?.toLowerCase()) {
       case "meat":
         return "drumstick-bite";
       case "vegetable":
         return "carrot";
       case "fruit":
         return "apple-alt";
+      case "fish":
+        return "fish";
       default:
         return "question";
     }
   };
 
-  const toggleModal = (style) => {
+  const toggleModal = () => {
     setModal((prev) => ({
       ...prev,
       visible: !prev.visible,
     }));
   };
 
-  console.log("TEST");
-
-  const loadModalByOption = (option, value) => {
-    let newValue = "";
-    let newDate = new Date("2020/12/30");
-    value = value.toLowerCase();
+  const loadAddItem = () => {
     return (
       <View
         style={{
@@ -208,7 +257,196 @@ export default function FridgeScreen({ navigation, route }) {
         <View
           style={{
             width: "80%",
-            height: "15%",
+            height: "60%",
+            backgroundColor: "white",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "90%",
+              height: "18%",
+              paddingTop: 20,
+            }}
+          >
+            <Text style={{ paddingBottom: 10, fontSize: 16 }}>
+              Name (required):
+            </Text>
+            <View
+              style={{
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: "#CBCBCB",
+                paddingHorizontal: 10,
+                paddingVertical: 10,
+              }}
+            >
+              <TextInput
+                style={{
+                  fontSize: 16,
+                }}
+                numberOfLines={1}
+                placeholder={"Name..."}
+                onChangeText={(val) =>
+                  setModal((prev) => ({
+                    ...prev,
+                    newValue: val,
+                  }))
+                }
+              />
+            </View>
+          </View>
+          <View
+            style={{
+              width: "90%",
+              height: "20%",
+              paddingVertical: 20,
+            }}
+          >
+            <Text style={{ paddingBottom: 0, fontSize: 16 }}>Type:</Text>
+            <View
+              style={{
+                borderRadius: 12,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Picker
+                selectedValue={modal.newType}
+                style={{
+                  height: "100%",
+                  width: "100%",
+                }}
+                itemStyle={{
+                  height: "100%",
+                }}
+                onValueChange={(val) => {
+                  if (val !== "0") {
+                    setModal((prev) => ({
+                      ...prev,
+                      newType: val,
+                    }));
+                  }
+                }}
+              >
+                <Picker.Item
+                  label={"Scroll to a type..."}
+                  value={"0"}
+                  color={"#CBCBCB"}
+                />
+                <Picker.Item label={"Fish"} value={"fish"} />
+                <Picker.Item label={"Fruit"} value={"fruit"} />
+                <Picker.Item label={"Meat"} value={"meat"} />
+                <Picker.Item label={"Vegetable"} value={"vegetable"} />
+              </Picker>
+            </View>
+          </View>
+          <View
+            style={{
+              width: "90%",
+              height: "50%",
+              paddingVertical: 20,
+            }}
+          >
+            <View
+              style={{
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ paddingBottom: 0, fontSize: 16 }}>
+                Expiration Date:
+              </Text>
+              <DateTimePicker
+                testID="dateTimePicker"
+                value={modal.newDate}
+                mode={"date"}
+                display={"default"}
+                onChange={(event, selectedDate) => {
+                  const currentDate = selectedDate || modal.newDate;
+                  setModal((prev) => ({
+                    ...prev,
+                    newDate: currentDate,
+                  }));
+                }}
+                style={{
+                  height: "95%",
+                }}
+              />
+            </View>
+          </View>
+
+          <View
+            style={{
+              width: "80%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingVertical: 20,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: "#2D82FF",
+                borderRadius: 16,
+                width: "45%",
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  padding: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={toggleModal}
+              >
+                <Text style={{ fontSize: 16, color: "white" }}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+            <View
+              style={{
+                backgroundColor: modal.newValue === "" ? "#A7CBFF" : "#2D82FF",
+                borderRadius: 16,
+                width: "45%",
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  padding: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={() => {
+                  addItem({
+                    name: modal.newValue,
+                    type: modal.newType,
+                    exp_date: modal.newDate,
+                    bought_date: new Date(),
+                  });
+                  toggleModal();
+                }}
+                disabled={modal.newValue === ""}
+              >
+                <Text style={{ fontSize: 16, color: "white" }}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const loadModalByOption = (option, value) => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            width: "80%",
+            height:
+              option === "exp_date" ? "35%" : option === "name" ? "15%" : "22%",
             backgroundColor: "white",
             alignItems: "center",
             justifyContent: "space-evenly",
@@ -216,7 +454,9 @@ export default function FridgeScreen({ navigation, route }) {
         >
           <View
             style={{
-              width: "80%",
+              width: "90%",
+              flex: 1,
+              justifyContent: "flex-end",
             }}
           >
             {option === "name" ? (
@@ -226,7 +466,7 @@ export default function FridgeScreen({ navigation, route }) {
                   borderWidth: 1,
                   borderColor: "#CBCBCB",
                   paddingHorizontal: 10,
-                  paddingVertical: 6,
+                  paddingVertical: 5,
                 }}
               >
                 <TextInput
@@ -234,59 +474,83 @@ export default function FridgeScreen({ navigation, route }) {
                     fontSize: 16,
                   }}
                   numberOfLines={1}
-                  placeholder={value}
-                  onChangeText={(val) => (newValue = val)}
+                  placeholder={value.name}
+                  onChangeText={(val) =>
+                    setModal((prev) => ({
+                      ...prev,
+                      newValue: val,
+                      changed: val === "" || val === value.name ? false : true,
+                    }))
+                  }
                 />
               </View>
             ) : option === "type" ? (
               <View
                 style={{
                   borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: "#CBCBCB",
                   paddingHorizontal: 10,
-                  paddingVertical: 6,
                 }}
               >
-                <RNPickerSelect
-                  onValueChange={(value) => (newValue = value)}
-                  items={[
-                    { label: "Meat", value: "meat", key: "meat" },
-                    { label: "Fruit", value: "fruit", key: "fruit" },
-                    {
-                      label: "Vegetable",
-                      value: "vegetable",
-                      key: "vegetable",
-                    },
-                  ]}
-                  placeholder={{
-                    label: "Select a type...",
-                    value: null,
-                    color: "#A8A8AF",
+                <Picker
+                  selectedValue={modal.newValue}
+                  style={{
+                    height: "100%",
+                    width: "100%",
                   }}
-                  itemKey={value}
-                  InputAccessoryView={() => null}
-                />
+                  itemStyle={{
+                    height: "100%",
+                  }}
+                  onValueChange={(val) => {
+                    if (val !== "0") {
+                      setModal((prev) => ({
+                        ...prev,
+                        newValue: val,
+                        changed: val === value.type ? false : true,
+                      }));
+                    }
+                  }}
+                >
+                  <Picker.Item
+                    label={"Scroll to a type..."}
+                    value={"0"}
+                    color={"#CBCBCB"}
+                  />
+                  <Picker.Item label={"Fish"} value={"fish"} />
+                  <Picker.Item label={"Fruit"} value={"fruit"} />
+                  <Picker.Item label={"Meat"} value={"meat"} />
+                  <Picker.Item label={"Vegetable"} value={"vegetable"} />
+                </Picker>
               </View>
             ) : (
               <View
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-evenly",
+                  justifyContent: "center",
                 }}
               >
-                <View
-                  style={{
-                    paddingHorizontal: 10,
-                    paddingVertical: 6,
-                    backgroundColor: "yellow"
+                <DateTimePicker
+                  testID="dateTimePicker"
+                  value={
+                    modal.changed
+                      ? modal.newDate
+                      : value.exp_date
+                      ? new Date(value.exp_date)
+                      : new Date()
+                  }
+                  mode={"date"}
+                  display={"default"}
+                  onChange={(event, selectedDate) => {
+                    const currentDate = selectedDate || modal.newDate;
+                    setModal((prev) => ({
+                      ...prev,
+                      newDate: currentDate,
+                      changed:
+                        formatDate(selectedDate) !== formatDate(value.exp_date),
+                    }));
                   }}
-                >
-                  <DatePicker
-      date={newDate}
-      onDateChange={value => newDate = value}
-    />
-                </View>
+                  style={{
+                    height: "95%",
+                  }}
+                />
               </View>
             )}
           </View>
@@ -295,6 +559,7 @@ export default function FridgeScreen({ navigation, route }) {
               width: "80%",
               flexDirection: "row",
               justifyContent: "space-between",
+              paddingVertical: 20,
             }}
           >
             <View
@@ -310,13 +575,14 @@ export default function FridgeScreen({ navigation, route }) {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                onPress={toggleModal}
               >
                 <Text style={{ fontSize: 16, color: "white" }}>Cancel</Text>
               </TouchableOpacity>
             </View>
             <View
               style={{
-                backgroundColor: "#2D82FF",
+                backgroundColor: !modal.changed ? "#A7CBFF" : "#2D82FF",
                 borderRadius: 16,
                 width: "45%",
               }}
@@ -327,10 +593,88 @@ export default function FridgeScreen({ navigation, route }) {
                   justifyContent: "center",
                   alignItems: "center",
                 }}
+                onPress={() => {
+                  option === "exp_date"
+                    ? setItemElement(option, modal.newDate, value._id)
+                    : setItemElement(option, modal.newValue, value._id);
+                  toggleModal();
+                }}
+                disabled={!modal.changed}
               >
                 <Text style={{ fontSize: 16, color: "white" }}>Save</Text>
               </TouchableOpacity>
             </View>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  const loadConfirmation = (option) => {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "white",
+            justifyContent: "center",
+            width: "60%",
+            height: 50,
+          }}
+        >
+          <Text numberOfLines={1} style={{ textAlign: "center", fontSize: 16 }}>
+            Are you sure?
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            alignItems: "flex-end",
+            width: "60%",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              width: "50%",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                padding: 8,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={toggleModal}
+            >
+              <Text style={{ fontSize: 16, color: "#2D82FF" }}>No</Text>
+            </TouchableOpacity>
+          </View>
+          <View
+            style={{
+              backgroundColor: "#2D82FF",
+              width: "50%",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                padding: 8,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => {
+                option === "delete" ? deleteFridge() : clearFridge();
+                toggleModal();
+              }}
+            >
+              <Text style={{ fontSize: 16, color: "white" }}>Yes</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -346,7 +690,11 @@ export default function FridgeScreen({ navigation, route }) {
     >
       <View>
         <Modal isVisible={modal.visible}>
-          {loadModalByOption(modal.style, modal.value)}
+          {modal.style === "delete" || modal.style === "clear"
+            ? loadConfirmation(modal.style)
+            : modal.style === "add"
+            ? loadAddItem()
+            : loadModalByOption(modal.style, modal.value)}
         </Modal>
       </View>
       <View
@@ -414,7 +762,7 @@ export default function FridgeScreen({ navigation, route }) {
           }}
         >
           <TouchableOpacity
-            onPress={() => setPrimary()}
+            onPress={() => setItemPrimary()}
             disabled={state.primary}
           >
             <FontAwesome
@@ -423,7 +771,15 @@ export default function FridgeScreen({ navigation, route }) {
               color={state.primary ? "#A7CBFF" : "#2D82FF"}
             />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => deleteFridge()}>
+          <TouchableOpacity
+            onPress={() =>
+              setModal((prevState) => ({
+                ...prevState,
+                visible: true,
+                style: "delete",
+              }))
+            }
+          >
             <FontAwesome5 name={"trash"} size={25} color={"#2D82FF"} />
           </TouchableOpacity>
         </View>
@@ -515,7 +871,13 @@ export default function FridgeScreen({ navigation, route }) {
               justifyContent: "center",
               alignItems: "center",
             }}
-            onPress={() => clearFridge()}
+            onPress={() =>
+              setModal((prevState) => ({
+                ...prevState,
+                visible: true,
+                style: "clear",
+              }))
+            }
           >
             <Text
               numberOfLines={1}
@@ -625,6 +987,7 @@ export default function FridgeScreen({ navigation, route }) {
             flex: 0.45,
             flexDirection: "row",
             alignItems: "flex-start",
+            justifyContent: "center",
           }}
         >
           <TouchableOpacity
@@ -699,14 +1062,17 @@ export default function FridgeScreen({ navigation, route }) {
                       setModal({
                         visible: true,
                         style: "name",
-                        value: data.item.name,
+                        value: data.item,
+                        newDate: new Date(),
+                        newValue: "",
+                        changed: false,
                       })
                     }
                   >
                     <Text
                       numberOfLines={1}
                       style={{
-                        fontSize: 16,
+                        fontSize: 17,
                       }}
                     >
                       {data.item.name}
@@ -724,7 +1090,10 @@ export default function FridgeScreen({ navigation, route }) {
                       setModal({
                         visible: true,
                         style: "type",
-                        value: data.item.type,
+                        value: data.item,
+                        newDate: new Date(),
+                        newValue: data.item.type,
+                        changed: false,
                       })
                     }
                   >
@@ -748,7 +1117,7 @@ export default function FridgeScreen({ navigation, route }) {
                 <View
                   style={{
                     flex: 0.45,
-                    alignItems: "flex-start",
+                    alignItems: "center",
                   }}
                 >
                   <TouchableOpacity
@@ -756,13 +1125,24 @@ export default function FridgeScreen({ navigation, route }) {
                       setModal({
                         visible: true,
                         style: "exp_date",
-                        value: data.item.exp_date,
+                        value: data.item,
+                        newDate: data.item.exp_date
+                          ? new Date(data.item.exp_date)
+                          : new Date(),
+                        newValue: "",
+                        changed: data.item.exp_date ? false : true,
                       })
                     }
                   >
-                    <Text numberOfLines={1} style={{}}>
-                      {data.item.exp_date ? formatDate(data.item.exp_date) : ""}
-                    </Text>
+                    {data.item.exp_date ? (
+                      <Text numberOfLines={1}>
+                        {formatDate(data.item.exp_date)}
+                      </Text>
+                    ) : (
+                      <View style={{}}>
+                        <FontAwesome name={"calendar-o"} size={24} />
+                      </View>
+                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -794,7 +1174,7 @@ export default function FridgeScreen({ navigation, route }) {
                 }}
                 onPress={() => {
                   closeRow(rowMap, data.index);
-                  deleteItem([data.item]);
+                  deleteItem(data.item);
                 }}
               >
                 <Text
@@ -834,7 +1214,14 @@ export default function FridgeScreen({ navigation, route }) {
             width: "100%",
           }}
           onPress={() =>
-            navigation.navigate("AddItemFromFridgeModal", { fridge: state.id })
+            setModal((prevState) => ({
+              ...prevState,
+              visible: true,
+              style: "add",
+              newValue: "",
+              newDate: new Date(),
+              newType: "",
+            }))
           }
         >
           <Text style={{ fontSize: 20, color: "white" }}>Add Item</Text>

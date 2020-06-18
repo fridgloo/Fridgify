@@ -104,7 +104,7 @@ export default function FridgeHubScreen({ navigation, route }) {
             width: 60
           }}
           resizeMode="center"
-          source={require("../assets/images/igloo.png")}
+          source={require("../assets/images/iglooTest5.png")}
         />
         
         <Text
@@ -275,10 +275,7 @@ export default function FridgeHubScreen({ navigation, route }) {
                   }}
                   key={index}
                   onPress={() =>
-                    navigation.navigate("FridgeScreenStack", {
-                      screen: "FridgeScreen",
-                      params: { data: fridge, type: "INITIALIZE" },
-                    })
+                    navigation.navigate("FridgeScreen", { data: fridge, type: "INITIALIZE" })
                   }
                 >
                   <View

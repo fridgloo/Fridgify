@@ -733,7 +733,7 @@ export default function FridgeScreen({ navigation, route }) {
           <Text
             style={{
               fontWeight: "bold",
-              fontSize: 44,
+              fontSize: state.name.length > 8 ? 25 : 40,
               color: "#2D82FF",
             }}
           >
@@ -746,7 +746,7 @@ export default function FridgeScreen({ navigation, route }) {
             }}
           >
             {state.primary ? (
-              <FontAwesome5 name={"igloo"} size={36} color={"black"} />
+              <FontAwesome5 name={"igloo"} size={ state.name.length > 8 ? 26 : 36 } color={"black"} />
             ) : (
               <Text />
             )}

@@ -104,7 +104,7 @@ export default function FridgeHubScreen({ navigation, route }) {
             width: 60
           }}
           resizeMode="center"
-          source={require("../assets/images/iglooTest5.png")}
+          source={require("../assets/images/igloo.png")}
         />
         
         <Text
@@ -112,11 +112,11 @@ export default function FridgeHubScreen({ navigation, route }) {
           style={{
             paddingLeft: 15,
             color: "#2D82FF",
-            fontSize: 30,
-            fontWeight: "bold",
+            fontSize: 32,
+            fontWeight: "600",
           }}
         >
-          Fridgloo
+          F r i d g l o o
         </Text>
       </View>
       {/* --------------------------------Expiration Overview --------------------------------- */}

@@ -43,12 +43,11 @@ export default function AuthContextProvider() {
     const bootstrapAsync = async () => {
       let userToken;
       try {
-        SecureStore.getItemAsync("user_token")
-          .then((userToken) => {
+        SecureStore.getItemAsync("user_token").then((userToken) => {
           // This will switch to the App screen or Auth screen and this loading
           // screen will be unmounted and thrown away.
-            dispatch({ type: "RESTORE_TOKEN", token: userToken });
-          });
+          dispatch({ type: "RESTORE_TOKEN", token: userToken });
+        });
       } catch (e) {
         // Restoring token failed
       }
@@ -86,7 +85,7 @@ export default function AuthContextProvider() {
           data.password !== "" &&
           data.email !== ""
         ) {
-          const res = await fetch("http://localhost:3200/v1/user", {
+          const res = await fetch("http://10.0.0.77:3200/v1/user", {
             method: "POST",
             headers: {
               Accept: "application/json",
@@ -104,15 +103,15 @@ export default function AuthContextProvider() {
     }),
     []
   );
-  
+
   return (
     <AuthContext.Provider value={authContext}>
-        <NavigationContainer linking={LinkingConfiguration}>
-            <RootStackNavigator
-                userToken={state.userToken}
-                isLoading={state.isLoading}
-            />
-        </NavigationContainer>
+      <NavigationContainer linking={LinkingConfiguration}>
+        <RootStackNavigator
+          userToken={state.userToken}
+          isLoading={state.isLoading}
+        />
+      </NavigationContainer>
     </AuthContext.Provider>
   );
 }

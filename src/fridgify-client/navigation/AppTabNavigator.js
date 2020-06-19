@@ -8,6 +8,7 @@ import DemoScreen from "../screens/DemoScreen";
 import GlistScreen from "../screens/GlistScreen";
 import FridgeHubScreen from "../screens/FridgeHubScreen";
 import FridgeRootStackNavigator from "./FridgeRootStackNavigator";
+import ProfileScreen from "../screens/ProfileScreen";
 
 const AppTab = createBottomTabNavigator();
 const INITIAL_ROUTE_NAME = "Fridge";
@@ -41,7 +42,7 @@ export default function AppTabNavigator({ navigation, route }) {
       />
       <AppTab.Screen
         name="Profile"
-        component={DemoScreen}
+        component={ProfileScreen}
         options={{
           title: "Profile",
           tabBarIcon: ({ focused }) => (

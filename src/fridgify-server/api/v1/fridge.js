@@ -18,7 +18,6 @@ module.exports = (app) => {
             .status(400)
             .send({ error: "fridge.post jwt verify error" });
         }
-
         const fridgeCheck = await app.models.Fridge.findOne({
           name: req.body.name,
         });

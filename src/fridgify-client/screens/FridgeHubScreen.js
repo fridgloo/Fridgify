@@ -1,5 +1,14 @@
 import React from "react";
-import { FlatList, Dimensions, StyleSheet, Text, View } from "react-native";
+import {
+  SafeAreaView,
+  ScrollView,
+  Dimensions,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ImageBackground,
+} from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -72,87 +81,315 @@ export default function FridgeHubScreen({ navigation, route }) {
   };
 
   return (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: "white",
-        paddingTop: 20,
       }}
     >
+      {/* --------------------------------Header ---------------------------------------------- */}
       <View
         style={{
           flex: 4,
-          top: 20,
-          justifyContent: "top",
+          paddingHorizontal: 25,
+          paddingVertical: 5,
+          flexDirection: "row",
           alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {state.fridges?.map((fridge, index) => {
-          return (
-            <TouchableOpacity
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: getFridgeBG(index),
-                borderRadius: 25,
-                width: Math.round(Dimensions.get('window').width - 20),
-                height: Math.round(Dimensions.get('window').height/8),
-                margin: 2,
-              }}
-              key={index}
-              onPress={() =>
-                navigation.navigate("FridgeScreenStack", {
-                  screen: "FridgeScreen",
-                  params: { data: fridge, type: "INITIALIZE" },
-                })
-              }
-            >
-              <Text>{fridge.name}</Text>
-            </TouchableOpacity>
-          );
-        })}
+      <Image
+          style={{
+            height: 60,
+            width: 60
+          }}
+          resizeMode="center"
+          source={require("../assets/images/igloo.png")}
+        />
+        
+        <Text
+          adjustsFontSizeToFit
+          style={{
+            paddingLeft: 15,
+            color: "#2D82FF",
+            fontSize: 32,
+            fontWeight: "600",
+          }}
+        >
+          F r i d g l o o
+        </Text>
       </View>
+      {/* --------------------------------Expiration Overview --------------------------------- */}
       <View
         style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
+          flex: 10,
+          paddingHorizontal: 25,
+          paddingTop: 15,
         }}
       >
-        <TouchableOpacity
-          style={
-            state.fridges.length >= 4
-              ? styles.addFridgeDisabled
-              : styles.addFridgeEnabled
-          }
-          onPress={() => navigation.navigate("AddFridgeModal")}
-          disabled={state.fridges.length >= 4}
+        <View
+          style={{
+            alignItems: "left",
+          }}
         >
-          <Icon name={"plus"} size={30} color="white"></Icon>
-        </TouchableOpacity>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            Expiration Overview
+          </Text>
+        </View>
+        <View
+          style={{
+            alignItems: "center",
+            paddingVertical: 20,
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              borderRadius: 20,
+              width: Math.round(Dimensions.get("window").width - 50),
+              height: "100%",
+              backgroundColor: "#F1F3F6",
+            }}
+          >
+            <View
+              style={{
+                flex: 1,
+                flexDirection: "row",
+              }}
+            >
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  paddingLeft: 25,
+                }}
+              >
+                <Text
+                  style={{
+                    fontWeight: "600",
+                    fontSize: 25,
+                    paddingBottom: 20,
+                  }}
+                >
+                  1 day left
+                </Text>
+                <Text
+                  style={{
+                    fontWeight: "300",
+                    fontSize: 15,
+                    paddingBottom: 10,
+                  }}
+                >
+                  Your yogurt is expiring
+                </Text>
+              </View>
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  paddingRight: 10,
+                }}
+              >
+                <View
+                  style={{
+                    borderRadius: 40,
+                    width: 50,
+                    height: 50,
+                    backgroundColor: "#FF7F23",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Icon name={"exclamation"} size={25} color="white"></Icon>
+                </View>
+                <View
+                  style={{
+                    paddingLeft: 10
+                  }}
+                >
+                  <Icon name={"chevron-right"} size={25} color="black"></Icon>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+      {/* --------------------------------Fridges---------------------------------------------- */}
+      <View
+        style={{
+          flex: 11,
+          paddingLeft: 25,
+          paddingTop: 25,
+        }}
+      >
+        <View>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            Your Fridges
+          </Text>
+        </View>
+
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingVertical: 10,
+            paddingLeft: 10,
+          }}
+        >
+          <TouchableOpacity
+            style={
+              state.fridges.length >= 4
+                ? styles.addFridgeDisabled
+                : styles.addFridgeEnabled
+            }
+            onPress={() => navigation.navigate("AddFridgeModal")}
+            disabled={state.fridges.length >= 4}
+          >
+            <Icon name={"plus"} size={25} color="white"></Icon>
+          </TouchableOpacity>
+          <ScrollView horizontal>
+            {state.fridges?.map((fridge, index) => {
+              return (
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#F1F3F6",
+                    // borderWidth: 1,
+                    // borderColor: "gray",
+                    borderRadius: 20,
+                    width: Math.round(Dimensions.get("window").width / 3.8),
+                    height: "100%",
+                    marginLeft: 10,
+                  }}
+                  key={index}
+                  onPress={() =>
+                    navigation.navigate("FridgeScreen", { data: fridge, type: "INITIALIZE" })
+                  }
+                >
+                  <View
+                    style={{
+                      paddingHorizontal: 8,
+                      paddingTop: 25,
+                      paddingBottom: 10,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        textAlign: "center",
+                      }}
+                    >
+                      {fridge.name}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      alignItems: "flex-end",
+                      justifyContent: "center",
+                      paddingRight: 10,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: "10%",
+                        height: "42%",
+                        backgroundColor: "#C4C4C4",
+                      }}
+                    ></View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+      </View>
+      {/* --------------------------------Recipe of the Day------------------------------------ */}
+      <View
+        style={{
+          flex: 10,
+          paddingTop: 25,
+          paddingBottom: 50,
+        }}
+      >
+        <View
+          style={{
+            paddingLeft: 25,
+            paddingBottom: 10,
+            alignItems: "left",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "600",
+            }}
+          >
+            Recipe of the Day
+          </Text>
+        </View>
+        <View>
+          <ImageBackground
+            style={{
+              width: "100%",
+              height: "100%",
+              resizeMode: "cover",
+              justifyContent: "center",
+            }}
+            source={require("../assets/images/some-salad-small.jpg")}
+          >
+            <View
+              style={{
+                paddingLeft: 20,
+                width: "40%",
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "white",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 10,
+                }}
+              >
+                <Text style={{ fontWeight: "bold" }}>SALAD</Text>
+                <Text style={{ fontWeight: "200" }}>A Plantful Dish</Text>
+              </View>
+            </View>
+          </ImageBackground>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   addFridgeEnabled: {
-    borderWidth: 5,
-    borderColor: "#0771ED",
     borderRadius: 50,
-    width: 75,
-    height: 75,
-    backgroundColor: "#177AEE",
+    width: 60,
+    height: 60,
+    backgroundColor: "#FF7F23",
     justifyContent: "center",
     alignItems: "center",
   },
   addFridgeDisabled: {
-    borderWidth: 5,
-    borderColor: "#7DADE5",
     borderRadius: 50,
-    width: 75,
-    height: 75,
-    backgroundColor: "#85B2E6",
+    width: 60,
+    height: 60,
+    backgroundColor: "#FFC194",
     justifyContent: "center",
     alignItems: "center",
   },

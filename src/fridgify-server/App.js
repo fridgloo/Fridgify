@@ -42,11 +42,51 @@ const setupServer = async () => {
     User: require("./model/user"),
     Fridge: require("./model/fridge"),
     Item: require("./model/item"),
-    Glist: require("./model/glist")
+    Glist: require("./model/glist"),
+    Quantity: require("./model/quantity"),
   };
 
   // Import our routes
   require("./api")(app);
+
+  async function initQuantity() {
+    // fridge check length
+    var resp;
+    // await app.models.Quantity.deleteMany({}, function (err) {});
+    // return;
+    await app.models.Quantity.countDocuments({}, function (err, count) {
+      console.log("[DEV]Quantity is:", count);
+    });
+    await app.models.Quantity.findOne({ symbol: "g" }, function (err, res) {
+      resp = res;
+    });
+    if (resp != null) {
+      return;
+    }
+    if (resp == null) {
+      const arr = [
+        { multiplier_to_gram: 1, weight_unit: "gram", symbol: "g" },
+        { multiplier_to_gram: 1000, weight_unit: "kilogram", symbol: "kg" },
+        { multiplier_to_gram: 453.59237, weight_unit: "pound", symbol: "lb" },
+        { multiplier_to_gram: 28.3496, weight_unit: "ounce", symbol: "oz" },
+        { multiplier_to_gram: 1000, weight_unit: "liter", symbol: "l" },
+        {
+          multiplier_to_gram: 3785.411784,
+          weight_unit: "gallon",
+          symbol: "gal",
+        },
+        { multiplier_to_gram: 946.352946, weight_unit: "quart", symbol: "qt" },
+        { multiplier_to_gram: 200, weight_unit: "cup", symbol: "cup" },
+      ];
+      await app.models.Quantity.collection.insertMany(arr, function (
+        error,
+        docs
+      ) {});
+      return;
+    }
+  }
+
+  await initQuantity();
 
   app.get("/", (req, res) => {
     res.status(200).json({ message: "FRIDGIFY SERVER WORKS" });

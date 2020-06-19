@@ -123,6 +123,12 @@ module.exports = (app) => {
   app.delete("/v1/fridge/:token", async (req, res) => {
     try {
       jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
+        if (err) {
+          return res
+            .status(400)
+            .send({ error: "fridge.delete jwt verify error" });
+        }
+
         await app.models.User.updateOne(
           { _id: decoded.user._id },
           { $pull: { fridges: req.body.id } }
@@ -141,6 +147,8 @@ module.exports = (app) => {
             );
           }
         }
+
+        await app.models.Item.deleteMany({ fridge: req.body.id });
         res.status(200).end();
       });
     } catch (err) {
@@ -152,5 +160,29 @@ module.exports = (app) => {
    * Edit the fridge
    *
    */
-  // app.put("/v1/fridge/:token")
+  app.put("/v1/fridge/:token", async (req, res) => {
+    try {
+      jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
+        if (err) {
+          return res.status(400).send({ error: "fridge.put jwt verify error" });
+        }
+        const editElements = req.body.data;
+        Object.keys(editElements).map(async (key, index) => {
+          if (key === "primary") {
+            await app.models.Fridge.findOneAndUpdate(
+              { primary: true },
+              { primary: false }
+            );
+          }
+          await app.models.Fridge.updateOne(
+            { _id: req.body.id },
+            { $set: { [key]: editElements[key] } }
+          );
+        });
+        return res.status(202).end();
+      });
+    } catch (err) {
+      res.status(400).send({ error: "fridge.put failed " });
+    }
+  });
 };

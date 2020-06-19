@@ -1,8 +1,8 @@
 "use strict";
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 let Joi = require("@hapi/joi");
 
-module.exports = app => {
+module.exports = (app) => {
   /**
    * Log a user in
    *
@@ -13,10 +13,8 @@ module.exports = app => {
   app.post("/v1/auth", async (req, res) => {
     // Validate incoming request has username and password, if not return 400:'username and password are required'
     let schema = Joi.object().keys({
-      username: Joi.string()
-        .lowercase()
-        .required(),
-      password: Joi.string().required()
+      username: Joi.string().lowercase().required(),
+      password: Joi.string().required(),
     });
     try {
       let data = await schema.validateAsync(req.body);
@@ -28,21 +26,20 @@ module.exports = app => {
       else if (user.authenticate(data.password)) {
         // Regenerate session when signing in to prevent fixation
         // console.log(`Session.login success: ${req.session.user.username}`);
-          // If a match, return 201:{ username, email }
-          jwt.sign({ user }, 'secretkey', (err, token) => {
-            res.status(200).send({
-              token: token
-            });
-          })
-          
+        // If a match, return 201:{ username, email }
+        jwt.sign({ user }, "secretkey", (err, token) => {
+          res.status(200).send({
+            token: token,
+          });
+        });
       } else {
         // If not a match, return 401:unauthorized
         console.log(`Session.login failed.  Incorrect credentials.`);
         res.status(401).send({ error: "unauthorized" });
       }
     } catch (err) {
-    //   console.log("here!")
-    //   console.log(err)
+      //   console.log("here!")
+      //   console.log(err)
       const message = err.details[0].message;
       console.log(`Session.login validation failure: ${message}`);
       res.status(400).send({ error: message });

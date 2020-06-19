@@ -85,7 +85,7 @@ export default function AuthContextProvider() {
           data.password !== "" &&
           data.email !== ""
         ) {
-          const res = await fetch("http://10.0.0.77:3200/v1/user", {
+          const res = await fetch("http://localhost:3200/v1/user", {
             method: "POST",
             headers: {
               Accept: "application/json",

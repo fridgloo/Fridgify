@@ -27,12 +27,12 @@ export default function RegistrationScreen({ navigation }) {
     // Make sure the username is valid
     if (name === 'username') {
       let usernameInvalid = validUsername(value);
-      if (usernameInvalid) setError(`Error: ${usernameInvalid.error}`);
+      if (usernameInvalid) {setError(`Error: ${usernameInvalid.error}`); console.log(usernameInvalid.error);}
     }
     // Make sure password is valid
     else if (name === 'password') {
       let pwdInvalid = validPassword(value);
-      if (pwdInvalid) setError(`Error: ${pwdInvalid.error}`);
+      if (pwdInvalid) {setError(`Error: ${pwdInvalid.error}`); console.log(pwdInvalid.error);}
     }
   }
 
@@ -60,14 +60,14 @@ export default function RegistrationScreen({ navigation }) {
       />
       
       {/* Added Section for Confirm Password */}
-      <AppTextInput
+      {/* <AppTextInput
         placeholder="Confirm Password"
         id="confirm_password"
         name="confirm_password"
         value={state.confirm_password}
         onChangeText={value => onChange('confirm_password', value)}
         secureTextEntry
-      /> 
+      />  */}
 
       <AppTextInput
         placeholder="Email"

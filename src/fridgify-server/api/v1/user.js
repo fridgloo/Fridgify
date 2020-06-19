@@ -29,6 +29,7 @@ module.exports = (app) => {
       });
       data = await schema.validateAsync(req.body);
     } catch (err) {
+      console.log(err);
       const message = err.details[0].message;
       //console.log(`User.create validation failure: ${message}`);
       return res.status(400).send({ error: message });

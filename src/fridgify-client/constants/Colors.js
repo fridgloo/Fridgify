@@ -4,8 +4,8 @@ export default {
   //exporting #fff as white
   white: "#fff",
 
-  //#177AEE is blue - primary color
-  primaryColor: "#177AEE",
+  //#2D82FF is azure - primary color
+  primaryColor: "#2D82FF",
 
   textGray: "#8b90a0",
 

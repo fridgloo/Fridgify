@@ -24,12 +24,12 @@ import {
 } from "../util/ScreenHelpers";
 
 export default function FridgeScreen({ navigation, route }) {
+  // refactor state system
   const [state, setState] = React.useState({
     _id: "",
     name: "",
     created: "",
     primary: false,
-    changed: false,
     items: [],
     search: "",
     filter: {},
@@ -158,9 +158,15 @@ export default function FridgeScreen({ navigation, route }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ data: { primary: true }, _id: state._id }),
-    }).then(() =>
-      setState((prevState) => ({ ...prevState, primary: true, changed: true }))
-    );
+    }).then((res) => {
+      if (res.ok) {
+        setState((prevState) => ({ ...prevState, primary: true }))
+        setModal((prevState) => ({ ...prevState, changed: true }))
+
+      } else {
+        console.log("error: setItemPrimary failed");
+      }
+    });
   };
 
   const setItemElement = async () => {
@@ -299,11 +305,12 @@ export default function FridgeScreen({ navigation, route }) {
         }}
       >
         <TouchableOpacity
-          onPress={() =>
+          onPress={() => {
+            console.log(modal.changed);
             modal.changed
-              ? navigation.navigate("FridgeHub", { data: state._id })
-              : navigation.navigate("FridgeHub")
-          }
+              ? navigation.navigate("FridgeHub", { data: state })
+              : navigation.navigate("FridgeHub");
+          }}
         >
           <FontAwesome5 name={"chevron-left"} size={22} color={"#2D82FF"} />
         </TouchableOpacity>

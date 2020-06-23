@@ -9,10 +9,10 @@ import {
   Image,
   TextInput,
   ImageBackground,
+  TouchableOpacity
 } from "react-native";
 import Modal from "react-native-modal";
 import * as SecureStore from "expo-secure-store";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 export default function FridgeHubScreen({ navigation, route }) {
@@ -371,6 +371,7 @@ export default function FridgeHubScreen({ navigation, route }) {
             alignItems: "center",
             paddingVertical: 10,
             paddingLeft: 10,
+            backgroundColor: "yellow"
           }}
         >
           <TouchableOpacity
@@ -384,7 +385,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           >
             <Icon name={"plus"} size={25} color="white"></Icon>
           </TouchableOpacity>
-          <ScrollView horizontal>
+          <ScrollView horizontal style={{ height: "100%"}}>
             {state.fridges?.map((fridge, index) => {
               return (
                 <TouchableOpacity

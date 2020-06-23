@@ -252,9 +252,6 @@ export default function FridgeHubScreen({ navigation, route }) {
         }}
       >
         <View
-          style={{
-            alignItems: "left",
-          }}
         >
           <Text
             style={{
@@ -371,7 +368,6 @@ export default function FridgeHubScreen({ navigation, route }) {
             alignItems: "center",
             paddingVertical: 10,
             paddingLeft: 10,
-            backgroundColor: "yellow"
           }}
         >
           <TouchableOpacity
@@ -457,7 +453,6 @@ export default function FridgeHubScreen({ navigation, route }) {
           style={{
             paddingLeft: 25,
             paddingBottom: 10,
-            alignItems: "left",
           }}
         >
           <Text

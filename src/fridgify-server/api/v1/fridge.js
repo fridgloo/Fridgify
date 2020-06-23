@@ -19,9 +19,10 @@ module.exports = (app) => {
             .send({ error: "fridge.post jwt verify error" });
         }
         const fridgeCheck = await app.models.Fridge.findOne({
-          name: req.body.name,
+          name: req.body.name.toLowerCase(), owner: decoded.user._id
         });
         if (fridgeCheck) {
+          console.log("error: fridge name already used");
           return res.status(400).send({ error: "Fridge name already used" });
         }
 
@@ -43,7 +44,7 @@ module.exports = (app) => {
         const query = { $push: { fridges: fridge._id } };
         await app.models.User.updateOne({ _id: decoded.user._id }, query);
         res.status(201).send({
-          id: fridge._id,
+          _id: fridge._id,
           name: fridge.name,
           created: fridge.created,
           items: fridge.items,
@@ -131,10 +132,10 @@ module.exports = (app) => {
 
         await app.models.User.updateOne(
           { _id: decoded.user._id },
-          { $pull: { fridges: req.body.id } }
+          { $pull: { fridges: req.body._id } }
         );
         const fridge = await app.models.Fridge.findOneAndDelete({
-          _id: req.body.id,
+          _id: req.body._id,
         });
         if (fridge.primary) {
           const fridges = await app.models.Fridge.find({
@@ -148,7 +149,7 @@ module.exports = (app) => {
           }
         }
 
-        await app.models.Item.deleteMany({ fridge: req.body.id });
+        await app.models.Item.deleteMany({ fridge: req.body._id });
         res.status(200).end();
       });
     } catch (err) {
@@ -175,7 +176,7 @@ module.exports = (app) => {
             );
           }
           await app.models.Fridge.updateOne(
-            { _id: req.body.id },
+            { _id: req.body._id },
             { $set: { [key]: editElements[key] } }
           );
         });

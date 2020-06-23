@@ -7,8 +7,10 @@ import {
   Text,
   View,
   Image,
+  TextInput,
   ImageBackground,
 } from "react-native";
+import Modal from "react-native-modal";
 import * as SecureStore from "expo-secure-store";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -16,6 +18,10 @@ import Icon from "react-native-vector-icons/FontAwesome";
 export default function FridgeHubScreen({ navigation, route }) {
   const [state, setState] = React.useState({
     fridges: [],
+  });
+  const [modal, setModal] = React.useState({
+    visible: false,
+    newName: "",
   });
 
   React.useEffect(() => {
@@ -36,7 +42,7 @@ export default function FridgeHubScreen({ navigation, route }) {
       resetFridges();
       data.fridges.map((fridge) => {
         const fridgeState = {
-          id: fridge._id,
+          _id: fridge._id,
           name: fridge.name,
           created: fridge.created,
           items: fridge.items,
@@ -55,29 +61,35 @@ export default function FridgeHubScreen({ navigation, route }) {
     }
   };
 
+  const addFridge = async (name) => {
+    let token = await SecureStore.getItemAsync("user_token");
+    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: name }),
+    })
+      .then((res) => res.json())
+      .then((data) =>
+        setState((prevState) => ({
+          fridges: [...prevState.fridges, data],
+        }))
+      );
+  };
+
   const resetFridges = () => {
     setState((prev) => ({
       fridges: [],
     }));
   };
 
-  const getFridgeBG = (index) => {
-    let fridgeBG = "white";
-    switch (index) {
-      case 0:
-        fridgeBG = "#3EB9BB";
-        break;
-      case 1:
-        fridgeBG = "#70CDD2";
-        break;
-      case 2:
-        fridgeBG = "#9ED9DE";
-        break;
-      case 3:
-        fridgeBG = "#D1F1F6";
-        break;
-    }
-    return fridgeBG;
+  const toggleModal = () => {
+    setModal((prev) => ({
+      ...prev,
+      visible: !prev.visible,
+    }));
   };
 
   return (
@@ -87,10 +99,121 @@ export default function FridgeHubScreen({ navigation, route }) {
         backgroundColor: "white",
       }}
     >
+      <View>
+        <Modal isVisible={modal.visible}>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                width: "80%",
+                height: "15%",
+                backgroundColor: "white",
+                alignItems: "center",
+                justifyContent: "space-evenly",
+                borderRadius: 12
+              }}
+            >
+              <View
+                style={{
+                  width: "85%",
+                  height: "90%",
+                  flex: 1,
+                  justifyContent: "center",
+                }}
+              >
+                <View
+                  style={{
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: "#CBCBCB",
+                    paddingHorizontal: 15,
+                    paddingVertical: 15,
+                  }}
+                >
+                  <TextInput
+                    style={{
+                      fontSize: 16,
+                    }}
+                    numberOfLines={1}
+                    placeholder={"Fridge name..."}
+                    onChangeText={(val) =>
+                      setModal((prevState) => ({
+                        ...prevState,
+                        newName: val,
+                      }))
+                    }
+                  />
+                </View>
+              </View>
+              <View
+                style={{
+                  flex: 0.5,
+                  width: "100%",
+                  height: "100%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  borderTopColor: "#CBCBCB",
+                  borderTopWidth: 1,
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "white",
+                    width: "50%",
+                    justifyContent: "center",
+                    borderBottomStartRadius: 12,
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{
+                      padding: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    onPress={toggleModal}
+                  >
+                    <Text style={{ fontSize: 16, color: "#2D82FF" }}>Cancel</Text>
+                  </TouchableOpacity>
+                </View>
+                <View
+                  style={{
+                    backgroundColor:
+                      modal.newName === "" ? "#A7CBFF" : "#2D82FF",
+                    width: "50%",
+                    justifyContent: "center",
+                    borderBottomEndRadius: 12
+
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{
+                      padding: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    onPress={() => {
+                      addFridge(modal.newName);
+                      toggleModal();
+                    }}
+                    disabled={modal.newName === ""}
+                  >
+                    <Text style={{ fontSize: 16, color: "white" }}>Create</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      </View>
       {/* --------------------------------Header ---------------------------------------------- */}
       <View
         style={{
-          flex: 4,
+          flex: 1,
           paddingHorizontal: 25,
           paddingVertical: 5,
           flexDirection: "row",
@@ -98,15 +221,15 @@ export default function FridgeHubScreen({ navigation, route }) {
           justifyContent: "center",
         }}
       >
-      <Image
+        <Image
           style={{
             height: 60,
-            width: 60
+            width: 60,
           }}
           resizeMode="center"
-          source={require("../assets/images/igloo.png")}
+          source={require("../assets/images/igloo25.png")}
         />
-        
+
         <Text
           adjustsFontSizeToFit
           style={{
@@ -114,15 +237,16 @@ export default function FridgeHubScreen({ navigation, route }) {
             color: "#2D82FF",
             fontSize: 32,
             fontWeight: "600",
+            fontFamily: "System"
           }}
         >
-          F r i d g l o o
+          Fridgloo
         </Text>
       </View>
       {/* --------------------------------Expiration Overview --------------------------------- */}
       <View
         style={{
-          flex: 10,
+          flex: 2,
           paddingHorizontal: 25,
           paddingTop: 15,
         }}
@@ -210,7 +334,7 @@ export default function FridgeHubScreen({ navigation, route }) {
                 </View>
                 <View
                   style={{
-                    paddingLeft: 10
+                    paddingLeft: 10,
                   }}
                 >
                   <Icon name={"chevron-right"} size={25} color="black"></Icon>
@@ -223,7 +347,7 @@ export default function FridgeHubScreen({ navigation, route }) {
       {/* --------------------------------Fridges---------------------------------------------- */}
       <View
         style={{
-          flex: 11,
+          flex: 2.5,
           paddingLeft: 25,
           paddingTop: 25,
         }}
@@ -255,7 +379,7 @@ export default function FridgeHubScreen({ navigation, route }) {
                 ? styles.addFridgeDisabled
                 : styles.addFridgeEnabled
             }
-            onPress={() => navigation.navigate("AddFridgeModal")}
+            onPress={toggleModal}
             disabled={state.fridges.length >= 4}
           >
             <Icon name={"plus"} size={25} color="white"></Icon>
@@ -275,7 +399,10 @@ export default function FridgeHubScreen({ navigation, route }) {
                   }}
                   key={index}
                   onPress={() =>
-                    navigation.navigate("FridgeScreen", { data: fridge, type: "INITIALIZE" })
+                    navigation.navigate("FridgeScreen", {
+                      data: fridge,
+                      type: "INITIALIZE",
+                    })
                   }
                 >
                   <View
@@ -320,7 +447,7 @@ export default function FridgeHubScreen({ navigation, route }) {
       {/* --------------------------------Recipe of the Day------------------------------------ */}
       <View
         style={{
-          flex: 10,
+          flex: 2.5,
           paddingTop: 25,
           paddingBottom: 50,
         }}

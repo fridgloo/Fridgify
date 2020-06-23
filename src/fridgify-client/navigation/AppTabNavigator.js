@@ -6,8 +6,8 @@ import HomeScreen from "../screens/HomeScreen";
 import LinksScreen from "../screens/LinksScreen";
 import DemoScreen from "../screens/DemoScreen";
 import GlistScreen from "../screens/GlistScreen";
-import FridgeHubScreen from "../screens/FridgeHubScreen";
 import FridgeRootStackNavigator from "./FridgeRootStackNavigator";
+import GlistRootStackNavigator from "./GlistRootStackNavigator";
 import ProfileScreen from "../screens/ProfileScreen";
 
 const AppTab = createBottomTabNavigator();
@@ -22,7 +22,7 @@ export default function AppTabNavigator({ navigation, route }) {
     <AppTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
       <AppTab.Screen
         name="Grocery"
-        component={GlistScreen}
+        component={GlistRootStackNavigator}
         options={{
           title: "Grocery",
           tabBarIcon: ({ focused }) => (

@@ -93,10 +93,19 @@ export default function AuthContextProvider() {
             },
             body: JSON.stringify(data),
           });
-          data = await res.json();
           if (res.ok) {
-            SecureStore.setItemAsync("user_token", data.token);
-            dispatch({ type: "SIGN_IN", token: data.token });
+            const resData = await res.json();
+            SecureStore.setItemAsync("user_token", resData.token);
+            let token = await SecureStore.getItemAsync("user_token");
+            await fetch(`http://localhost:3200/v1/glist/${token}`, {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ name: "main" }),
+            });
+            dispatch({ type: "SIGN_IN", token: resData.token });
           }
         }
       },

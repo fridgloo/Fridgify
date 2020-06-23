@@ -3,7 +3,6 @@ import {
   TouchableOpacity,
   TouchableHighlight,
   Picker,
-  Button,
   TextInput,
   StyleSheet,
   Text,
@@ -11,16 +10,22 @@ import {
   SafeAreaView,
   Dimensions,
 } from "react-native";
-import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { SwipeListView } from "react-native-swipe-list-view";
 import * as SecureStore from "expo-secure-store";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 
+import FridgeModal from "../components/modals/FridgeModal";
+import {
+  formatDate,
+  getExpirationColor,
+  getItemType,
+} from "../util/ScreenHelpers";
+
 export default function FridgeScreen({ navigation, route }) {
   const [state, setState] = React.useState({
-    id: "",
+    _id: "",
     name: "",
     created: "",
     primary: false,
@@ -31,9 +36,9 @@ export default function FridgeScreen({ navigation, route }) {
   });
   const [modal, setModal] = React.useState({
     visible: false,
-    style: "",
+    option: "",
     value: "",
-    newValue: "",
+    newName: "",
     newType: "",
     newDate: new Date(),
     changed: false,
@@ -50,7 +55,7 @@ export default function FridgeScreen({ navigation, route }) {
   const fillFridgeState = async (params) => {
     let token = await SecureStore.getItemAsync("user_token");
     const response = await fetch(
-      `http://localhost:3200/v1/item/fridge/${params.id}/${token}`,
+      `http://localhost:3200/v1/item/fridge/${params._id}/${token}`,
       {
         method: "GET",
         headers: {
@@ -63,7 +68,7 @@ export default function FridgeScreen({ navigation, route }) {
       const data = await response.json();
       setState((prev) => ({
         ...prev,
-        id: params.id,
+        _id: params._id,
         name: params.name,
         created: params.created,
         primary: params.primary,
@@ -80,37 +85,25 @@ export default function FridgeScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id: state.id }),
+      body: JSON.stringify({ _id: state._id }),
     }).then(() =>
-      navigation.navigate("FridgeHub", { data: state.id, type: "DELETE" })
+      navigation.navigate("FridgeHub", { data: state._id, type: "DELETE" })
     );
   };
 
   const clearFridge = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
-      method: "PUT",
+    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+      method: "DELETE",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data: { items: [] }, id: state.id }),
-    })
-      .then(
-        async () =>
-          await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
-            method: "DELETE",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ fridge: state.id, items: state.items }),
-          })
-      )
-      .then(() => setState((prevState) => ({ ...prevState, items: [] })));
+      body: JSON.stringify({ fridge: state._id, items: state.items }),
+    }).then(() => setState((prevState) => ({ ...prevState, items: [] })));
   };
 
-  const addItem = async (data) => {
+  const addItem = async () => {
     let token = await SecureStore.getItemAsync("user_token");
     await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
       method: "POST",
@@ -118,7 +111,15 @@ export default function FridgeScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data: data, fridge: state.id }),
+      body: JSON.stringify({
+        data: {
+          name: modal.newName,
+          type: modal.newType,
+          exp_date: modal.newDate,
+          bought_date: new Date(),
+        },
+        fridge: state._id,
+      }),
     }).then(() => fillFridgeState(state));
     // .then((response) => response.json())
     // .then((data) => {
@@ -129,6 +130,25 @@ export default function FridgeScreen({ navigation, route }) {
     //   });
   };
 
+  // const addItem = async (data) => {
+  //   let token = await SecureStore.getItemAsync("user_token");
+  //   await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+  //     method: "POST",
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({ data: data, fridge: state._id }),
+  //   }).then(() => fillFridgeState(state));
+  //   // .then((response) => response.json())
+  //   // .then((data) => {
+  //   //     setState((prevState) => ({
+  //   //       ...prevState,
+  //   //       items: [...prevState.items, data.item],
+  //   //     }));
+  //   //   });
+  // };
+
   const setItemPrimary = async () => {
     let token = await SecureStore.getItemAsync("user_token");
     await fetch(`http://localhost:3200/v1/fridge/${token}`, {
@@ -137,13 +157,19 @@ export default function FridgeScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data: { primary: true }, id: state.id }),
+      body: JSON.stringify({ data: { primary: true }, _id: state._id }),
     }).then(() =>
       setState((prevState) => ({ ...prevState, primary: true, changed: true }))
     );
   };
 
-  const setItemElement = async (option, value, id) => {
+  const setItemElement = async () => {
+    const value =
+      modal.option === "name"
+        ? modal.newName
+        : modal.option === "type"
+        ? modal.newType
+        : modal.newDate;
     let token = await SecureStore.getItemAsync("user_token");
     await fetch(`http://localhost:3200/v1/item/${token}`, {
       method: "PUT",
@@ -151,15 +177,25 @@ export default function FridgeScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data: { [option]: value }, id: id }),
-    }).then(() => {
-      const itemIndex = state.items.findIndex((element) => element._id == id);
-      let newArray = [...state.items];
-      newArray[itemIndex] = { ...newArray[itemIndex], [option]: value };
-      setState((prevState) => ({
-        ...prevState,
-        items: newArray,
-      }));
+      body: JSON.stringify({
+        data: { [modal.option]: value },
+        _id: modal.value._id,
+      }),
+    }).then((res) => {
+      if (res.ok) {
+        const itemIndex = state.items.findIndex(
+          (element) => element._id == modal.value._id
+        );
+        let newArray = [...state.items];
+        newArray[itemIndex] = {
+          ...newArray[itemIndex],
+          [modal.option]: value,
+        };
+        setState((prevState) => ({
+          ...prevState,
+          items: newArray,
+        }));
+      }
     });
   };
 
@@ -177,7 +213,7 @@ export default function FridgeScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fridge: state.id, items: [item] }),
+      body: JSON.stringify({ fridge: state._id, items: [item] }),
     }).then(() => {
       const itemIndex = state.items.findIndex(
         (element) => element._id == item._id
@@ -191,50 +227,43 @@ export default function FridgeScreen({ navigation, route }) {
     });
   };
 
-  const formatDate = (date) => {
-    date = new Date(date);
-    let month = "" + (date.getMonth() + 1);
-    let day = "" + date.getDate();
-    const year = date.getFullYear();
-
-    if (month.length < 2) {
-      month = "0" + month;
-    }
-    if (day.length < 2) {
-      day = "0" + day;
-    }
-
-    return [month, day, year].join("/");
-  };
-
-  const getExpirationColor = (date) => {
-    if (!date) {
-      return "#CBCBCB";
-    }
-    date = new Date(date);
-    if (date < Date.now()) {
-      return "red";
-    } else {
-      if ((date - Date.now()) / (1000 * 60 * 60 * 24) <= 3) {
-        return "orange";
-      } else {
-        return "green";
+  const onChangeText = (val, nestedOption) => {
+    if (modal.option === "name") {
+      setModal((prev) => ({
+        ...prev,
+        newName: val,
+        changed: val === "" || val === modal.value.name ? false : true,
+      }));
+    } else if (modal.option === "type") {
+      setModal((prev) => ({
+        ...prev,
+        newType: val,
+        changed: val === modal.value.type ? false : true,
+      }));
+    } else if (modal.option === "exp_date") {
+      setModal((prev) => ({
+        ...prev,
+        newDate: val,
+        changed: formatDate(val) !== formatDate(modal.value.exp_date),
+      }));
+    } else if (modal.option === "add") {
+      if (nestedOption === "name") {
+        setModal((prev) => ({
+          ...prev,
+          newName: val,
+          changed: val === "" || val === modal.value.name ? false : true,
+        }));
+      } else if (nestedOption === "type") {
+        setModal((prev) => ({
+          ...prev,
+          newType: val,
+        }));
+      } else if (nestedOption === "exp_date") {
+        setModal((prev) => ({
+          ...prev,
+          newDate: val,
+        }));
       }
-    }
-  };
-
-  const getItemType = (type) => {
-    switch (type?.toLowerCase()) {
-      case "meat":
-        return "drumstick-bite";
-      case "vegetable":
-        return "carrot";
-      case "fruit":
-        return "apple-alt";
-      case "fish":
-        return "fish";
-      default:
-        return "question";
     }
   };
 
@@ -245,442 +274,6 @@ export default function FridgeScreen({ navigation, route }) {
     }));
   };
 
-  const loadAddItem = () => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <View
-          style={{
-            width: "80%",
-            height: "60%",
-            backgroundColor: "white",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: "90%",
-              height: "18%",
-              paddingTop: 20,
-            }}
-          >
-            <Text style={{ paddingBottom: 10, fontSize: 16 }}>
-              Name (required):
-            </Text>
-            <View
-              style={{
-                borderRadius: 12,
-                borderWidth: 1,
-                borderColor: "#CBCBCB",
-                paddingHorizontal: 10,
-                paddingVertical: 10,
-              }}
-            >
-              <TextInput
-                style={{
-                  fontSize: 16,
-                }}
-                numberOfLines={1}
-                placeholder={"Name..."}
-                onChangeText={(val) =>
-                  setModal((prev) => ({
-                    ...prev,
-                    newValue: val,
-                  }))
-                }
-              />
-            </View>
-          </View>
-          <View
-            style={{
-              width: "90%",
-              height: "20%",
-              paddingVertical: 20,
-            }}
-          >
-            <Text style={{ paddingBottom: 0, fontSize: 16 }}>Type:</Text>
-            <View
-              style={{
-                borderRadius: 12,
-                paddingHorizontal: 10,
-              }}
-            >
-              <Picker
-                selectedValue={modal.newType}
-                style={{
-                  height: "100%",
-                  width: "100%",
-                }}
-                itemStyle={{
-                  height: "100%",
-                }}
-                onValueChange={(val) => {
-                  if (val !== "0") {
-                    setModal((prev) => ({
-                      ...prev,
-                      newType: val,
-                    }));
-                  }
-                }}
-              >
-                <Picker.Item
-                  label={"Scroll to a type..."}
-                  value={"0"}
-                  color={"#CBCBCB"}
-                />
-                <Picker.Item label={"Fish"} value={"fish"} />
-                <Picker.Item label={"Fruit"} value={"fruit"} />
-                <Picker.Item label={"Meat"} value={"meat"} />
-                <Picker.Item label={"Vegetable"} value={"vegetable"} />
-              </Picker>
-            </View>
-          </View>
-          <View
-            style={{
-              width: "90%",
-              height: "50%",
-              paddingVertical: 20,
-            }}
-          >
-            <View
-              style={{
-                justifyContent: "center",
-              }}
-            >
-              <Text style={{ paddingBottom: 0, fontSize: 16 }}>
-                Expiration Date:
-              </Text>
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={modal.newDate}
-                mode={"date"}
-                display={"default"}
-                onChange={(event, selectedDate) => {
-                  const currentDate = selectedDate || modal.newDate;
-                  setModal((prev) => ({
-                    ...prev,
-                    newDate: currentDate,
-                  }));
-                }}
-                style={{
-                  height: "95%",
-                }}
-              />
-            </View>
-          </View>
-
-          <View
-            style={{
-              width: "80%",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingVertical: 20,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#2D82FF",
-                borderRadius: 16,
-                width: "45%",
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={toggleModal}
-              >
-                <Text style={{ fontSize: 16, color: "white" }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                backgroundColor: modal.newValue === "" ? "#A7CBFF" : "#2D82FF",
-                borderRadius: 16,
-                width: "45%",
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => {
-                  addItem({
-                    name: modal.newValue,
-                    type: modal.newType,
-                    exp_date: modal.newDate,
-                    bought_date: new Date(),
-                  });
-                  toggleModal();
-                }}
-                disabled={modal.newValue === ""}
-              >
-                <Text style={{ fontSize: 16, color: "white" }}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const loadModalByOption = (option, value) => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <View
-          style={{
-            width: "80%",
-            height:
-              option === "exp_date" ? "35%" : option === "name" ? "15%" : "22%",
-            backgroundColor: "white",
-            alignItems: "center",
-            justifyContent: "space-evenly",
-          }}
-        >
-          <View
-            style={{
-              width: "90%",
-              flex: 1,
-              justifyContent: "flex-end",
-            }}
-          >
-            {option === "name" ? (
-              <View
-                style={{
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: "#CBCBCB",
-                  paddingHorizontal: 10,
-                  paddingVertical: 5,
-                }}
-              >
-                <TextInput
-                  style={{
-                    fontSize: 16,
-                  }}
-                  numberOfLines={1}
-                  placeholder={value.name}
-                  onChangeText={(val) =>
-                    setModal((prev) => ({
-                      ...prev,
-                      newValue: val,
-                      changed: val === "" || val === value.name ? false : true,
-                    }))
-                  }
-                />
-              </View>
-            ) : option === "type" ? (
-              <View
-                style={{
-                  borderRadius: 12,
-                  paddingHorizontal: 10,
-                }}
-              >
-                <Picker
-                  selectedValue={modal.newValue}
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                  }}
-                  itemStyle={{
-                    height: "100%",
-                  }}
-                  onValueChange={(val) => {
-                    if (val !== "0") {
-                      setModal((prev) => ({
-                        ...prev,
-                        newValue: val,
-                        changed: val === value.type ? false : true,
-                      }));
-                    }
-                  }}
-                >
-                  <Picker.Item
-                    label={"Scroll to a type..."}
-                    value={"0"}
-                    color={"#CBCBCB"}
-                  />
-                  <Picker.Item label={"Fish"} value={"fish"} />
-                  <Picker.Item label={"Fruit"} value={"fruit"} />
-                  <Picker.Item label={"Meat"} value={"meat"} />
-                  <Picker.Item label={"Vegetable"} value={"vegetable"} />
-                </Picker>
-              </View>
-            ) : (
-              <View
-                style={{
-                  justifyContent: "center",
-                }}
-              >
-                <DateTimePicker
-                  testID="dateTimePicker"
-                  value={
-                    modal.changed
-                      ? modal.newDate
-                      : value.exp_date
-                      ? new Date(value.exp_date)
-                      : new Date()
-                  }
-                  mode={"date"}
-                  display={"default"}
-                  onChange={(event, selectedDate) => {
-                    const currentDate = selectedDate || modal.newDate;
-                    setModal((prev) => ({
-                      ...prev,
-                      newDate: currentDate,
-                      changed:
-                        formatDate(selectedDate) !== formatDate(value.exp_date),
-                    }));
-                  }}
-                  style={{
-                    height: "95%",
-                  }}
-                />
-              </View>
-            )}
-          </View>
-          <View
-            style={{
-              width: "80%",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingVertical: 20,
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#2D82FF",
-                borderRadius: 16,
-                width: "45%",
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={toggleModal}
-              >
-                <Text style={{ fontSize: 16, color: "white" }}>Cancel</Text>
-              </TouchableOpacity>
-            </View>
-            <View
-              style={{
-                backgroundColor: !modal.changed ? "#A7CBFF" : "#2D82FF",
-                borderRadius: 16,
-                width: "45%",
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  padding: 5,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                onPress={() => {
-                  option === "exp_date"
-                    ? setItemElement(option, modal.newDate, value._id)
-                    : setItemElement(option, modal.newValue, value._id);
-                  toggleModal();
-                }}
-                disabled={!modal.changed}
-              >
-                <Text style={{ fontSize: 16, color: "white" }}>Save</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
-  const loadConfirmation = (option) => {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "white",
-            justifyContent: "center",
-            width: "60%",
-            height: 50,
-          }}
-        >
-          <Text numberOfLines={1} style={{ textAlign: "center", fontSize: 16 }}>
-            Are you sure?
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-evenly",
-            alignItems: "flex-end",
-            width: "60%",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "white",
-              width: "50%",
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                padding: 8,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={toggleModal}
-            >
-              <Text style={{ fontSize: 16, color: "#2D82FF" }}>No</Text>
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              backgroundColor: "#2D82FF",
-              width: "50%",
-            }}
-          >
-            <TouchableOpacity
-              style={{
-                padding: 8,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                option === "delete" ? deleteFridge() : clearFridge();
-                toggleModal();
-              }}
-            >
-              <Text style={{ fontSize: 16, color: "white" }}>Yes</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
   return (
     <SafeAreaView
       style={{
@@ -688,15 +281,16 @@ export default function FridgeScreen({ navigation, route }) {
         backgroundColor: "white",
       }}
     >
-      <View>
-        <Modal isVisible={modal.visible}>
-          {modal.style === "delete" || modal.style === "clear"
-            ? loadConfirmation(modal.style)
-            : modal.style === "add"
-            ? loadAddItem()
-            : loadModalByOption(modal.style, modal.value)}
-        </Modal>
-      </View>
+      <FridgeModal
+        modalState={modal}
+        toggleModal={toggleModal}
+        onChangeText={onChangeText}
+        deleteFridge={deleteFridge}
+        clearFridge={clearFridge}
+        setItemElement={setItemElement}
+        addItem={addItem}
+      />
+
       <View
         style={{
           flex: 1,
@@ -706,8 +300,8 @@ export default function FridgeScreen({ navigation, route }) {
       >
         <TouchableOpacity
           onPress={() =>
-            state.changed
-              ? navigation.navigate("FridgeHub", { data: state.id })
+            modal.changed
+              ? navigation.navigate("FridgeHub", { data: state._id })
               : navigation.navigate("FridgeHub")
           }
         >
@@ -746,7 +340,11 @@ export default function FridgeScreen({ navigation, route }) {
             }}
           >
             {state.primary ? (
-              <FontAwesome5 name={"igloo"} size={ state.name.length > 8 ? 26 : 36 } color={"black"} />
+              <FontAwesome5
+                name={"igloo"}
+                size={state.name.length > 8 ? 26 : 36}
+                color={"black"}
+              />
             ) : (
               <Text />
             )}
@@ -776,7 +374,8 @@ export default function FridgeScreen({ navigation, route }) {
               setModal((prevState) => ({
                 ...prevState,
                 visible: true,
-                style: "delete",
+                option: "delete",
+                changed: true,
               }))
             }
           >
@@ -875,7 +474,8 @@ export default function FridgeScreen({ navigation, route }) {
               setModal((prevState) => ({
                 ...prevState,
                 visible: true,
-                style: "clear",
+                option: "clear",
+                changed: true,
               }))
             }
           >
@@ -1061,10 +661,10 @@ export default function FridgeScreen({ navigation, route }) {
                     onPress={() =>
                       setModal({
                         visible: true,
-                        style: "name",
+                        option: "name",
                         value: data.item,
                         newDate: new Date(),
-                        newValue: "",
+                        newName: "",
                         changed: false,
                       })
                     }
@@ -1089,10 +689,10 @@ export default function FridgeScreen({ navigation, route }) {
                     onPress={() =>
                       setModal({
                         visible: true,
-                        style: "type",
+                        option: "type",
                         value: data.item,
                         newDate: new Date(),
-                        newValue: data.item.type,
+                        newName: data.item.type,
                         changed: false,
                       })
                     }
@@ -1124,12 +724,12 @@ export default function FridgeScreen({ navigation, route }) {
                     onPress={() =>
                       setModal({
                         visible: true,
-                        style: "exp_date",
+                        option: "exp_date",
                         value: data.item,
                         newDate: data.item.exp_date
                           ? new Date(data.item.exp_date)
                           : new Date(),
-                        newValue: "",
+                        newName: "",
                         changed: data.item.exp_date ? false : true,
                       })
                     }
@@ -1217,8 +817,8 @@ export default function FridgeScreen({ navigation, route }) {
             setModal((prevState) => ({
               ...prevState,
               visible: true,
-              style: "add",
-              newValue: "",
+              option: "add",
+              newName: "",
               newDate: new Date(),
               newType: "",
             }))

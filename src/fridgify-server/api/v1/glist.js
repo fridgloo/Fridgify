@@ -18,9 +18,10 @@ module.exports = (app) => {
         }
 
         const glistCheck = await app.models.Glist.findOne({
-          name: req.body.name,
+          name: req.body.name.toLowerCase(), owner: decoded.user._id
         });
         if (glistCheck) {
+          console.log("error: glist name already used");
           return res.status(400).send({ error: "Glist name already used" });
         }
 
@@ -36,7 +37,7 @@ module.exports = (app) => {
         const query = { $push: { glists: glist._id } };
         await app.models.User.updateOne({ _id: decoded.user._id }, query);
         res.status(201).send({
-          id: glist._id,
+          _id: glist._id,
           name: glist.name,
           created: glist.created,
           items: glist.items,
@@ -118,12 +119,12 @@ module.exports = (app) => {
 
         await app.models.User.updateOne(
           { _id: decoded.user._id },
-          { $pull: { glists: req.body.id } }
+          { $pull: { glists: req.body._id } }
         );
         await app.models.Glist.deleteOne({
-          _id: req.body.id,
+          _id: req.body._id,
         });
-
+        await app.models.Item.deleteMany({ glist: req.body._id });
         res.status(200).end();
       });
     } catch (err) {
@@ -141,12 +142,51 @@ module.exports = (app) => {
         if (err) {
           return res.status(400).send({ error: "glist.put jwt verify error" });
         }
-        const glist = await app.models.Glist.findOne({ _id: req.body.id });
         const editElements = req.body.data;
-        Object.keys(editElements).map((key, index) => {
-          glist[key] = editElements[key];
+        Object.keys(editElements).map(async (key, index) => {
+          await app.models.Glist.updateOne(
+            { _id: req.body._id },
+            { $set: { [key]: editElements[key] } }
+          );
         });
-        await glist.save();
+        return res.status(202).end();
+      });
+    } catch (err) {
+      res.status(400).send({ error: "glist.put failed " });
+    }
+  });
+
+  /**
+   * Submit glist to fridge
+   */
+  app.put("/v1/glist/fridge/:token", async (req, res) => {
+    try {
+      jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
+        if (err) {
+          return res.status(400).send({ error: "glist.put jwt verify error" });
+        }
+
+        req.body.items.map(async (item) => {
+          await app.models.Item.updateOne(
+            { _id: item._id },
+            {
+              $set: { glist: undefined, fridge: req.body.fridge },
+            }
+          );
+          await app.models.Fridge.updateOne(
+            { _id: req.body.fridge },
+            {
+              $push: { items: item._id },
+            }
+          );
+          await app.models.Glist.updateOne(
+            { _id: req.body.glist },
+            {
+              $pull: { items: item._id },
+            }
+          );
+        });
+
         return res.status(202).end();
       });
     } catch (err) {

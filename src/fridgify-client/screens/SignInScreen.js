@@ -1,14 +1,23 @@
 import React from "react";
-import { View, SafeAreaView, Image, Text, StyleSheet} from "react-native"; 
+import { View, SafeAreaView, Image, Text, StyleSheet } from "react-native";
 import { AuthContext } from "../providers/AuthContextProvider";
 import AuthButton from "../components/AuthButton";
-import AppTextInput from "../components/AppTextInput";
 import LogoText from "../components/LogoText";
 
-export default function SignInScreen({ navigation }) {
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
+import * as Yup from "yup";
+import {
+  ErrorMessage,
+  Form,
+  FormField,
+  SubmitButton,
+} from "../components/form";
 
+const validationSchema = Yup.object().shape({
+  username: Yup.string().required().max(255).label("Username"),
+  password: Yup.string().required().max(255).label("Password"),
+});
+
+export default function SignInScreen({ navigation }) {
   const { signIn } = React.useContext(AuthContext);
   return (
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
@@ -22,26 +31,35 @@ export default function SignInScreen({ navigation }) {
 
       <Text style={styles.loginIndicator}>Login</Text>
 
-      <AppTextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={(text) => setUsername(text)}
-      />
-      <AppTextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={(text) => setPassword(text)}
-        secureTextEntry
-      />
-      <View>
-        <AuthButton title="Login" onPress={() => signIn({ username, password })} />
-      </View>
-      <View>
-        <AuthButton
+      <Form
+        initialValues={{ username: "", password: "" }}
+        onSubmit={({ username, password }) => signIn({ username, password })}
+        validationSchema={validationSchema}
+      >
+        {/* <ErrorMessage
+          error="Invalid Username/Password."
+          visible={loginFailed}
+        /> */}
+        <FormField
+          autoCapitalize="none"
+          autoCorrect={false}
+          name="username"
+          placeholder="Username"
+        />
+        <FormField
+          autoCapitalize="none"
+          autoCorrect={false}
+          name="password"
+          placeholder="Password"
+          secureTextEntry
+          textContentType="password"
+        />
+        <SubmitButton title="Login" />
+      </Form>
+      <AuthButton
         title="Register"
         onPress={() => navigation.navigate("Registration")}
       />
-      </View>
       <Text
         onPress={() => navigation.navigate("Registration")}
         style={{ textAlign: "center" }}
@@ -71,7 +89,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   loginIndicator: {
-    fontFamily: "Avenir",
+    fontFamily: "System",
     fontSize: 15,
     marginLeft: "10%",
     marginBottom: 5,

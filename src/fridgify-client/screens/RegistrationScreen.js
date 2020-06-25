@@ -1,103 +1,89 @@
 import React from "react";
-import { Button, TextInput, View, SafeAreaView, Image, Text, StyleSheet} from "react-native"; 
+import { SafeAreaView, Text, StyleSheet } from "react-native";
 import { AuthContext } from "../providers/AuthContextProvider";
-import { validPassword, validUsername } from '../util/Validation';
-import AuthButton from "../components/AuthButton";
-import AppTextInput from "../components/AppTextInput";
 import LogoText from "../components/LogoText";
 
+import * as Yup from "yup";
+import {
+  ErrorMessage,
+  Form,
+  FormField,
+  SubmitButton,
+} from "../components/form";
+
+const validationSchema = Yup.object().shape({
+  username: Yup.string().required().min(2).max(16).label("Username"),
+  password: Yup.string()
+    .required()
+    .min(8)
+    .matches(
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]$/,
+      "Must contain uppercase, lowercase, number and a special character"
+    )
+    .label("Password"),
+  confirmPassword: Yup.string()
+    .required()
+    .label("Confirm Password")
+    .test("passwords-match", "Passwords must match", function (value) {
+      return this.parent.password === value;
+    }),
+  email: Yup.string().required().email().label("Email"),
+});
 
 export default function RegistrationScreen({ navigation }) {
-  const [state, setState] = React.useState({
-    username: '',
-    password: '',
-    email: '',
-    first_name: '',
-    last_name: ''
-  });
-  const [error, setError] = React.useState('');
-
-  const onChange = (name, value) => {
-    setError('');
-    // Update from form and clear errors
-    setState({
-      ...state,
-      [name]: value
-    });
-    // Make sure the username is valid
-    if (name === 'username') {
-      let usernameInvalid = validUsername(value);
-      if (usernameInvalid) {setError(`Error: ${usernameInvalid.error}`); console.log(usernameInvalid.error);}
-    }
-    // Make sure password is valid
-    else if (name === 'password') {
-      let pwdInvalid = validPassword(value);
-      if (pwdInvalid) {setError(`Error: ${pwdInvalid.error}`); console.log(pwdInvalid.error);}
-    }
-  }
-
-
   const { signUp } = React.useContext(AuthContext);
   return (
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
       <LogoText style={styles.title}>Fridgloo </LogoText>
-
       <Text style={styles.loginIndicator}>Register</Text>
-      <AppTextInput
-        placeholder="Username"
-        id="username"
-        name="username"
-        value={state.username}
-        onChangeText={value => onChange('username', value)}
-      />
-      <AppTextInput
-        placeholder="Password"
-        id="password"
-        name="password"
-        value={state.password}
-        onChangeText={value => onChange('password', value)}
-        secureTextEntry
-      />
-      
-      {/* Added Section for Confirm Password */}
-      {/* <AppTextInput
-        placeholder="Confirm Password"
-        id="confirm_password"
-        name="confirm_password"
-        value={state.confirm_password}
-        onChangeText={value => onChange('confirm_password', value)}
-        secureTextEntry
-      />  */}
-
-      <AppTextInput
-        placeholder="Email"
-        id="email"
-        name="email"
-        value={state.email}
-        onChangeText={value => onChange('email', value)}
-      />
-      {/*
-      <AppTextInput
-        placeholder="First Name"
-        id="first_name"
-        name="first_name"
-        value={state.first_name}
-        onChangeText={value => onChange('first_name', value)}
-      />
-      <AppTextInput
-        placeholder="Last Name"
-        id="last_name"
-        name="last_name"
-        value={state.last_name}
-        onChangeText={value => onChange('last_name', value)}
-      />
-      */}
-      
-      <AuthButton title="Register" onPress={() => { signUp(state); }} />
+      <Form
+        initialValues={{
+          username: "",
+          password: "",
+          confirmPassword: "",
+          email: "",
+        }}
+        onSubmit={({ username, password, email }) =>
+          signUp({ username, password, email })
+        }
+        validationSchema={validationSchema}
+      >
+        {/* <ErrorMessage error={error} visible={error} /> */}
+        <FormField
+          autoCapitalize="none"
+          autoCorrect={false}
+          name="username"
+          placeholder="Username"
+        />
+        <FormField
+          autoCapitalize="none"
+          autoCorrect={false}
+          name="password"
+          placeholder="Password"
+          secureTextEntry
+          textContentType="password"
+        />
+        <FormField
+          autoCapitalize="none"
+          autoCorrect={false}
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          secureTextEntry
+          textContentType="password"
+        />
+        <FormField
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          name="email"
+          placeholder="Email"
+          textContentType="emailAddress"
+        />
+        <SubmitButton title="Register" />
+      </Form>
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   title: {
@@ -118,7 +104,7 @@ const styles = StyleSheet.create({
     height: 50,
   },
   loginIndicator: {
-    fontFamily: "Avenir",
+    fontFamily: "System",
     fontSize: 15,
     marginLeft: "10%",
     marginBottom: 5,

@@ -10,7 +10,6 @@ function AppTextInput({ ...props }) {
   );
 }
 
-// Will follow whatever color scheme is in the constants folder
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.white,
@@ -22,8 +21,9 @@ const styles = StyleSheet.create({
     height: "7%",
     marginLeft: "10%",
     marginRight: "10%",
-    marginBottom: 20,
-    padding: 20,
+    //marginBottom: 20,
+    padding: 15,
+    marginVertical: 10,
   },
   inputBox: {
     padding: 0,

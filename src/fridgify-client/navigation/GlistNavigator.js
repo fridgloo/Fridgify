@@ -4,21 +4,21 @@ import { createStackNavigator } from "@react-navigation/stack";
 import GlistHubScreen from "../screens/GlistHubScreen";
 import GlistScreen from "../screens/GlistScreen";
 
-const GlistRootStack = createStackNavigator();
+const Glist = createStackNavigator();
 
-export default function GlistRootStackNavigator({ navigation }) {
+export default function GlistNavigator({ navigation }) {
   return (
-    <GlistRootStack.Navigator>
-      <GlistRootStack.Screen
+    <Glist.Navigator>
+      <Glist.Screen
         name="GlistHub"
         component={GlistHubScreen}
         options={{ headerShown: false }}
       />
-      <GlistRootStack.Screen
+      <Glist.Screen
         name="GlistScreen"
         component={GlistScreen}
         options={{ headerShown: false }}
       />
-    </GlistRootStack.Navigator>
+    </Glist.Navigator>
   );
 }

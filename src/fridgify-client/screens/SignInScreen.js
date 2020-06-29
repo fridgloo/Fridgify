@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, SafeAreaView, Image, Text, StyleSheet } from "react-native";
-import { AuthContext } from "../providers/AuthContextProvider";
 import AuthButton from "../components/AuthButton";
 import LogoText from "../components/LogoText";
+import styles from "../constants/AuthStyles";
 
 import * as Yup from "yup";
 import {
@@ -11,6 +11,9 @@ import {
   FormField,
   SubmitButton,
 } from "../components/form";
+import authApi from "../api/auth";
+import useAuth from "../auth/useAuth";
+import routes from "../navigation/routes";
 
 const validationSchema = Yup.object().shape({
   username: Yup.string().required().max(255).label("Username"),
@@ -18,7 +21,16 @@ const validationSchema = Yup.object().shape({
 });
 
 export default function SignInScreen({ navigation }) {
-  const { signIn } = React.useContext(AuthContext);
+  const auth = useAuth();
+  const [signInFailed, setSignInFailed] = useState(false);
+
+  const handleSubmit = async ({ username, password }) => {
+    const result = await authApi.signIn(username, password);
+    if (!result.ok) return setSignInFailed(true);
+    setSignInFailed(false);
+    auth.signIn(result.data.token);
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
       <LogoText style={styles.title}>Fridgloo </LogoText>
@@ -33,13 +45,13 @@ export default function SignInScreen({ navigation }) {
 
       <Form
         initialValues={{ username: "", password: "" }}
-        onSubmit={({ username, password }) => signIn({ username, password })}
+        onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
-        {/* <ErrorMessage
+        <ErrorMessage
           error="Invalid Username/Password."
-          visible={loginFailed}
-        /> */}
+          visible={signInFailed}
+        />
         <FormField
           autoCapitalize="none"
           autoCorrect={false}
@@ -58,10 +70,10 @@ export default function SignInScreen({ navigation }) {
       </Form>
       <AuthButton
         title="Register"
-        onPress={() => navigation.navigate("Registration")}
+        onPress={() => navigation.navigate(routes.REGISTER)}
       />
       <Text
-        onPress={() => navigation.navigate("Registration")}
+        onPress={() => navigation.navigate(routes.REGISTER)}
         style={{ textAlign: "center" }}
       >
         Forgot Password?
@@ -70,28 +82,28 @@ export default function SignInScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 55,
-    lineHeight: 68,
-    textAlign: "center",
-    padding: "10%",
-    marginTop: "10%",
-  },
-  logoContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    margin: "10%",
-    marginBottom: "5%",
-  },
-  logo: {
-    width: 50,
-    height: 50,
-  },
-  loginIndicator: {
-    fontFamily: "System",
-    fontSize: 15,
-    marginLeft: "10%",
-    marginBottom: 5,
-  },
-});
+// const styles = StyleSheet.create({
+//   title: {
+//     fontSize: 55,
+//     lineHeight: 68,
+//     textAlign: "center",
+//     padding: "10%",
+//     marginTop: "10%",
+//   },
+//   logoContainer: {
+//     justifyContent: "center",
+//     alignItems: "center",
+//     margin: "10%",
+//     marginBottom: "5%",
+//   },
+//   logo: {
+//     width: 50,
+//     height: 50,
+//   },
+//   loginIndicator: {
+//     fontFamily: "System",
+//     fontSize: 15,
+//     marginLeft: "10%",
+//     marginBottom: 5,
+//   },
+// });

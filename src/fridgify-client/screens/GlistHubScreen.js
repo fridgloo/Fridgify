@@ -34,7 +34,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const getGlists = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    const response = await fetch(`http://localhost:3200/v1/glist/${token}`, {
+    const response = await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -60,7 +60,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const addGlist = async (name) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/glist/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -82,7 +82,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const deleteGlist = async (id) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/glist/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -102,7 +102,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const sendGlist = async (id) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/glist/${id}/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/item/glist/${id}/${token}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -111,7 +111,7 @@ export default function GlistHubScreen({ navigation, route }) {
     })
       .then((res) => res.json())
       .then((items) =>
-        fetch(`http://localhost:3200/v1/item/glist/${token}`, {
+        fetch(`http://10.0.0.77:3200/v1/item/glist/${token}`, {
           method: "POST",
           headers: {
             Accept: "application/json",
@@ -432,8 +432,7 @@ export default function GlistHubScreen({ navigation, route }) {
                   <View
                     style={{
                       borderRadius: 20,
-                      width: 100
-                      ,
+                      width: 100,
                       height: 50,
                       backgroundColor: "white",
                       justifyContent: "center",

@@ -4,21 +4,21 @@ import { createStackNavigator } from "@react-navigation/stack";
 import FridgeHubScreen from "../screens/FridgeHubScreen";
 import FridgeScreen from "../screens/FridgeScreen";
 
-const FridgeRootStack = createStackNavigator();
+const Fridge = createStackNavigator();
 
-export default function FridgeRootStackNavigator({ navigation }) {
+export default function FridgeNavigator({ navigation }) {
   return (
-    <FridgeRootStack.Navigator>
-      <FridgeRootStack.Screen
+    <Fridge.Navigator>
+      <Fridge.Screen
         name="FridgeHub"
         component={FridgeHubScreen}
         options={{ headerShown: false }}
       />
-      <FridgeRootStack.Screen
+      <Fridge.Screen
         name="FridgeScreen"
         component={FridgeScreen}
         options={{ headerShown: false }}
       />
-    </FridgeRootStack.Navigator>
+    </Fridge.Navigator>
   );
 }

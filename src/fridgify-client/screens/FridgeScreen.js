@@ -55,7 +55,7 @@ export default function FridgeScreen({ navigation, route }) {
   const fillFridgeState = async (params) => {
     let token = await SecureStore.getItemAsync("user_token");
     const response = await fetch(
-      `http://localhost:3200/v1/item/fridge/${params._id}/${token}`,
+      `http://10.0.0.77:3200/v1/item/fridge/${params._id}/${token}`,
       {
         method: "GET",
         headers: {
@@ -79,7 +79,7 @@ export default function FridgeScreen({ navigation, route }) {
 
   const deleteFridge = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/fridge/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -93,7 +93,7 @@ export default function FridgeScreen({ navigation, route }) {
 
   const clearFridge = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/item/fridge/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -105,7 +105,7 @@ export default function FridgeScreen({ navigation, route }) {
 
   const addItem = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/item/fridge/${token}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -132,7 +132,7 @@ export default function FridgeScreen({ navigation, route }) {
 
   // const addItem = async (data) => {
   //   let token = await SecureStore.getItemAsync("user_token");
-  //   await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+  //   await fetch(`http://10.0.0.77:3200/v1/item/fridge/${token}`, {
   //     method: "POST",
   //     headers: {
   //       Accept: "application/json",
@@ -151,7 +151,7 @@ export default function FridgeScreen({ navigation, route }) {
 
   const setItemPrimary = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/fridge/${token}`, {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -160,9 +160,8 @@ export default function FridgeScreen({ navigation, route }) {
       body: JSON.stringify({ data: { primary: true }, _id: state._id }),
     }).then((res) => {
       if (res.ok) {
-        setState((prevState) => ({ ...prevState, primary: true }))
-        setModal((prevState) => ({ ...prevState, changed: true }))
-
+        setState((prevState) => ({ ...prevState, primary: true }));
+        setModal((prevState) => ({ ...prevState, changed: true }));
       } else {
         console.log("error: setItemPrimary failed");
       }
@@ -177,7 +176,7 @@ export default function FridgeScreen({ navigation, route }) {
         ? modal.newType
         : modal.newDate;
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/item/${token}`, {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -213,7 +212,7 @@ export default function FridgeScreen({ navigation, route }) {
 
   const deleteItem = async (item) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+    await fetch(`http://10.0.0.77:3200/v1/item/fridge/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",

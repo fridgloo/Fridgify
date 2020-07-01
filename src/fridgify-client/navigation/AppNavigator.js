@@ -1,7 +1,8 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 import React from "react";
 
-import TabBarIcon from "../components/TabBarIcon";
 import FridgeNavigator from "./FridgeNavigator";
 import GlistNavigator from "./GlistNavigator";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -17,8 +18,8 @@ export default function AppNavigator() {
         component={GlistNavigator}
         options={{
           title: "Grocery",
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-basket" />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="cart" color={color} size={size} />
           ),
         }}
       />
@@ -27,8 +28,8 @@ export default function AppNavigator() {
         component={FridgeNavigator}
         options={{
           title: "Fridge",
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-journal" />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="fridge" color={color} size={size} />
           ),
         }}
       />
@@ -37,8 +38,12 @@ export default function AppNavigator() {
         component={ProfileScreen}
         options={{
           title: "Profile",
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} name="md-person" />
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons
+              name="account-box"
+              color={color}
+              size={size}
+            />
           ),
         }}
       />

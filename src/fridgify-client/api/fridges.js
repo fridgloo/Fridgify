@@ -2,12 +2,12 @@ import client from "./client";
 
 const endpoint = "/fridge";
 
-const getFridges = () => client.get(endpoint);
+const getFridges = (token) => client.get(endpoint + "/" + token);
 
-export const addFridge = (fridgeName) => {
+export const addFridge = (fridgeName, token) => {
   const obj = { name: fridgeName };
   const data = JSON.stringify(obj);
-  return client.post(endpoint, data);
+  return client.post(endpoint + "/" + token, data);
 };
 
 export default {

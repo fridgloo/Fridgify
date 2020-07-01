@@ -1,24 +1,15 @@
-import * as React from "react";
+import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-
 import FridgeHubScreen from "../screens/FridgeHubScreen";
-import FridgeScreen from "../screens/FridgeScreen";
+import FridgeDetailsScreen from "../screens/FridgeDetailsScreen";
 
 const Fridge = createStackNavigator();
 
-export default function FridgeNavigator({ navigation }) {
+export default function FridgeNavigator() {
   return (
-    <Fridge.Navigator>
-      <Fridge.Screen
-        name="FridgeHub"
-        component={FridgeHubScreen}
-        options={{ headerShown: false }}
-      />
-      <Fridge.Screen
-        name="FridgeScreen"
-        component={FridgeScreen}
-        options={{ headerShown: false }}
-      />
+    <Fridge.Navigator mode="modal" screenOptions={{ headerShown: false }}>
+      <Fridge.Screen name="FridgeHub" component={FridgeHubScreen} />
+      <Fridge.Screen name="FridgeDetails" component={FridgeDetailsScreen} />
     </Fridge.Navigator>
   );
 }

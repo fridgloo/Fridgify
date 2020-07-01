@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { View, SafeAreaView, Image, Text, StyleSheet } from "react-native";
+import {
+  View,
+  SafeAreaView,
+  Image,
+  Text,
+  StyleSheet,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+} from "react-native";
 import AuthButton from "../components/AuthButton";
 import LogoText from "../components/LogoText";
 import styles from "../constants/AuthStyles";
@@ -32,7 +40,10 @@ export default function SignInScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
+    <KeyboardAvoidingView
+      style={{ backgroundColor: "white", flex: 1 }}
+      behavior="position"
+    >
       <LogoText style={styles.title}>Fridgloo </LogoText>
       <View style={styles.logoContainer}>
         <Image
@@ -78,7 +89,7 @@ export default function SignInScreen({ navigation }) {
       >
         Forgot Password?
       </Text>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 

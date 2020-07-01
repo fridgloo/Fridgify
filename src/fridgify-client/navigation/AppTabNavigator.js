@@ -11,7 +11,6 @@ import GlistRootStackNavigator from "./GlistRootStackNavigator";
 import ProfileScreen from "../screens/ProfileScreen";
 
 const AppTab = createBottomTabNavigator();
-const INITIAL_ROUTE_NAME = "Fridge";
 
 export default function AppTabNavigator({ navigation, route }) {
   // Set the header title on the parent stack navigator depending on the
@@ -19,7 +18,7 @@ export default function AppTabNavigator({ navigation, route }) {
   // https://reactnavigation.org/docs/en/screen-options-resolution.html
   navigation.setOptions({ headerTitle: getHeaderTitle(route) });
   return (
-    <AppTab.Navigator initialRouteName={INITIAL_ROUTE_NAME}>
+    <AppTab.Navigator initialRouteName={"Fridge"}>
       <AppTab.Screen
         name="Grocery"
         component={GlistRootStackNavigator}
@@ -56,7 +55,7 @@ export default function AppTabNavigator({ navigation, route }) {
 
 function getHeaderTitle(route) {
   const routeName =
-    route.state?.routes[route.state.index]?.name ?? INITIAL_ROUTE_NAME;
+    route.state?.routes[route.state.index]?.name;
 
   switch (routeName) {
     case "Grocery":

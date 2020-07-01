@@ -101,7 +101,7 @@ export function DeleteModal(props) {
 export function ClearModal(props) {
   return (
     <View style={[styles.container, { height: optionHeight("clear") }]}>
-      <Message>Are you sure?</Message>
+      <Message>Clear the list?</Message>
       <Confirmation>
         <Cancel toggleModal={props.toggleModal}>No</Cancel>
         <Save
@@ -126,6 +126,27 @@ export function AddItemNTEModal(props) {
       <ExpDate onChangeText={props.onChangeText} newVal={props.newDate}>
         Expiration Date:
       </ExpDate>
+      <Confirmation>
+        <Cancel toggleModal={props.toggleModal}>Cancel</Cancel>
+        <Save
+          onPress={props.onPress}
+          toggleModal={props.toggleModal}
+          changed={props.changed}
+        >
+          Save
+        </Save>
+      </Confirmation>
+    </View>
+  );
+}
+
+export function AddItemNTModal(props) {
+  return (
+    <View style={[styles.container, { height: optionHeight("add_nt") }]}>
+      <Name onChangeText={props.onChangeText}>Name (required):</Name>
+      <Type onChangeText={props.onChangeText} newVal={props.newType}>
+        Type:
+      </Type>
       <Confirmation>
         <Cancel toggleModal={props.toggleModal}>Cancel</Cancel>
         <Save

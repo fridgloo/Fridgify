@@ -391,7 +391,7 @@ export default function GlistHubScreen({ navigation, route }) {
               backgroundColor: "#F1F3F6",
             }}
             onPress={() =>
-              navigation.navigate("GlistScreen", {
+              navigation.navigate("ShoppingCartScreen", {
                 data: state.glists[0],
                 type: "INITIALIZE",
               })

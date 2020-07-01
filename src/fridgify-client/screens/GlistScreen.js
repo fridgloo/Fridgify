@@ -106,7 +106,7 @@ export default function GlistScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data: { items: data }, glist: state._id }),
+      body: JSON.stringify({ items: data, glist: state._id }),
     }).then(() => {
       fillGlistState(state);
       setModal((prevState) => ({

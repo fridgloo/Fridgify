@@ -30,35 +30,25 @@ export default function FridgeHubScreen({ navigation, route }) {
 
   const getFridges = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    const response = await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-    });
-    const data = await response.json();
-    if (response.ok) {
-      resetFridges();
+    }).then(res => res.json()).then(data => {
+      let fridgeArray = []
       data.fridges.map((fridge) => {
-        const fridgeState = {
-          _id: fridge._id,
-          name: fridge.name,
-          created: fridge.created,
-          items: fridge.items,
-          primary: fridge.primary,
-        };
-        if (!fridgeState.primary) {
-          setState((prev) => ({
-            fridges: [...prev.fridges, fridgeState],
-          }));
+        if (!fridge.primary) {
+          fridgeArray.unshift(fridge);
         } else {
-          setState((prev) => ({
-            fridges: [fridgeState, ...prev.fridges],
-          }));
+          fridgeArray.push(fridge);
         }
       });
-    }
+      setState(prevState => ({
+        fridges: fridgeArray
+      }));
+    });
   };
 
   const addFridge = async (name) => {
@@ -214,7 +204,6 @@ export default function FridgeHubScreen({ navigation, route }) {
       <View
         style={{
           flex: 1,
-          paddingHorizontal: 25,
           paddingVertical: 5,
           flexDirection: "row",
           alignItems: "center",
@@ -227,7 +216,7 @@ export default function FridgeHubScreen({ navigation, route }) {
             width: 60,
           }}
           resizeMode="center"
-          source={require("../assets/images/igloo25.png")}
+          source={require("../assets/images/iglooIcon.png")}
         />
 
         <Text
@@ -236,11 +225,9 @@ export default function FridgeHubScreen({ navigation, route }) {
             paddingLeft: 15,
             color: "#2D82FF",
             fontSize: 32,
-            fontWeight: "600",
-            fontFamily: "System"
+            fontWeight: "500",
           }}
         >
-          Fridgloo
         </Text>
       </View>
       {/* --------------------------------Expiration Overview --------------------------------- */}

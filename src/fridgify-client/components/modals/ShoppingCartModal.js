@@ -4,13 +4,12 @@ import {
   ModalTemplate,
   NameModal,
   TypeModal,
-  ExpDateModal,
   DeleteModal,
   ClearModal,
-  AddItemNTEModal,
+  AddItemNTModal,
 } from "./Modals";
 
-export default function FridgeModal(props) {
+export default function ShoppingCartModal(props) {
   return (
     <ModalTemplate
       visible={props.modalState.visible}
@@ -26,7 +25,7 @@ function modalOption(props) {
     case "name":
       return (
         <NameModal
-          changed={props.modalState.changed}
+          changed={props.changed}
           onChangeText={props.onChangeText}
           toggleModal={props.toggleModal}
           onPress={props.setItemElement}
@@ -36,17 +35,7 @@ function modalOption(props) {
       return (
         <TypeModal
           newVal={props.modalState.newType}
-          changed={props.modalState.changed}
-          onChangeText={props.onChangeText}
-          toggleModal={props.toggleModal}
-          onPress={props.setItemElement}
-        />
-      );
-    case "exp_date":
-      return (
-        <ExpDateModal
-          newVal={props.modalState.newDate}
-          changed={props.modalState.changed}
+          changed={props.changed}
           onChangeText={props.onChangeText}
           toggleModal={props.toggleModal}
           onPress={props.setItemElement}
@@ -54,29 +43,20 @@ function modalOption(props) {
       );
     case "add":
       return (
-        <AddItemNTEModal
+        <AddItemNTModal
           newType={props.modalState.newType}
-          newDate={props.modalState.newDate}
-          changed={props.modalState.changed}
+          changed={props.changed}
           onChangeText={props.onChangeText}
           toggleModal={props.toggleModal}
           onPress={props.addItem}
         />
       );
-    case "delete":
-      return (
-        <DeleteModal
-          changed={props.modalState.changed}
-          toggleModal={props.toggleModal}
-          onPress={props.deleteFridge}
-        />
-      );
     case "clear":
       return (
         <ClearModal
-          changed={props.modalState.changed}
+          changed={props.changed}
           toggleModal={props.toggleModal}
-          onPress={props.clearFridge}
+          onPress={props.clearGlist}
         />
       );
     default:

@@ -14,18 +14,15 @@ module.exports = (app) => {
       // const recipeCheck = await app.models.Recipe.findOne({
       //   name: req.body.name.toLowerCase()
       // });
-      // if (fridgeCheck) {
-      //   console.log("error: fridge name already used");
-      //   return res.status(400).send({ error: "Fridge name already used" });
-      // }
 
       // find and get item id
-      // req.body.items.forEach(item => {
-      //   var itemCheck = await app.models.Item.findOne({
-      //     name: item.toLowerCase()
-      //   });
-      //   console.log(itemCheck)
-      // })
+
+      for (const item of req.body.items) {
+        const itemCheck = await app.models.Item.findOne({
+          name: item.toLowerCase(),
+        });
+        console.log(itemCheck);
+      }
 
       return;
 

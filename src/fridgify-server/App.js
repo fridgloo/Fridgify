@@ -44,10 +44,12 @@ const setupServer = async () => {
     Item: require("./model/item"),
     Glist: require("./model/glist"),
     Quantity: require("./model/quantity"),
+    Recipe: require("./model/recipe"),
   };
 
   // Import our routes
   require("./api")(app);
+  console.log("asdasd");
 
   async function initQuantity() {
     // fridge check length

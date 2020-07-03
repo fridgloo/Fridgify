@@ -35,7 +35,6 @@ export default function GlistScreen({ navigation, route }) {
     value: "",
     newValue: "",
     newType: "",
-    newDate: new Date(),
     changed: false,
   });
 
@@ -106,7 +105,7 @@ export default function GlistScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ data: { items: data }, glist: state._id }),
+      body: JSON.stringify({ items: data, glist: state._id }),
     }).then(() => {
       fillGlistState(state);
       setModal((prevState) => ({
@@ -173,39 +172,6 @@ export default function GlistScreen({ navigation, route }) {
         changed: true,
       }));
     });
-  };
-
-  const submitToFridge = async () => {
-    let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    })
-      .then(async (res) => await res.json())
-      .then(async (data) => {
-        await fetch(`http://localhost:3200/v1/glist/fridge/${token}`, {
-          method: "PUT",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: state.items,
-            fridge: data.fridges[0]._id,
-            glist: state._id,
-          }),
-        });
-      })
-      .then(() => {
-        fillGlistState(state);
-        setModal((prevState) => ({
-          ...prevState,
-          changed: true,
-        }));
-      });
   };
 
   const formatDate = (date) => {
@@ -391,7 +357,6 @@ export default function GlistScreen({ navigation, route }) {
                   {
                     name: modal.newValue,
                     type: modal.newType,
-                    exp_date: modal.newDate,
                     bought_date: new Date(),
                   },
                 ]);
@@ -1074,20 +1039,11 @@ export default function GlistScreen({ navigation, route }) {
       <View
         style={{
           flex: 1.5,
-          flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "yellow",
         }}
       >
-        <View
-          style={{
-            width: "50%",
-            borderRightWidth: 0.5,
-            borderColor: "#CBCBCB",
-          }}
-        >
-          <TouchableOpacity
+        <TouchableOpacity
             style={{
               backgroundColor: "#2D82FF",
               alignItems: "center",
@@ -1108,27 +1064,6 @@ export default function GlistScreen({ navigation, route }) {
           >
             <Text style={{ fontSize: 20, color: "white" }}>Add Item</Text>
           </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            width: "50%",
-            borderLeftWidth: 0.5,
-            borderColor: "#CBCBCB",
-          }}
-        >
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#2D82FF",
-              alignItems: "center",
-              justifyContent: "center",
-              height: "100%",
-              width: "100%",
-            }}
-            onPress={() => submitToFridge()}
-          >
-            <Text style={{ fontSize: 20, color: "white" }}>Submit To...</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );

@@ -110,14 +110,17 @@ export default function GlistHubScreen({ navigation, route }) {
       },
     })
       .then((res) => res.json())
-      .then((items) =>
+      .then((data) =>
         fetch(`http://localhost:3200/v1/item/glist/${token}`, {
           method: "POST",
           headers: {
             Accept: "application/json",
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ data: items, glist: state.glists[0]._id }),
+          body: JSON.stringify({
+            items: data.items,
+            glist: state.glists[0]._id,
+          }),
         })
       )
       .then(() => getGlists());
@@ -391,7 +394,7 @@ export default function GlistHubScreen({ navigation, route }) {
               backgroundColor: "#F1F3F6",
             }}
             onPress={() =>
-              navigation.navigate("GlistScreen", {
+              navigation.navigate("ShoppingCartScreen", {
                 data: state.glists[0],
                 type: "INITIALIZE",
               })
@@ -429,19 +432,11 @@ export default function GlistHubScreen({ navigation, route }) {
                     paddingRight: 10,
                   }}
                 >
-                  <View
-                    style={{
-                      borderRadius: 20,
-                      width: 100
-                      ,
-                      height: 50,
-                      backgroundColor: "white",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text>{state.glists[0]?.items.length} items</Text>
-                  </View>
+                  <FontAwesome5
+                    name={"shopping-cart"}
+                    size={30}
+                    color={"white"}
+                  />
                   <View
                     style={{
                       paddingLeft: 10,

@@ -8,7 +8,7 @@ const FridgeRootStack = createStackNavigator();
 
 export default function FridgeRootStackNavigator({ navigation }) {
   return (
-    <FridgeRootStack.Navigator>
+    <FridgeRootStack.Navigator initialRouteName={"FridgeHub"}>
       <FridgeRootStack.Screen
         name="FridgeHub"
         component={FridgeHubScreen}

@@ -1,8 +1,6 @@
 import React from "react";
 import {
   TouchableOpacity,
-  TouchableHighlight,
-  Picker,
   TextInput,
   StyleSheet,
   Text,
@@ -10,30 +8,28 @@ import {
   SafeAreaView,
   Dimensions,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { CheckBox } from "react-native-elements";
 import * as SecureStore from "expo-secure-store";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import MaterialCommunity from "react-native-vector-icons/MaterialCommunityIcons";
 
-import FridgeModal from "../components/modals/FridgeModal";
+import ShoppingCartModal from "../components/modals/ShoppingCartModal";
 import {
   formatDate,
   getExpirationColor,
   getItemType,
 } from "../util/ScreenHelpers";
 
-export default function FridgeScreen({ navigation, route }) {
+export default function ShoppingCartScreen({ navigation, route }) {
   // refactor state system
   const [state, setState] = React.useState({
     _id: "",
-    name: "",
-    created: "",
-    primary: false,
     items: [],
     search: "",
     filter: {},
-    numFridges: 0,
+    checked: [],
   });
   const [modal, setModal] = React.useState({
     visible: false,
@@ -41,22 +37,22 @@ export default function FridgeScreen({ navigation, route }) {
     value: "",
     newName: "",
     newType: "",
-    newDate: new Date(),
-    changed: false,
+    fridges: [],
   });
+  const [changed, setChanged] = React.useState(false);
 
   React.useEffect(() => {
     if (route.params?.type === "INITIALIZE") {
-      fillFridgeState(route.params?.data, route.params?.numFridges);
+      fillGlistState(route.params?.data);
     } else {
-      fillFridgeState(state, state.numFridges);
+      fillGlistState(state);
     }
   }, [route.params?.data]);
 
-  const fillFridgeState = async (params, numFridges) => {
+  const fillGlistState = async (params) => {
     let token = await SecureStore.getItemAsync("user_token");
     const response = await fetch(
-      `http://localhost:3200/v1/item/fridge/${params._id}/${token}`,
+      `http://localhost:3200/v1/item/glist/${params._id}/${token}`,
       {
         method: "GET",
         headers: {
@@ -70,78 +66,44 @@ export default function FridgeScreen({ navigation, route }) {
       setState((prev) => ({
         ...prev,
         _id: params._id,
-        name: params.name,
-        created: params.created,
-        primary: params.primary,
         items: data.items,
-        numFridges: numFridges,
+        checked: [],
       }));
     }
   };
 
-  const deleteFridge = async () => {
+  const clearGlist = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ _id: state._id }),
+      body: JSON.stringify({ glist: state._id, items: state.items }),
     }).then(() =>
-      navigation.navigate("FridgeHub", { data: state._id, type: "DELETE" })
+      setState((prevState) => ({ ...prevState, items: [], checked: [] }))
     );
-  };
-
-  const clearFridge = async () => {
-    let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ fridge: state._id, items: state.items }),
-    }).then(() => setState((prevState) => ({ ...prevState, items: [] })));
   };
 
   const addItem = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${token}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        data: {
-          name: modal.newName,
-          type: modal.newType,
-          exp_date: modal.newDate,
-          bought_date: new Date(),
-        },
-        fridge: state._id,
+        items: [
+          {
+            name: modal.newName,
+            type: modal.newType,
+          },
+        ],
+        glist: state._id,
       }),
-    }).then(() => fillFridgeState(state));
-  };
-
-  const setFridgePrimary = async () => {
-    let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
-      method: "PUT",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ data: { primary: true }, _id: state._id }),
-    }).then((res) => {
-      if (res.ok) {
-        setState((prevState) => ({ ...prevState, primary: true }));
-        setModal((prevState) => ({ ...prevState, changed: true }));
-      } else {
-        console.log("error: setFridgePrimary failed");
-      }
-    });
+    }).then(() => fillGlistState(state));
   };
 
   const setItemElement = async () => {
@@ -188,13 +150,13 @@ export default function FridgeScreen({ navigation, route }) {
 
   const deleteItem = async (item) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fridge: state._id, items: [item] }),
+      body: JSON.stringify({ glist: state._id, items: [item] }),
     }).then(() => {
       const itemIndex = state.items.findIndex(
         (element) => element._id == item._id
@@ -208,44 +170,101 @@ export default function FridgeScreen({ navigation, route }) {
     });
   };
 
+  const submitToFridge = async (fridge_id) => {
+    let token = await SecureStore.getItemAsync("user_token");
+    await fetch(`http://localhost:3200/v1/glist/fridge/${token}`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: state.checked,
+        fridge: fridge_id,
+        glist: state._id,
+      }),
+    }).then(() => {
+      fillGlistState(state);
+      setChanged(true);
+    });
+  };
+
+  const loadSubmitModal = async () => {
+    let token = await SecureStore.getItemAsync("user_token");
+    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then(async (res) => await res.json())
+      .then(async (data) => {
+        setModal((prevState) => ({
+          ...prevState,
+          visible: true,
+          option: "submit",
+          fridges: data.fridges,
+        }));
+      });
+  };
+
+  const checkItem = (item) => {
+    const { checked } = state;
+
+    if (!checked.includes(item)) {
+      setState((prevState) => ({
+        ...prevState,
+        checked: [...prevState.checked, item],
+      }));
+    } else {
+      setState((prevState) => ({
+        ...prevState,
+        checked: prevState.checked.filter((a) => a !== item),
+      }));
+    }
+  };
+
   const onChangeText = (val, nestedOption) => {
     if (modal.option === "name") {
       setModal((prev) => ({
         ...prev,
         newName: val,
-        changed: val === "" || val === modal.value.name ? false : true,
       }));
+      setChanged(!(val === "" || val === modal.value.name));
     } else if (modal.option === "type") {
       setModal((prev) => ({
         ...prev,
         newType: val,
-        changed: val === modal.value.type ? false : true,
       }));
-    } else if (modal.option === "exp_date") {
-      setModal((prev) => ({
-        ...prev,
-        newDate: val,
-        changed: formatDate(val) !== formatDate(modal.value.exp_date),
-      }));
+      setChanged(val !== modal.value.type);
     } else if (modal.option === "add") {
       if (nestedOption === "name") {
         setModal((prev) => ({
           ...prev,
           newName: val,
-          changed: val === "" || val === modal.value.name ? false : true,
         }));
+        setChanged(!(val === "" || val === modal.value.name));
       } else if (nestedOption === "type") {
         setModal((prev) => ({
           ...prev,
           newType: val,
         }));
-      } else if (nestedOption === "exp_date") {
-        setModal((prev) => ({
-          ...prev,
-          newDate: val,
-        }));
       }
     }
+  };
+
+  const checkAll = () => {
+    const resultArray = [];
+    if (state.checked.length < state.items.length) {
+      state.items.map((item) => {
+        resultArray.push(item._id);
+      });
+    }
+    setState((prevState) => ({
+      ...prevState,
+      checked: resultArray,
+    }));
   };
 
   const toggleModal = () => {
@@ -262,14 +281,15 @@ export default function FridgeScreen({ navigation, route }) {
         backgroundColor: "white",
       }}
     >
-      <FridgeModal
+      <ShoppingCartModal
         modalState={modal}
+        changed={changed}
         toggleModal={toggleModal}
         onChangeText={onChangeText}
-        deleteFridge={deleteFridge}
-        clearFridge={clearFridge}
+        clearGlist={clearGlist}
         setItemElement={setItemElement}
         addItem={addItem}
+        submitToFridge={submitToFridge}
       />
 
       <View
@@ -281,22 +301,21 @@ export default function FridgeScreen({ navigation, route }) {
       >
         <TouchableOpacity
           onPress={() => {
-            console.log(modal.changed);
-            modal.changed
-              ? navigation.navigate("FridgeHub", { data: state })
-              : navigation.navigate("FridgeHub");
+            changed
+              ? navigation.navigate("GlistHub", { data: state })
+              : navigation.navigate("GlistHub");
           }}
         >
-          <FontAwesome5 name={"chevron-left"} size={22} color={"#2D82FF"} />
+          <FontAwesome5 name={"chevron-left"} size={22} color={"black"} />
         </TouchableOpacity>
       </View>
-      {/* --------------------------------Fridge Name / DefaultOrNot / DropDown Menu----------- */}
+      {/* --------------------------------Shopping Cart Header----------- */}
       <View
         style={{
           flex: 1.4,
           flexDirection: "row",
           paddingHorizontal: 25,
-          paddingVertical: 8,
+          paddingVertical: 4,
           alignItems: "center",
         }}
       >
@@ -304,16 +323,17 @@ export default function FridgeScreen({ navigation, route }) {
           style={{
             flex: 3,
             flexDirection: "row",
+            justifyContent: "center",
           }}
         >
           <Text
             style={{
               fontWeight: "bold",
-              fontSize: state.name.length > 8 ? 25 : 40,
-              color: "#2D82FF",
+              fontSize: 36,
+              color: "#FF7F23",
             }}
           >
-            {state.name}
+            Shopping Cart
           </Text>
           <View
             style={{
@@ -321,53 +341,8 @@ export default function FridgeScreen({ navigation, route }) {
               justifyContent: "center",
             }}
           >
-            {state.primary ? (
-              <FontAwesome5
-                name={"igloo"}
-                size={state.name.length > 8 ? 26 : 36}
-                color={"black"}
-              />
-            ) : (
-              <Text />
-            )}
+            <FontAwesome5 name={"shopping-cart"} size={25} color={"#FF7F23"} />
           </View>
-        </View>
-
-        <View
-          style={{
-            flex: 1.4,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-evenly",
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => setFridgePrimary()}
-            disabled={state.primary}
-          >
-            <FontAwesome
-              name={"star"}
-              size={25}
-              color={state.primary ? "#A7CBFF" : "#2D82FF"}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              setModal((prevState) => ({
-                ...prevState,
-                visible: true,
-                option: "delete",
-                changed: true,
-              }))
-            }
-            disabled={state.numFridges <= 1}
-          >
-            <FontAwesome5
-              name={"trash"}
-              size={25}
-              color={state.numFridges <= 1 ? "#A7CBFF" : "#2D82FF"}
-            />
-          </TouchableOpacity>
         </View>
       </View>
       {/* --------------------------------List Options (Search, Clear List)-------------------- */}
@@ -443,38 +418,34 @@ export default function FridgeScreen({ navigation, route }) {
         </View>
         <View
           style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "flex-end",
+            flex: 1.5,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingLeft: 15,
           }}
         >
+          <TouchableOpacity>
+            <MaterialCommunity name="grid" size={25} color={"#FF7F23"} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => checkAll()}>
+            <MaterialCommunity name="check-all" size={25} color={"#FF7F23"} />
+          </TouchableOpacity>
           <TouchableOpacity
-            style={{
-              backgroundColor: "#2D82FF",
-              borderRadius: 12,
-              padding: 5,
-              width: "80%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-            onPress={() =>
+            onPress={() => {
               setModal((prevState) => ({
                 ...prevState,
                 visible: true,
                 option: "clear",
-                changed: true,
-              }))
-            }
+              }));
+              setChanged(true);
+            }}
           >
-            <Text
-              numberOfLines={1}
-              style={{
-                fontSize: 12,
-                color: "white",
-              }}
-            >
-              Clear List
-            </Text>
+            <MaterialCommunity
+              name="playlist-remove"
+              size={35}
+              color={"#FF7F23"}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -489,6 +460,7 @@ export default function FridgeScreen({ navigation, route }) {
           borderBottomWidth: 0.5,
         }}
       >
+        <View style={{ flex: 0.1, paddingLeft: 10 }} />
         <View
           style={{
             flex: 1,
@@ -563,46 +535,6 @@ export default function FridgeScreen({ navigation, route }) {
             <Text style={{ fontSize: 14, fontWeight: "500" }}>Type</Text>
           </TouchableOpacity>
         </View>
-        <View
-          style={{
-            flex: 0.1,
-            alignItems: "center",
-          }}
-        ></View>
-        <View
-          style={{
-            flex: 0.45,
-            flexDirection: "row",
-            alignItems: "flex-start",
-            justifyContent: "center",
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              const items = state.items;
-              items.sort((a, b) =>
-                a.exp_date > b.exp_date
-                  ? state.filter.exp_date
-                    ? -1
-                    : 1
-                  : b.exp_date > a.exp_date
-                  ? state.filter.exp_date
-                    ? 1
-                    : -1
-                  : 0
-              );
-              setState((prevState) => ({
-                ...prevState,
-                items: items,
-                filter: {
-                  exp_date: !prevState.filter.exp_date,
-                },
-              }));
-            }}
-          >
-            <Text style={{ fontSize: 14, fontWeight: "500" }}>Expiration</Text>
-          </TouchableOpacity>
-        </View>
       </View>
       {/* --------------------------------Food List-------------------------------------------- */}
       <View
@@ -611,7 +543,6 @@ export default function FridgeScreen({ navigation, route }) {
         }}
       >
         <SwipeListView
-          useFlatList={true}
           data={
             state.search === ""
               ? state.items
@@ -619,6 +550,7 @@ export default function FridgeScreen({ navigation, route }) {
                   item.name.toLowerCase().includes(state.search.toLowerCase())
                 )
           }
+          extraData={state.checked}
           renderItem={(data, rowMap) => (
             <View
               style={{
@@ -640,21 +572,33 @@ export default function FridgeScreen({ navigation, route }) {
               >
                 <View
                   style={{
+                    flex: 0.1,
+                  }}
+                >
+                  <CheckBox
+                    right
+                    checked={state.checked.includes(data.item._id)}
+                    onPress={() => checkItem(data.item._id)}
+                    checkedColor={"#2D82FF"}
+                  />
+                </View>
+                <View
+                  style={{
                     flex: 1,
-                    paddingRight: 10,
+                    paddingLeft: 10,
                   }}
                 >
                   <TouchableOpacity
-                    onPress={() =>
-                      setModal({
+                    onPress={() => {
+                      setModal((prevState) => ({
+                        ...prevState,
                         visible: true,
                         option: "name",
                         value: data.item,
-                        newDate: new Date(),
                         newName: "",
-                        changed: false,
-                      })
-                    }
+                      }));
+                      setChanged(false);
+                    }}
                   >
                     <Text
                       numberOfLines={1}
@@ -673,63 +617,21 @@ export default function FridgeScreen({ navigation, route }) {
                   }}
                 >
                   <TouchableOpacity
-                    onPress={() =>
-                      setModal({
+                    onPress={() => {
+                      setModal((prevState) => ({
+                        ...prevState,
                         visible: true,
                         option: "type",
                         value: data.item,
-                        newDate: new Date(),
-                        newName: data.item.type,
-                        changed: false,
-                      })
-                    }
+                        newType: "",
+                      }));
+                      setChanged(false);
+                    }}
                   >
                     <FontAwesome5
                       name={getItemType(data.item.type)}
                       size={20}
                     />
-                  </TouchableOpacity>
-                </View>
-                <View
-                  style={{
-                    flex: 0.1,
-                    alignItems: "center",
-                  }}
-                >
-                  <FontAwesome
-                    name={"circle"}
-                    color={getExpirationColor(data.item.exp_date)}
-                  />
-                </View>
-                <View
-                  style={{
-                    flex: 0.45,
-                    alignItems: "center",
-                  }}
-                >
-                  <TouchableOpacity
-                    onPress={() =>
-                      setModal({
-                        visible: true,
-                        option: "exp_date",
-                        value: data.item,
-                        newDate: data.item.exp_date
-                          ? new Date(data.item.exp_date)
-                          : new Date(),
-                        newName: "",
-                        changed: data.item.exp_date ? false : true,
-                      })
-                    }
-                  >
-                    {data.item.exp_date ? (
-                      <Text numberOfLines={1}>
-                        {formatDate(data.item.exp_date)}
-                      </Text>
-                    ) : (
-                      <View style={{}}>
-                        <FontAwesome name={"calendar-o"} size={24} />
-                      </View>
-                    )}
                   </TouchableOpacity>
                 </View>
               </View>
@@ -787,56 +689,63 @@ export default function FridgeScreen({ navigation, route }) {
       <View
         style={{
           flex: 1.5,
+          flexDirection: "row",
           justifyContent: "center",
           alignItems: "center",
+          backgroundColor: "yellow",
         }}
       >
-        <TouchableOpacity
+        <View
           style={{
-            backgroundColor: "#2D82FF",
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#2D82FF",
-            height: "100%",
-            width: "100%",
+            width: "50%",
+            borderRightWidth: 0.5,
+            borderColor: "#CBCBCB",
           }}
-          onPress={() =>
-            setModal((prevState) => ({
-              ...prevState,
-              visible: true,
-              option: "add",
-              newName: "",
-              newDate: new Date(),
-              newType: "",
-            }))
-          }
         >
-          <Text style={{ fontSize: 20, color: "white" }}>Add Item</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#FF7F23",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              width: "100%",
+            }}
+            onPress={() =>
+              setModal((prevState) => ({
+                ...prevState,
+                visible: true,
+                option: "add",
+                newValue: "",
+                newType: "",
+              }))
+            }
+          >
+            <Text style={{ fontSize: 20, color: "white" }}>Add Item</Text>
+          </TouchableOpacity>
+        </View>
+        <View
+          style={{
+            width: "50%",
+            borderLeftWidth: 0.5,
+            borderColor: "#CBCBCB",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              backgroundColor:
+                state.checked.length === 0 ? "#FFAD71" : "#FF7F23",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              width: "100%",
+            }}
+            onPress={() => loadSubmitModal()}
+            disabled={state.checked.length === 0}
+          >
+            <Text style={{ fontSize: 20, color: "white" }}>Submit To...</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  addFridgeEnabled: {
-    borderWidth: 5,
-    borderColor: "#0771ED",
-    borderRadius: 50,
-    width: "30%",
-    height: "80%",
-    backgroundColor: "#2D82FF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addFridgeDisabled: {
-    borderWidth: 5,
-    borderColor: "#7DADE5",
-    borderRadius: 50,
-    width: "30%",
-    height: "80%",
-    backgroundColor: "#85B2E6",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

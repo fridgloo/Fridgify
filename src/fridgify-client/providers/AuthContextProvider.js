@@ -105,6 +105,14 @@ export default function AuthContextProvider() {
               },
               body: JSON.stringify({ name: "main" }),
             });
+            await fetch(`http://localhost:3200/v1/fridge/${token}`, {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ name: "Kitchen" }),
+            });
             dispatch({ type: "SIGN_IN", token: resData.token });
           }
         }

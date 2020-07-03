@@ -37,6 +37,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
     value: "",
     newName: "",
     newType: "",
+    fridges: [],
   });
   const [changed, setChanged] = React.useState(false);
 
@@ -66,6 +67,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
         ...prev,
         _id: params._id,
         items: data.items,
+        checked: [],
       }));
     }
   };
@@ -79,7 +81,9 @@ export default function ShoppingCartScreen({ navigation, route }) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ glist: state._id, items: state.items }),
-    }).then(() => setState((prevState) => ({ ...prevState, items: [] })));
+    }).then(() =>
+      setState((prevState) => ({ ...prevState, items: [], checked: [] }))
+    );
   };
 
   const addItem = async () => {
@@ -95,7 +99,6 @@ export default function ShoppingCartScreen({ navigation, route }) {
           {
             name: modal.newName,
             type: modal.newType,
-            bought_date: new Date(),
           },
         ],
         glist: state._id,
@@ -167,7 +170,26 @@ export default function ShoppingCartScreen({ navigation, route }) {
     });
   };
 
-  const submitToFridge = async () => {
+  const submitToFridge = async (fridge_id) => {
+    let token = await SecureStore.getItemAsync("user_token");
+    await fetch(`http://localhost:3200/v1/glist/fridge/${token}`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: state.checked,
+        fridge: fridge_id,
+        glist: state._id,
+      }),
+    }).then(() => {
+      fillGlistState(state);
+      setChanged(true);
+    });
+  };
+
+  const loadSubmitModal = async () => {
     let token = await SecureStore.getItemAsync("user_token");
     await fetch(`http://localhost:3200/v1/fridge/${token}`, {
       method: "GET",
@@ -178,22 +200,12 @@ export default function ShoppingCartScreen({ navigation, route }) {
     })
       .then(async (res) => await res.json())
       .then(async (data) => {
-        await fetch(`http://localhost:3200/v1/glist/fridge/${token}`, {
-          method: "PUT",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            items: state.items,
-            fridge: data.fridges[0]._id,
-            glist: state._id,
-          }),
-        });
-      })
-      .then(() => {
-        fillGlistState(state);
-        setChanged(true);
+        setModal((prevState) => ({
+          ...prevState,
+          visible: true,
+          option: "submit",
+          fridges: data.fridges,
+        }));
       });
   };
 
@@ -242,6 +254,19 @@ export default function ShoppingCartScreen({ navigation, route }) {
     }
   };
 
+  const checkAll = () => {
+    const resultArray = [];
+    if (state.checked.length < state.items.length) {
+      state.items.map((item) => {
+        resultArray.push(item._id);
+      });
+    }
+    setState((prevState) => ({
+      ...prevState,
+      checked: resultArray,
+    }));
+  };
+
   const toggleModal = () => {
     setModal((prev) => ({
       ...prev,
@@ -264,6 +289,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
         clearGlist={clearGlist}
         setItemElement={setItemElement}
         addItem={addItem}
+        submitToFridge={submitToFridge}
       />
 
       <View
@@ -303,7 +329,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
           <Text
             style={{
               fontWeight: "bold",
-              fontSize: 32,
+              fontSize: 36,
               color: "#FF7F23",
             }}
           >
@@ -392,18 +418,18 @@ export default function ShoppingCartScreen({ navigation, route }) {
         </View>
         <View
           style={{
-            flex: 1.2,
+            flex: 1.5,
             flexDirection: "row",
-            justifyContent: "flex-end",
+            justifyContent: "space-between",
             alignItems: "center",
+            paddingLeft: 15,
           }}
         >
-          <TouchableOpacity
-            style={{
-              paddingRight: 15,
-            }}
-          >
+          <TouchableOpacity>
             <MaterialCommunity name="grid" size={25} color={"#FF7F23"} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => checkAll()}>
+            <MaterialCommunity name="check-all" size={25} color={"#FF7F23"} />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -553,6 +579,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
                     right
                     checked={state.checked.includes(data.item._id)}
                     onPress={() => checkItem(data.item._id)}
+                    checkedColor={"#2D82FF"}
                   />
                 </View>
                 <View
@@ -705,13 +732,15 @@ export default function ShoppingCartScreen({ navigation, route }) {
         >
           <TouchableOpacity
             style={{
-              backgroundColor: "#FF7F23",
+              backgroundColor:
+                state.checked.length === 0 ? "#FFAD71" : "#FF7F23",
               alignItems: "center",
               justifyContent: "center",
               height: "100%",
               width: "100%",
             }}
-            onPress={() => submitToFridge()}
+            onPress={() => loadSubmitModal()}
+            disabled={state.checked.length === 0}
           >
             <Text style={{ fontSize: 20, color: "white" }}>Submit To...</Text>
           </TouchableOpacity>

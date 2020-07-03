@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import {
   Confirmation,
   Name,
@@ -157,6 +157,23 @@ export function AddItemNTModal(props) {
           Save
         </Save>
       </Confirmation>
+    </View>
+  );
+}
+
+export function SubmitToModal(props) {
+  return (
+    <View style={[styles.container, { height: 55 * props.numFridges + 55 }]}>
+      <View
+        style={{
+          height: 40,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text style={{ fontSize: 16 }}>Send checked items to:</Text>
+      </View>
+      {props.children}
     </View>
   );
 }

@@ -33,6 +33,7 @@ export default function FridgeScreen({ navigation, route }) {
     items: [],
     search: "",
     filter: {},
+    numFridges: 0,
   });
   const [modal, setModal] = React.useState({
     visible: false,
@@ -46,13 +47,13 @@ export default function FridgeScreen({ navigation, route }) {
 
   React.useEffect(() => {
     if (route.params?.type === "INITIALIZE") {
-      fillFridgeState(route.params?.data);
+      fillFridgeState(route.params?.data, route.params?.numFridges);
     } else {
-      fillFridgeState(state);
+      fillFridgeState(state, state.numFridges);
     }
   }, [route.params?.data]);
 
-  const fillFridgeState = async (params) => {
+  const fillFridgeState = async (params, numFridges) => {
     let token = await SecureStore.getItemAsync("user_token");
     const response = await fetch(
       `http://localhost:3200/v1/item/fridge/${params._id}/${token}`,
@@ -73,6 +74,7 @@ export default function FridgeScreen({ navigation, route }) {
         created: params.created,
         primary: params.primary,
         items: data.items,
+        numFridges: numFridges,
       }));
     }
   };
@@ -121,35 +123,9 @@ export default function FridgeScreen({ navigation, route }) {
         fridge: state._id,
       }),
     }).then(() => fillFridgeState(state));
-    // .then((response) => response.json())
-    // .then((data) => {
-    //     setState((prevState) => ({
-    //       ...prevState,
-    //       items: [...prevState.items, data.item],
-    //     }));
-    //   });
   };
 
-  // const addItem = async (data) => {
-  //   let token = await SecureStore.getItemAsync("user_token");
-  //   await fetch(`http://localhost:3200/v1/item/fridge/${token}`, {
-  //     method: "POST",
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //     body: JSON.stringify({ data: data, fridge: state._id }),
-  //   }).then(() => fillFridgeState(state));
-  //   // .then((response) => response.json())
-  //   // .then((data) => {
-  //   //     setState((prevState) => ({
-  //   //       ...prevState,
-  //   //       items: [...prevState.items, data.item],
-  //   //     }));
-  //   //   });
-  // };
-
-  const setItemPrimary = async () => {
+  const setFridgePrimary = async () => {
     let token = await SecureStore.getItemAsync("user_token");
     await fetch(`http://localhost:3200/v1/fridge/${token}`, {
       method: "PUT",
@@ -160,11 +136,10 @@ export default function FridgeScreen({ navigation, route }) {
       body: JSON.stringify({ data: { primary: true }, _id: state._id }),
     }).then((res) => {
       if (res.ok) {
-        setState((prevState) => ({ ...prevState, primary: true }))
-        setModal((prevState) => ({ ...prevState, changed: true }))
-
+        setState((prevState) => ({ ...prevState, primary: true }));
+        setModal((prevState) => ({ ...prevState, changed: true }));
       } else {
-        console.log("error: setItemPrimary failed");
+        console.log("error: setFridgePrimary failed");
       }
     });
   };
@@ -367,7 +342,7 @@ export default function FridgeScreen({ navigation, route }) {
           }}
         >
           <TouchableOpacity
-            onPress={() => setItemPrimary()}
+            onPress={() => setFridgePrimary()}
             disabled={state.primary}
           >
             <FontAwesome
@@ -385,8 +360,13 @@ export default function FridgeScreen({ navigation, route }) {
                 changed: true,
               }))
             }
+            disabled={state.numFridges <= 1}
           >
-            <FontAwesome5 name={"trash"} size={25} color={"#2D82FF"} />
+            <FontAwesome5
+              name={"trash"}
+              size={25}
+              color={state.numFridges <= 1 ? "#A7CBFF" : "#2D82FF"}
+            />
           </TouchableOpacity>
         </View>
       </View>

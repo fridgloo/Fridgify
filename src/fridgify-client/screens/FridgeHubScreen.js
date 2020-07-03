@@ -9,7 +9,7 @@ import {
   Image,
   TextInput,
   ImageBackground,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import Modal from "react-native-modal";
 import * as SecureStore from "expo-secure-store";
@@ -36,19 +36,21 @@ export default function FridgeHubScreen({ navigation, route }) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-    }).then(res => res.json()).then(data => {
-      let fridgeArray = []
-      data.fridges.map((fridge) => {
-        if (!fridge.primary) {
-          fridgeArray.unshift(fridge);
-        } else {
-          fridgeArray.push(fridge);
-        }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        let fridgeArray = [];
+        data.fridges.map((fridge) => {
+          if (!fridge.primary) {
+            fridgeArray.push(fridge);
+          } else {
+            fridgeArray.unshift(fridge);
+          }
+        });
+        setState((prevState) => ({
+          fridges: fridgeArray,
+        }));
       });
-      setState(prevState => ({
-        fridges: fridgeArray
-      }));
-    });
   };
 
   const addFridge = async (name) => {
@@ -105,7 +107,7 @@ export default function FridgeHubScreen({ navigation, route }) {
                 backgroundColor: "white",
                 alignItems: "center",
                 justifyContent: "space-evenly",
-                borderRadius: 12
+                borderRadius: 12,
               }}
             >
               <View
@@ -167,7 +169,9 @@ export default function FridgeHubScreen({ navigation, route }) {
                     }}
                     onPress={toggleModal}
                   >
-                    <Text style={{ fontSize: 16, color: "#2D82FF" }}>Cancel</Text>
+                    <Text style={{ fontSize: 16, color: "#2D82FF" }}>
+                      Cancel
+                    </Text>
                   </TouchableOpacity>
                 </View>
                 <View
@@ -176,8 +180,7 @@ export default function FridgeHubScreen({ navigation, route }) {
                       modal.newName === "" ? "#A7CBFF" : "#2D82FF",
                     width: "50%",
                     justifyContent: "center",
-                    borderBottomEndRadius: 12
-
+                    borderBottomEndRadius: 12,
                   }}
                 >
                   <TouchableOpacity
@@ -227,8 +230,7 @@ export default function FridgeHubScreen({ navigation, route }) {
             fontSize: 32,
             fontWeight: "500",
           }}
-        >
-        </Text>
+        ></Text>
       </View>
       {/* --------------------------------Expiration Overview --------------------------------- */}
       <View
@@ -238,8 +240,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           paddingTop: 15,
         }}
       >
-        <View
-        >
+        <View>
           <Text
             style={{
               fontSize: 16,
@@ -368,7 +369,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           >
             <Icon name={"plus"} size={25} color="white"></Icon>
           </TouchableOpacity>
-          <ScrollView horizontal style={{ height: "100%"}}>
+          <ScrollView horizontal style={{ height: "100%" }}>
             {state.fridges?.map((fridge, index) => {
               return (
                 <TouchableOpacity
@@ -385,6 +386,7 @@ export default function FridgeHubScreen({ navigation, route }) {
                   onPress={() =>
                     navigation.navigate("FridgeScreen", {
                       data: fridge,
+                      numFridges: state.fridges.length,
                       type: "INITIALIZE",
                     })
                   }

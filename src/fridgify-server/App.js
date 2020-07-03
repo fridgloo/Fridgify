@@ -49,7 +49,6 @@ const setupServer = async () => {
 
   // Import our routes
   require("./api")(app);
-  console.log("asdasd");
 
   async function initQuantity() {
     // fridge check length

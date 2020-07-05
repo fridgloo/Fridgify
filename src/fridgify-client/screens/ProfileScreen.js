@@ -1,15 +1,16 @@
 import React from "react";
-import { StyleSheet, SafeAreaView } from "react-native";
+import { StyleSheet } from "react-native";
 import AuthButton from "../components/AuthButton";
 import LogoText from "../components/LogoText";
 import ProfileInfo from "../components/ProfileInfo";
 import useAuth from "../auth/useAuth";
+import Screen from "../components/Screen";
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
 
   return (
-    <SafeAreaView>
+    <Screen>
       <LogoText style={styles.profiletitle}>{user.user.username}</LogoText>
       <ProfileInfo>Your Fridges:</ProfileInfo>
       <ProfileInfo>Password:</ProfileInfo>
@@ -28,7 +29,7 @@ export default function ProfileScreen() {
           signOut();
         }}
       />
-    </SafeAreaView>
+    </Screen>
   );
 }
 

@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
-import { FlatList, Text, StyleSheet } from "react-native";
-
-import Authstyles from "../constants/AuthStyles"; // Change this
+import { FlatList, Text, StyleSheet, Button, View } from "react-native";
 
 import Screen from "../components/Screen";
-import fridgesApi from "../api/fridges";
-import useApi from "../hooks/useApi";
-import authStorage from "../auth/storage";
 import LogoText from "../components/LogoText";
 import Fridge from "../components/Fridge";
 import routes from "../navigation/routes";
+
+import fridgesApi from "../api/fridge";
+import useApi from "../hooks/useApi";
+import authStorage from "../auth/storage";
 
 export default function FridgeHubScreen({ navigation }) {
   const getFridgesApi = useApi(fridgesApi.getFridges);
@@ -25,17 +24,24 @@ export default function FridgeHubScreen({ navigation }) {
 
   return (
     <Screen style={styles.screen}>
-      <LogoText style={Authstyles.title}>Fridge Hub</LogoText>
-      <FlatList
-        horizontal
-        data={getFridgesApi.data.fridges}
-        keyExtractor={(fridge) => fridge._id.toString()}
-        renderItem={({ item }) => (
-          <Fridge
-            name={item.name}
-            onPress={() => navigation.navigate(routes.FRIDGE_DETAILS, item)}
-          />
-        )}
+      <LogoText style={styles.title}>Fridge Hub</LogoText>
+      <View style={styles.container}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={getFridgesApi.data.fridges}
+          keyExtractor={(fridge) => fridge._id}
+          renderItem={({ item }) => (
+            <Fridge
+              name={item.name}
+              onPress={() => navigation.navigate(routes.FRIDGE_DETAILS, item)}
+            />
+          )}
+        />
+      </View>
+      <Button
+        title="Add Fridge"
+        onPress={() => navigation.navigate("FridgeEdit")}
       />
     </Screen>
   );
@@ -44,5 +50,14 @@ export default function FridgeHubScreen({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     backgroundColor: "white",
+  },
+  title: {
+    fontSize: 50,
+    lineHeight: 68,
+    textAlign: "center",
+    padding: "10%",
+  },
+  container: {
+    height: "30%",
   },
 });

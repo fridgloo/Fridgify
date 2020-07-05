@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { SafeAreaView, Text, StyleSheet } from "react-native";
 import LogoText from "../components/LogoText";
-import styles from "../constants/AuthStyles";
+import styles from "../constants/authStyles";
 
 import * as Yup from "yup";
 import {
@@ -11,7 +11,7 @@ import {
   SubmitButton,
 } from "../components/form";
 
-import usersApi from "../api/users";
+import usersApi from "../api/user";
 import authApi from "../api/auth";
 import useAuth from "../auth/useAuth";
 import useApi from "../hooks/useApi";

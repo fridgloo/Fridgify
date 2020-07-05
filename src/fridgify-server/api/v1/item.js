@@ -1,5 +1,4 @@
 "use strict";
-let Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 
 module.exports = (app) => {
@@ -66,8 +65,7 @@ module.exports = (app) => {
           await app.models.Glist.updateOne({ _id: req.body.glist }, query);
         });
 
-        res.status(201).send({
-        });
+        res.status(201).send({});
       });
     } catch (err) {
       console.log(err);

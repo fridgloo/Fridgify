@@ -6,6 +6,7 @@ import AuthNavigator from "./navigation/AuthNavigator";
 import AuthContext from "./auth/context";
 import authStorage from "./auth/storage";
 import { navigationRef } from "./navigation/rootNavigation";
+import navigationTheme from "./navigation/navigationTheme";
 
 export default function App() {
   const [user, setUser] = useState();
@@ -22,7 +23,7 @@ export default function App() {
     );
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser }} theme={navigationTheme}>
       <NavigationContainer ref={navigationRef}>
         {user ? <AppNavigator /> : <AuthNavigator />}
       </NavigationContainer>

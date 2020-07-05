@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -6,6 +6,8 @@ import {
   StyleSheet,
   Text,
   View,
+  Button,
+  FlatList,
   Image,
   TextInput,
   ImageBackground,
@@ -15,77 +17,69 @@ import Modal from "react-native-modal";
 import * as SecureStore from "expo-secure-store";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-export default function FridgeHubScreen({ navigation, route }) {
-  const [state, setState] = React.useState({
-    fridges: [],
-  });
-  const [modal, setModal] = React.useState({
-    visible: false,
-    newName: "",
-  });
+import Screen from "../components/Screen";
+import LogoText from "../components/LogoText";
+import Fridge from "../components/Fridge";
+import routes from "../navigation/routes";
 
-  React.useEffect(() => {
-    getFridges();
-  }, [route.params?.data]);
+import fridgesApi from "../api/fridge";
+import useApi from "../hooks/useApi";
+import authStorage from "../auth/storage";
 
-  const getFridges = async () => {
-    let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        let fridgeArray = [];
-        data.fridges.map((fridge) => {
-          if (!fridge.primary) {
-            fridgeArray.push(fridge);
-          } else {
-            fridgeArray.unshift(fridge);
-          }
-        });
-        setState((prevState) => ({
-          fridges: fridgeArray,
-        }));
-      });
+export default function FridgeHubScreen({ navigation }) {
+  const getFridgesApi = useApi(fridgesApi.getFridges);
+
+  const getTokenAndFridges = async () => {
+    const authToken = await authStorage.getToken();
+    getFridgesApi.request(authToken);
   };
 
-  const addFridge = async (name) => {
-    let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://localhost:3200/v1/fridge/${token}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: name }),
-    })
-      .then((res) => res.json())
-      .then((data) =>
-        setState((prevState) => ({
-          fridges: [...prevState.fridges, data],
-        }))
-      );
-  };
-
-  const resetFridges = () => {
-    setState((prev) => ({
-      fridges: [],
-    }));
-  };
-
-  const toggleModal = () => {
-    setModal((prev) => ({
-      ...prev,
-      visible: !prev.visible,
-    }));
-  };
+  useEffect(() => {
+    getTokenAndFridges();
+  }, []);
 
   return (
-    <SafeAreaView
+    <Screen style={styles.screen}>
+      <LogoText style={styles.title}>Fridge Hub</LogoText>
+      <View style={styles.container}>
+        <FlatList
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          data={getFridgesApi.data.fridges}
+          keyExtractor={(fridge) => fridge._id}
+          renderItem={({ item }) => (
+            <Fridge
+              name={item.name}
+              onPress={() => navigation.navigate(routes.FRIDGE_DETAILS, item)}
+            />
+          )}
+        />
+      </View>
+      <Button
+        title="Add Fridge"
+        onPress={() => navigation.navigate("FridgeEdit")}
+      />
+    </Screen>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: {
+    backgroundColor: "white",
+  },
+  title: {
+    fontSize: 50,
+    lineHeight: 68,
+    textAlign: "center",
+    padding: "10%",
+  },
+  container: {
+    height: "30%",
+  },
+});
+
+{
+  /* <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: "white",
@@ -203,7 +197,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           </View>
         </Modal>
       </View>
-      {/* --------------------------------Header ---------------------------------------------- */}
+      --------------------------------Header ---------------------------------------------- 
       <View
         style={{
           flex: 1,
@@ -232,7 +226,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           }}
         ></Text>
       </View>
-      {/* --------------------------------Expiration Overview --------------------------------- */}
+      {/* --------------------------------Expiration Overview --------------------------------- 
       <View
         style={{
           flex: 2,
@@ -329,7 +323,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           </TouchableOpacity>
         </View>
       </View>
-      {/* --------------------------------Fridges---------------------------------------------- */}
+      {/* --------------------------------Fridges---------------------------------------------- 
       <View
         style={{
           flex: 2.5,
@@ -430,7 +424,7 @@ export default function FridgeHubScreen({ navigation, route }) {
           </ScrollView>
         </View>
       </View>
-      {/* --------------------------------Recipe of the Day------------------------------------ */}
+      {/* --------------------------------Recipe of the Day------------------------------------ 
       <View
         style={{
           flex: 2.5,
@@ -484,25 +478,5 @@ export default function FridgeHubScreen({ navigation, route }) {
           </ImageBackground>
         </View>
       </View>
-    </SafeAreaView>
-  );
+    </SafeAreaView> */
 }
-
-const styles = StyleSheet.create({
-  addFridgeEnabled: {
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    backgroundColor: "#FF7F23",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  addFridgeDisabled: {
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    backgroundColor: "#FFC194",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-});

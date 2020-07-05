@@ -27,7 +27,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
   const [state, setState] = React.useState({
     _id: "",
     items: [],
-    search: "",
+    display_items: [],
     filter: {},
     checked: [],
   });

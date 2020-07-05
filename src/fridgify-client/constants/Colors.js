@@ -1,10 +1,8 @@
 const tintColor = "#2f95dc";
 
 export default {
-  //exporting #fff as white
   white: "#fff",
 
-  //#2D82FF is azure - primary color
   primaryColor: "#2D82FF",
 
   textGray: "#8b90a0",

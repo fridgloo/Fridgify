@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView, Text, StyleSheet } from "react-native";
-import { AuthContext } from "../providers/AuthContextProvider";
 import LogoText from "../components/LogoText";
+import styles from "../constants/authStyles";
 
 import * as Yup from "yup";
 import {
@@ -10,6 +10,11 @@ import {
   FormField,
   SubmitButton,
 } from "../components/form";
+
+import usersApi from "../api/user";
+import authApi from "../api/auth";
+import useAuth from "../auth/useAuth";
+import useApi from "../hooks/useApi";
 
 const validationSchema = Yup.object().shape({
   username: Yup.string().required().min(2).max(16).label("Username"),
@@ -30,8 +35,28 @@ const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label("Email"),
 });
 
-export default function RegistrationScreen({ navigation }) {
-  const { signUp } = React.useContext(AuthContext);
+export default function RegisterScreen() {
+  const registerApi = useApi(usersApi.register);
+  const signInApi = useApi(authApi.signIn);
+  const auth = useAuth();
+  const [error, setError] = useState();
+
+  const handleSubmit = async ({ username, password, email }) => {
+    const result = await registerApi.request({ username, password, email });
+
+    if (!result.ok) {
+      if (result.data) setError(result.data.error);
+      else {
+        setError("An unexpected error occurred.");
+        console.log(result);
+      }
+      return;
+    }
+
+    const { data: authObj } = await signInApi.request(username, password);
+    auth.signIn(authObj.token);
+  };
+
   return (
     <SafeAreaView style={{ backgroundColor: "white", flex: 1 }}>
       <LogoText style={styles.title}>Fridgloo </LogoText>
@@ -43,12 +68,10 @@ export default function RegistrationScreen({ navigation }) {
           confirmPassword: "",
           email: "",
         }}
-        onSubmit={({ username, password, email }) =>
-          signUp({ username, password, email })
-        }
+        onSubmit={handleSubmit}
         validationSchema={validationSchema}
       >
-        {/* <ErrorMessage error={error} visible={error} /> */}
+        <ErrorMessage error={error} visible={error} />
         <FormField
           autoCapitalize="none"
           autoCorrect={false}
@@ -85,28 +108,18 @@ export default function RegistrationScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 55,
-    lineHeight: 68,
-    textAlign: "center",
-    padding: "10%",
-    marginTop: "10%",
-  },
-  logoContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    margin: "10%",
-    marginBottom: "5%",
-  },
-  logo: {
-    width: 50,
-    height: 50,
-  },
-  loginIndicator: {
-    fontFamily: "System",
-    fontSize: 15,
-    marginLeft: "10%",
-    marginBottom: 5,
-  },
-});
+// const styles = StyleSheet.create({
+//   title: {
+//     fontSize: 55,
+//     lineHeight: 68,
+//     textAlign: "center",
+//     padding: "10%",
+//     marginTop: "10%",
+//   },
+//   loginIndicator: {
+//     fontFamily: "System",
+//     fontSize: 15,
+//     marginLeft: "10%",
+//     marginBottom: 5,
+//   },
+// });

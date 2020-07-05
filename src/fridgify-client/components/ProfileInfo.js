@@ -1,22 +1,21 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
+import colors from "../constants/colors";
 
 function ProfileInfo({ children, props }) {
   return (
     <View style={styles.container}>
-        <Text style={[styles.inputBox, props]}>{children}</Text>
+      <Text style={[styles.inputBox, props]}>{children}</Text>
     </View>
   );
 }
 
-// Will follow whatever color scheme is in the constants folder
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: Colors.textGray,
+    borderColor: colors.textGray,
     justifyContent: "center",
     width: "80%",
     height: "7%",

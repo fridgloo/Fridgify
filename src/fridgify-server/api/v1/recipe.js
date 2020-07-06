@@ -25,6 +25,7 @@ module.exports = (app) => {
         // img
         items: [],
       };
+
       let recipe = new app.models.Recipe(newRecipe);
       await recipe.save();
 
@@ -63,6 +64,7 @@ module.exports = (app) => {
           quantity_val: item.val,
           quantity: quantCheck._id,
         };
+
         let recipe_Item_Idx = new app.models.Recipe_Item_Idx(
           newRecipe_Item_Idx
         );
@@ -71,14 +73,12 @@ module.exports = (app) => {
       }
       // Update recipe with the new Ids : `recipe_item_idx_ids`
       await app.models.Recipe.updateOne(
-        { _id: savedRecipe_id },
+        { _id: recipe._id },
         { items: recipe_item_idx_ids }
       );
-
       const currentRecipe = await app.models.Recipe.findOne({
         _id: recipe._id,
       });
-
       res.status(201).send(currentRecipe);
     } catch (err) {
       res.status(400).send({ error: "recipe.post failed", message: err });

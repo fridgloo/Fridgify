@@ -85,7 +85,7 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/v1/recipe/view/:viewSetting?", async (req, res) => {
+  app.get("/v1/recipe/view/all/:viewSetting?", async (req, res) => {
     try {
       const viewSetting = req.params.viewSetting;
 
@@ -148,133 +148,14 @@ module.exports = (app) => {
       res.status(400).send({ error: "recipe.get failed", message: err });
     }
   });
-  /**
-   * Get the fridge by id
-   *
-   */
-  // app.get("/v1/fridge/id/:id", async (req, res) => {
-  //   try {
-  //     // Search database for item
-  //     const fridge = await app.models.Fridge.findById(req.params.id);
-  //     // If not found, return 401:unauthorized
-  //     if (!fridge) {
-  //       res.status(404).send({ error: "fridge.get - Fridge not found" });
-  //     }
-  //     // If found, compare hashed passwords
-  //     else {
-  //       res.status(200).send({
-  //         name: fridge.name,
-  //         created: fridge.created,
-  //         items: fridge.items,
-  //         primary: fridge.primary,
-  //       });
-  //     }
-  //   } catch (err) {
-  //     res.status(400).send({ error: "fridge.get failed" });
-  //   }
-  // });
 
-  // /**
-  //  * Get the fridges from token
-  //  *
-  //  * @param {req.body.name} Username of user trying to log in
-  //  * @return { 200, {username, primary_email} }
-  //  */
-  // app.get("/v1/fridge/:token", async (req, res) => {
-  //   try {
-  //     jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
-  //       if (err) {
-  //         return res.status(400).send({ error: "fridge.get jwt verify error" });
-  //       }
-  //       const user = await app.models.User.findOne({
-  //         username: decoded.user.username,
-  //       });
+  // get recipe by id
 
-  //       const fridges = await app.models.Fridge.find({ owner: user._id });
-  //       // If not found, return 401:unauthorized
-  //       if (!fridges) {
-  //         return res
-  //           .status(404)
-  //           .send({ error: "fridge.get - Fridge not found" });
-  //       }
-  //       // If found, compare hashed passwords
-  //       else {
-  //         res.status(200).send({
-  //           fridges: fridges,
-  //         });
-  //       }
-  //     });
-  //   } catch (err) {
-  //     res.status(400).send({ error: "fridge.get failed" });
-  //   }
-  // });
+  // get recipe by ingredient
 
-  // /**
-  //  * Delete the fridge
-  //  */
-  // app.delete("/v1/fridge/:token", async (req, res) => {
-  //   try {
-  //     jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
-  //       if (err) {
-  //         return res
-  //           .status(400)
-  //           .send({ error: "fridge.delete jwt verify error" });
-  //       }
+  // get recipe by name
 
-  //       await app.models.User.updateOne(
-  //         { _id: decoded.user._id },
-  //         { $pull: { fridges: req.body._id } }
-  //       );
-  //       const fridge = await app.models.Fridge.findOneAndDelete({
-  //         _id: req.body._id,
-  //       });
-  //       if (fridge.primary) {
-  //         const fridges = await app.models.Fridge.find({
-  //           owner: decoded.user._id,
-  //         });
-  //         if (fridges.length !== 0) {
-  //           await app.models.Fridge.updateOne(
-  //             { _id: fridges[0]._id },
-  //             { primary: true }
-  //           );
-  //         }
-  //       }
+  // edit recipe
 
-  //       await app.models.Item.deleteMany({ fridge: req.body._id });
-  //       res.status(200).end();
-  //     });
-  //   } catch (err) {
-  //     res.status(400).send({ error: "fridge.get failed" });
-  //   }
-  // });
-
-  // /**
-  //  * Edit the fridge
-  //  *
-  //  */
-  // app.put("/v1/fridge/:token", async (req, res) => {
-  //   try {
-  //     jwt.verify(req.params.token, "secretkey", async (err, decoded) => {
-  //       if (err) {
-  //         return res.status(400).send({ error: "fridge.put jwt verify error" });
-  //       }
-  //       const editElements = req.body.data;
-  //       Object.keys(editElements).map(async (key, index) => {
-  //         if (key === "primary") {
-  //           await app.models.Fridge.findOneAndUpdate(
-  //             { primary: true },
-  //             { primary: false }
-  //           );
-  //         }
-  //         await app.models.Fridge.updateOne(
-  //           { _id: req.body._id },
-  //           { $set: { [key]: editElements[key] } }
-  //         );
-  //       });
-  //       return res.status(202).end();
-  //     });
-  //   } catch (err) {
-  //     res.status(400).send({ error: "fridge.put failed " });
-  //   }
-  // });
+  // delete recipe
 };

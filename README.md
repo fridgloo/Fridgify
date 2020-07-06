@@ -4,7 +4,7 @@
 
 - Expo hot reloading means any saved changes you make within **fridgify-client** will instantly reload the client to display the change.
 
-- Our express-backend server now supports hot-reload. To show the changes made in **fridgify-server**, run the server with *npm run dev*
+- Our express-backend server now supports hot-reload. To show the changes made in **fridgify-server** in real time, run the server with *npm run dev*
 
 Port numbers:
 

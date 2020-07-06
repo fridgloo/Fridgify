@@ -9,7 +9,7 @@ const Schema = mongoose.Schema;
 // relationship table
 let Recipe_Item_Idx = new Schema({
   recipe_id: { type: Schema.ObjectId, ref: "Recipe" },
-  item_id: { type: Schema.ObjectId, ref: "Item_Idx" },
+  item_idx_id: { type: Schema.ObjectId, ref: "Item_Idx" },
   quantity_val: { type: mongoose.Types.Decimal128 },
   quantity: { type: Schema.ObjectId, ref: "Quantity" },
 });

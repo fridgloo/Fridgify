@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
 [];
 
 let Item_Idx = new Schema({
-  item_name: { type: String, required: true },
+  name: { type: String, required: true },
 });
 
 Item_Idx.pre("validate", function (next) {

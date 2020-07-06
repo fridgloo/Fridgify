@@ -63,12 +63,10 @@ module.exports = (app) => {
           quantity_val: item.val,
           quantity: quantCheck._id,
         };
-        console.log(newRecipe_Item_Idx);
         let recipe_Item_Idx = new app.models.Recipe_Item_Idx(
           newRecipe_Item_Idx
         );
         await recipe_Item_Idx.save();
-        console.log("Item saved");
         recipe_item_idx_ids.push(recipe_Item_Idx._id);
       }
       // Update recipe with the new Ids : `recipe_item_idx_ids`
@@ -111,8 +109,6 @@ module.exports = (app) => {
             const item_idx_res = await app.models.Item_Idx.findOne({
               _id: recipe_item_idx_res.item_idx_id,
             });
-            // console.log(recipe_item_idx_res);
-            // console.log(item_idx_res, recipe_item_idx_res.item_idx_id);
             const quantity_res = await app.models.Quantity.findOne({
               _id: recipe_item_idx_res.quantity,
             });
@@ -125,7 +121,6 @@ module.exports = (app) => {
             };
 
             recipe_item_idx_list.push(cleanedItemObj);
-            // console.log(item_res, item_id);
           }
           let cleanedRecipe = {
             _id: recipe._id,

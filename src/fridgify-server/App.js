@@ -55,6 +55,7 @@ const setupServer = async () => {
     // await app.models.Quantity.deleteMany({}, function (err) {});
     // return;
     await app.models.Quantity.countDocuments({}, function (err, count) {
+      if (err) console.log(err);
       console.log("[DEV]Quantity is:", count);
     });
     await app.models.Quantity.findOne({ symbol: "g" }, function (err, res) {

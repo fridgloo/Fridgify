@@ -85,75 +85,115 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/v1/recipe/view/all/:viewSetting?", async (req, res) => {
+  // abstract the detailed work
+  async function expandRecipe(recipeObj) {
+    let cleanedRes = [];
+    let recipes = recipeObj;
+    for (let recipe of recipes) {
+      let recipe_item_idx_list = [];
+      for (let item_id of recipe.items) {
+        let cleanedItemObj = {}; // _id, ing_name, quantity, unit
+        const recipe_item_idx_res = await app.models.Recipe_Item_Idx.findOne({
+          _id: item_id,
+        });
+
+        // get ing_name
+        const item_idx_res = await app.models.Item_Idx.findOne({
+          _id: recipe_item_idx_res.item_idx_id,
+        });
+        const quantity_res = await app.models.Quantity.findOne({
+          _id: recipe_item_idx_res.quantity,
+        });
+
+        cleanedItemObj = {
+          recipe_item_idx_id: item_id,
+          item_name: item_idx_res.name,
+          quantity_val: Number(recipe_item_idx_res.quantity_val),
+          quantity: quantity_res.symbol,
+        };
+
+        recipe_item_idx_list.push(cleanedItemObj);
+      }
+      let cleanedRecipe = {
+        _id: recipe._id,
+        name: recipe.name,
+        created: recipe.created,
+        instructions: recipe.instructions,
+        cuisine: recipe.cuisine,
+        items: recipe_item_idx_list,
+      };
+      cleanedRes.push(cleanedRecipe);
+    }
+    return cleanedRes;
+  }
+
+  // abstract the names only work
+  function simplifyRecipe(recipeObj) {
+    let cleanedRes = [];
+    let recipes = recipeObj;
+    for (let recipe of recipes) {
+      cleanedRes.push({ name: recipe.name, _id: recipe._id });
+    }
+    return cleanedRes;
+  }
+
+  app.get("/v1/recipe/view/:recipeId/:viewSetting?", async (req, res) => {
     try {
       const viewSetting = req.params.viewSetting;
+      const recipeId = req.params.recipeId;
+      let recipes;
 
-      let recipes = await app.models.Recipe.find({});
+      if (recipeId === "all") {
+        recipes = await app.models.Recipe.find({});
+      }
+      if (recipeId !== "all") {
+        recipes = await app.models.Recipe.find({ _id: recipeId });
+      }
       if (viewSetting === undefined || viewSetting === "default") {
         res.status(200).send(recipes);
       }
-      let cleanedRes = [];
       if (viewSetting === "detailed") {
-        for (let recipe of recipes) {
-          let recipe_item_idx_list = [];
-          for (let item_id of recipe.items) {
-            let cleanedItemObj = {}; // _id, ing_name, quantity, unit
-            const recipe_item_idx_res = await app.models.Recipe_Item_Idx.findOne(
-              {
-                _id: item_id,
-              }
-            );
-
-            // get ing_name
-            const item_idx_res = await app.models.Item_Idx.findOne({
-              _id: recipe_item_idx_res.item_idx_id,
-            });
-            const quantity_res = await app.models.Quantity.findOne({
-              _id: recipe_item_idx_res.quantity,
-            });
-
-            cleanedItemObj = {
-              recipe_item_idx_id: item_id,
-              item_name: item_idx_res.name,
-              quantity_val: Number(recipe_item_idx_res.quantity_val),
-              quantity: quantity_res.symbol,
-            };
-
-            recipe_item_idx_list.push(cleanedItemObj);
-          }
-          let cleanedRecipe = {
-            _id: recipe._id,
-            name: recipe.name,
-            created: recipe.created,
-            instructions: recipe.instructions,
-            cuisine: recipe.cuisine,
-            items: recipe_item_idx_list,
-          };
-          cleanedRes.push(cleanedRecipe);
-        }
-
-        res.status(200).send(cleanedRes);
+        const finalRes = await expandRecipe(recipes);
+        res.status(200).send(finalRes);
       }
       if (viewSetting === "namesOnly") {
-        for (let recipe of recipes) {
-          cleanedRes.push({ name: recipe.name, _id: recipe._id });
-        }
-        res.status(200).send(cleanedRes);
+        const finalRes = simplifyRecipe(recipes);
+        res.status(200).send(finalRes);
       }
-
-      // res.status(200).send(recipes);
     } catch (err) {
       console.log(err);
       res.status(400).send({ error: "recipe.get failed", message: err });
     }
   });
 
-  // get recipe by id
+  // get recipe by name
+  app.get(
+    "/v1/recipe/view/name/:recipeName/:viewSetting?",
+    async (req, res) => {
+      try {
+        const viewSetting = req.params.viewSetting;
+        const recipeName = req.params.recipeName;
+        let recipes = await app.models.Recipe.find({ name: recipeName });
+
+        if (viewSetting === undefined || viewSetting === "default") {
+          res.status(200).send(recipes);
+        }
+        if (viewSetting === "detailed") {
+          const finalRes = await expandRecipe(recipes);
+          res.status(200).send(finalRes);
+        }
+        if (viewSetting === "namesOnly") {
+          const finalRes = simplifyRecipe(recipes);
+          res.status(200).send(finalRes);
+        }
+      } catch (err) {
+        console.log(err);
+        res.status(400).send({ error: "recipe.get failed", message: err });
+      }
+    }
+  );
 
   // get recipe by ingredient
-
-  // get recipe by name
 
   // edit recipe
 

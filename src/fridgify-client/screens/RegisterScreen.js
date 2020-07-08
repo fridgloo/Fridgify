@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { SafeAreaView, Text, StyleSheet } from "react-native";
 import LogoText from "../components/LogoText";
-import styles from "../constants/AuthStyles";
+import styles from "../constants/authStyles";
 
 import * as Yup from "yup";
 import {

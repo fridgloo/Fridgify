@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import colors from "../constants/Colors";
+import colors from "../constants/colors";
 
 function ProfileInfo({ children, props }) {
   return (

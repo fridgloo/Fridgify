@@ -55,6 +55,8 @@ function optionHeight(option) {
       return "32%";
     case "add_nte":
       return "60%";
+    case "add_nt":
+      return "32%";
     case "delete":
       return "15%";
     case "clear":

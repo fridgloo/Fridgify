@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Text } from "react-native";
 import {
   Confirmation,
   Name,
@@ -101,7 +101,7 @@ export function DeleteModal(props) {
 export function ClearModal(props) {
   return (
     <View style={[styles.container, { height: optionHeight("clear") }]}>
-      <Message>Are you sure?</Message>
+      <Message>Clear the list?</Message>
       <Confirmation>
         <Cancel toggleModal={props.toggleModal}>No</Cancel>
         <Save
@@ -136,6 +136,44 @@ export function AddItemNTEModal(props) {
           Save
         </Save>
       </Confirmation>
+    </View>
+  );
+}
+
+export function AddItemNTModal(props) {
+  return (
+    <View style={[styles.container, { height: optionHeight("add_nt") }]}>
+      <Name onChangeText={props.onChangeText}>Name (required):</Name>
+      <Type onChangeText={props.onChangeText} newVal={props.newType}>
+        Type:
+      </Type>
+      <Confirmation>
+        <Cancel toggleModal={props.toggleModal}>Cancel</Cancel>
+        <Save
+          onPress={props.onPress}
+          toggleModal={props.toggleModal}
+          changed={props.changed}
+        >
+          Save
+        </Save>
+      </Confirmation>
+    </View>
+  );
+}
+
+export function SubmitToModal(props) {
+  return (
+    <View style={[styles.container, { height: 55 * props.numFridges + 55 }]}>
+      <View
+        style={{
+          height: 40,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text style={{ fontSize: 16 }}>Send checked items to:</Text>
+      </View>
+      {props.children}
     </View>
   );
 }

@@ -1,5 +1,4 @@
 "use strict";
-let Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 
 module.exports = (app) => {
@@ -19,7 +18,8 @@ module.exports = (app) => {
             .send({ error: "fridge.post jwt verify error" });
         }
         const fridgeCheck = await app.models.Fridge.findOne({
-          name: req.body.name.toLowerCase(), owner: decoded.user._id
+          name: req.body.name.toLowerCase(),
+          owner: decoded.user._id,
         });
         if (fridgeCheck) {
           console.log("error: fridge name already used");

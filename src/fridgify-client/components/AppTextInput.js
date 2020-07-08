@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
-import Colors from "../constants/Colors";
+import colors from "../constants/colors";
 
 function AppTextInput({ ...props }) {
   return (
@@ -12,10 +12,10 @@ function AppTextInput({ ...props }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.white,
+    backgroundColor: colors.white,
     borderRadius: 9,
     borderWidth: 1,
-    borderColor: Colors.textGray,
+    borderColor: colors.textGray,
     justifyContent: "center",
     width: "80%",
     height: "7%",

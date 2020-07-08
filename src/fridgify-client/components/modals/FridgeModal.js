@@ -83,17 +83,3 @@ function modalOption(props) {
       return <View></View>;
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  optionContainer: {
-    width: "80%",
-    backgroundColor: "white",
-    alignItems: "center",
-    borderRadius: 12,
-  },
-});

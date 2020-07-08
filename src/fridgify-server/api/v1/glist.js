@@ -1,5 +1,4 @@
 "use strict";
-let Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 
 module.exports = (app) => {
@@ -18,7 +17,8 @@ module.exports = (app) => {
         }
 
         const glistCheck = await app.models.Glist.findOne({
-          name: req.body.name.toLowerCase(), owner: decoded.user._id
+          name: req.body.name.toLowerCase(),
+          owner: decoded.user._id,
         });
         if (glistCheck) {
           console.log("error: glist name already used");

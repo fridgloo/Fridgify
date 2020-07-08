@@ -1,10 +1,10 @@
 import React from "react";
 import { Text } from "react-native";
-import Styles from "../constants/Styles";
+import defaultStyles from "../constants/defaultStyles";
 
 function LogoText({ children, style, ...otherProps }) {
   return (
-    <Text style={[Styles.text, style]} {...otherProps}>
+    <Text style={[defaultStyles.text, style]} {...otherProps}>
       {children}
     </Text>
   );

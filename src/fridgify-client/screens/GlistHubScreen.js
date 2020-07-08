@@ -17,6 +17,8 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import MaterialCommunity from "react-native-vector-icons/MaterialCommunityIcons";
 
+import LogoText from "../components/LogoText";
+
 export default function GlistHubScreen({ navigation, route }) {
   const [state, setState] = React.useState({
     glists: [],
@@ -34,7 +36,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const getGlists = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    const response = await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
+    const response = await fetch(`http://localhost:3200/v1/glist/${token}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -60,7 +62,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const addGlist = async (name) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
+    await fetch(`http://localhost:3200/v1/glist/${token}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -82,7 +84,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const deleteGlist = async (id) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
+    await fetch(`http://localhost:3200/v1/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -102,7 +104,7 @@ export default function GlistHubScreen({ navigation, route }) {
 
   const sendGlist = async (id) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/item/glist/${id}/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${id}/${token}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -342,37 +344,8 @@ export default function GlistHubScreen({ navigation, route }) {
         </Modal>
       </View>
       {/* --------------------------------Header ---------------------------------------------- */}
-      <View
-        style={{
-          flex: 1,
-          paddingHorizontal: 25,
-          paddingVertical: 5,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Image
-          style={{
-            height: 60,
-            width: 60,
-          }}
-          resizeMode="center"
-          source={require("../assets/images/igloo.png")}
-        />
+      <LogoText style={styles.title}>Grocery</LogoText>
 
-        <Text
-          adjustsFontSizeToFit
-          style={{
-            paddingLeft: 15,
-            color: "#2D82FF",
-            fontSize: 32,
-            fontWeight: "600",
-          }}
-        >
-          G r o c e r y
-        </Text>
-      </View>
       {/* --------------------------------Grocery Overview ------------------------------------ */}
       <View
         style={{
@@ -619,5 +592,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFC194",
     justifyContent: "center",
     alignItems: "center",
+  },
+  screen: {
+    backgroundColor: "white",
+  },
+  title: {
+    fontSize: 50,
+    textAlign: "center",
+    padding: "10%",
+  },
+  container: {
+    height: "30%",
   },
 });

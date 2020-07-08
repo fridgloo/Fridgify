@@ -3,7 +3,7 @@ import authStorage from "../auth/storage";
 import cache from "../util/cache";
 
 const apiClient = create({
-  baseURL: "http://10.0.0.77:3200/v1",
+  baseURL: "http://localhost:3200/v1",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",

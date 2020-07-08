@@ -48,9 +48,7 @@ export function Name(props) {
         <Text style={{ paddingBottom: 10, fontSize: 16 }}>
           {props.children}
         </Text>
-      ) : (
-        null
-      )}
+      ) : null}
       <View
         style={{
           borderRadius: 12,
@@ -83,12 +81,8 @@ export function Type(props) {
       }}
     >
       {props.children ? (
-        <Text style={{ fontSize: 16 }}>
-          {props.children}
-        </Text>
-      ) : (
-        null
-      )}
+        <Text style={{ fontSize: 16 }}>{props.children}</Text>
+      ) : null}
       <Picker
         selectedValue={props.newVal}
         itemStyle={{
@@ -130,12 +124,8 @@ export function ExpDate(props) {
         }}
       >
         {props.children ? (
-        <Text style={{ fontSize: 16 }}>
-          {props.children}
-        </Text>
-      ) : (
-        null
-      )}
+          <Text style={{ fontSize: 16 }}>{props.children}</Text>
+        ) : null}
         <DateTimePicker
           testID="dateTimePicker"
           value={props.newVal}

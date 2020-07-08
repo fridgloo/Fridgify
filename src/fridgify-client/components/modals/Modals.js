@@ -37,7 +37,7 @@ export function NameModal(props) {
           toggleModal={props.toggleModal}
           changed={props.changed}
         >
-          Save
+          {props.saveMessage}
         </Save>
       </Confirmation>
     </View>

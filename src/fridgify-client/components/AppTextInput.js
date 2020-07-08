@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
-import colors from "../constants/colors";
+import colors from "../constants/Colors";
 
 function AppTextInput({ ...props }) {
   return (
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     height: "7%",
     marginLeft: "10%",
     marginRight: "10%",
-    //marginBottom: 20,
+    marginBottom: 20,
     padding: 15,
     marginVertical: 10,
   },

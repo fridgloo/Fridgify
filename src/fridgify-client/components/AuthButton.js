@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
 
-import colors from "../constants/colors";
+import colors from "../constants/Colors";
 
 // In case you're wondering : https://reactnative.dev/docs/touchableopacity
 

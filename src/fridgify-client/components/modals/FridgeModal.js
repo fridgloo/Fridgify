@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   ModalTemplate,
@@ -11,6 +11,11 @@ import {
 } from "./Modals";
 
 export default function FridgeModal(props) {
+  const [state, setState] = useState({
+    newName: "",
+    newType: "",
+    newDate: new Date(),
+  });
   return (
     <ModalTemplate
       visible={props.modalState.visible}

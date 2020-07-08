@@ -49,7 +49,7 @@ export default function GlistScreen({ navigation, route }) {
   const fillGlistState = async (params) => {
     let token = await SecureStore.getItemAsync("user_token");
     const response = await fetch(
-      `http://10.0.0.77:3200/v1/item/glist/${params._id}/${token}`,
+      `http://localhost:3200/v1/item/glist/${params._id}/${token}`,
       {
         method: "GET",
         headers: {
@@ -72,7 +72,7 @@ export default function GlistScreen({ navigation, route }) {
 
   const deleteGlist = async () => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/glist/${token}`, {
+    await fetch(`http://localhost:3200/v1/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -87,7 +87,7 @@ export default function GlistScreen({ navigation, route }) {
   const clearGlist = async () => {
     let token = await SecureStore.getItemAsync("user_token");
 
-    await fetch(`http://10.0.0.77:3200/v1/item/glist/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -99,7 +99,7 @@ export default function GlistScreen({ navigation, route }) {
 
   const addItem = async (data) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/item/glist/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${token}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -124,7 +124,7 @@ export default function GlistScreen({ navigation, route }) {
 
   const setItemElement = async (option, value, id) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/item/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/${token}`, {
       method: "PUT",
       headers: {
         Accept: "application/json",
@@ -150,7 +150,7 @@ export default function GlistScreen({ navigation, route }) {
 
   const deleteItem = async (item) => {
     let token = await SecureStore.getItemAsync("user_token");
-    await fetch(`http://10.0.0.77:3200/v1/item/glist/${token}`, {
+    await fetch(`http://localhost:3200/v1/item/glist/${token}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",

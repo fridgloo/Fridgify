@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import AuthButton from "../components/AuthButton";
 import LogoText from "../components/LogoText";
-import styles from "../constants/authStyles";
+import styles from "../constants/AuthStyles";
 
 import * as Yup from "yup";
 import {

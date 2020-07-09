@@ -196,50 +196,58 @@ module.exports = (app) => {
   // get recipe by ingredient
   app.post("/v1/recipe/view/:viewSetting?", async (req, res) => {
     const item_names = req.body.item_names;
+    const viewSetting = req.params.viewSetting;
     // ingredient order [ highest --> lowest priority]
 
     // doesnt have to match all specified.
     // get the itemIdx id from names.
     // if itemIdx doesn't exist ignore
 
-    let item_idx_list = [];
-    for (let i in item_names) {
-      // console.log("item_name", item_names[i]);
-      const item_idx = await app.models.Item_Idx.findOne({
-        name: item_names[i],
-      });
-
-      if (item_idx) {
+    try {
+      let item_idx_list = [];
+      for (let i in item_names) {
+        const item_idx = await app.models.Item_Idx.findOne({
+          name: item_names[i],
+        });
         // ignore if null
-        item_idx_list.push(item_idx._id);
+        if (item_idx) {
+          item_idx_list.push(item_idx._id);
+        }
       }
+      // aggregate
+      const ranked_recipe_search_results = await app.models.Recipe_Item_Idx.aggregate(
+        [
+          { $match: { item_idx_id: { $in: item_idx_list } } }, // get recipe_item_idx instance where at item matches
+          { $sortByCount: "$recipe_id" }, // group/sort the results by how often the recipe_id shows up
+          {
+            $lookup: {
+              // *join to connect grouped id from above result
+              from: "recipes",
+              localField: "_id",
+              foreignField: "_id",
+              as: "recipe",
+            },
+          },
+          { $unwind: "$recipe" }, // unfold the object and display the info
+        ]
+      );
+
+      if (viewSetting === "namesOnly") {
+        let cleanedRes = [];
+        for (let idx in ranked_recipe_search_results) {
+          cleanedRes.push({
+            _id: ranked_recipe_search_results[idx]._id,
+            recipe_name: ranked_recipe_search_results[idx].recipe.name,
+            count: ranked_recipe_search_results[idx].count,
+          });
+        }
+        res.status(200).send(cleanedRes);
+        return;
+      }
+      res.status(200).send(ranked_recipe_search_results);
+    } catch (err) {
+      res.status(400).send({ error: "recipe.get failed", message: err });
     }
-    console.log("list", item_idx_list);
-    // query against recipe_item_idx
-    // const recipe_item_idx_res = await app.models.Recipe_Item_Idx.find({})
-    //   .where("item_idx_id")
-    //   .in(item_idx_list)
-    //   .sort("item_idx_id");
-    // console.log(recipe_item_idx_res);
-
-    // aggregate
-    const test = await app.models.Recipe_Item_Idx.aggregate([
-      {
-        $match: { item_idx_id: { $in: item_idx_list } },
-      },
-      {
-        $sortByCount: "$recipe_id",
-      },
-    ]);
-    console.log(test);
-
-    // sort by count of instance --> higher count of instance --> more matches in ingredients
-
-    // recipe_item_idx_res.sortByCount("item_idx_id");
-    // console.log(recipe_item_idx_res);
-    // collect recipes
-
-    res.status(200).send(item_idx_list);
   });
 
   // check what ingredients from recipe the user doesn't have.

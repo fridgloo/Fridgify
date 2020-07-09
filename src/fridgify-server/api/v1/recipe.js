@@ -194,7 +194,56 @@ module.exports = (app) => {
   );
 
   // get recipe by ingredient
+  app.post("/v1/recipe/view/:viewSetting?", async (req, res) => {
+    const item_names = req.body.item_names;
+    // ingredient order [ highest --> lowest priority]
 
+    // doesnt have to match all specified.
+    // get the itemIdx id from names.
+    // if itemIdx doesn't exist ignore
+
+    let item_idx_list = [];
+    for (let i in item_names) {
+      // console.log("item_name", item_names[i]);
+      const item_idx = await app.models.Item_Idx.findOne({
+        name: item_names[i],
+      });
+
+      if (item_idx) {
+        // ignore if null
+        item_idx_list.push(item_idx._id);
+      }
+    }
+    console.log("list", item_idx_list);
+    // query against recipe_item_idx
+    // const recipe_item_idx_res = await app.models.Recipe_Item_Idx.find({})
+    //   .where("item_idx_id")
+    //   .in(item_idx_list)
+    //   .sort("item_idx_id");
+    // console.log(recipe_item_idx_res);
+
+    // aggregate
+    const test = await app.models.Recipe_Item_Idx.aggregate([
+      {
+        $match: { item_idx_id: { $in: item_idx_list } },
+      },
+      {
+        $sortByCount: "$recipe_id",
+      },
+    ]);
+    console.log(test);
+
+    // sort by count of instance --> higher count of instance --> more matches in ingredients
+
+    // recipe_item_idx_res.sortByCount("item_idx_id");
+    // console.log(recipe_item_idx_res);
+    // collect recipes
+
+    res.status(200).send(item_idx_list);
+  });
+
+  // check what ingredients from recipe the user doesn't have.
+  // specific / separate endpoint to not waste time on multiple recipes.
   // edit recipe
 
   // delete recipe

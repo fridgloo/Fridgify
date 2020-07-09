@@ -50,17 +50,13 @@ const setupServer = async () => {
   require("./api")(app);
 
   async function initQuantity() {
-    // fridge check length
-    var resp;
     // await app.models.Quantity.deleteMany({}, function (err) {});
     // return;
     await app.models.Quantity.countDocuments({}, function (err, count) {
       if (err) console.log(err);
       console.log("[DEV]Quantity is:", count);
     });
-    await app.models.Quantity.findOne({ symbol: "g" }, function (err, res) {
-      resp = res;
-    });
+    const resp = await app.models.Quantity.findOne({});
     if (resp != null) {
       return;
     }

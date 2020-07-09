@@ -252,7 +252,27 @@ module.exports = (app) => {
 
   // check what ingredients from recipe the user doesn't have.
   // specific / separate endpoint to not waste time on multiple recipes.
+  // { -----------------------------
+  // get user fridge items
+  // find item_idx equivalent
+  // maybe we should implement item revision before?
+  // build array of ^
+  // cross check against recipe items
+  // return missing item list
+  // ----------------------------- }
+
   // edit recipe
+  // { -----------------------------
+  // find recipe
+  // find recipe_item_idx
+  // update ^
+  // return
+  // ----------------------------- }
 
   // delete recipe
+  // { -----------------------------
+  // delete recipe item idx
+  // delete recipe
+  // return
+  // ----------------------------- }
 };

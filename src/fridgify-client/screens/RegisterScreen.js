@@ -53,8 +53,8 @@ export default function RegisterScreen() {
       return;
     }
 
-    const { data: authObj } = await signInApi.request(username, password);
-    auth.signIn(authObj.token);
+    const { data: authToken } = await signInApi.request(username, password);
+    auth.signIn(authToken);
   };
 
   return (

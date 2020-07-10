@@ -8,8 +8,7 @@ import authStorage from "../auth/storage";
 
 const FridgeEditScreen = ({ navigation }) => {
   const handleSubmit = async (fridgeName) => {
-    const authToken = await authStorage.getToken();
-    const result = await FridgesApi.addFridge(fridgeName, authToken);
+    const result = await FridgesApi.addFridge(fridgeName);
     if (!result.ok) {
       console.log(result);
     }

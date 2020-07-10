@@ -14,9 +14,8 @@ export const deleteFridge = (fridgeId) => {
   return client.delete(endpoint, {}, fridgeId);
 };
 
-export const editFridge = (fridgeId) => {
-  const obj = { data: { primary: true }, _id: fridgeId };
-  return client.put(endpoint, obj);
+export const editFridge = (data) => {
+  return client.put(endpoint, data);
 };
 
 export default {

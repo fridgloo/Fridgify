@@ -8,17 +8,10 @@ const fs = require("fs");
 const path = require("path");
 
 module.exports = (app) => {
-  /**
-   * Create a fridge
-   *
-   */
+  // create recipe
   app.post("/v1/recipe", async (req, res) => {
-    // Try to create the fridge
     try {
       // NOTE: multiple recipes of same name can exist
-      // const recipeCheck = await app.models.Recipe.findOne({
-      //   name: req.body.name.toLowerCase()
-      // });
 
       // make recipe first without items. need to have it for tying relationships.
       let newRecipe = {
@@ -202,6 +195,7 @@ module.exports = (app) => {
     const item_names = req.body.item_names;
     const viewSetting = req.params.viewSetting;
     // ingredient order [ highest --> lowest priority]
+    // ^ not implemented...............
 
     // doesnt have to match all specified.
     // get the itemIdx id from names.
@@ -315,6 +309,7 @@ module.exports = (app) => {
 
   const upload = multer({
     dest: path.resolve("public/multer_upload"),
+    fileSize: 1000000,
     // you might also want to set some limits: https://github.com/expressjs/multer#limits
   });
 

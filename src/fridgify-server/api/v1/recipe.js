@@ -9,10 +9,10 @@ const path = require("path");
 
 module.exports = (app) => {
   // create recipe
-  app.post("/v1/recipe", async (req, res) => {
+  app.post("/v1/recipe/edit/:recipeId?", async (req, res) => {
     try {
       // NOTE: multiple recipes of same name can exist
-
+      const recipeId = req.params.recipeId;
       // make recipe first without items. need to have it for tying relationships.
       let newRecipe = {
         name: req.body.name,
@@ -23,9 +23,16 @@ module.exports = (app) => {
         items: [],
       };
 
-      let recipe = new app.models.Recipe(newRecipe);
-      await recipe.save();
-
+      let recipe;
+      if (recipeId) {
+        recipe = await app.models.Recipe.findOneAndUpdate(
+          { _id: recipeId },
+          newRecipe
+        );
+      } else {
+        recipe = new app.models.Recipe(newRecipe);
+        await recipe.save();
+      }
       // ingredient_list ids
       let recipe_item_idx_ids = [];
 
@@ -56,28 +63,42 @@ module.exports = (app) => {
         });
         // create `recipe_item_idx` instance with current item
         let newRecipe_Item_Idx = {
-          recipe_id: recipe._id,
+          recipe_id: recipeId ? recipeId : recipe._id,
           item_idx_id: itemIdx_id,
           quantity_val: item.val,
           quantity: quantCheck._id,
         };
 
-        let recipe_Item_Idx = new app.models.Recipe_Item_Idx(
-          newRecipe_Item_Idx
-        );
-        await recipe_Item_Idx.save();
+        const recipe_item_idx_check = await app.models.Recipe_Item_Idx.findOne({
+          item_idx_id: itemIdx_id,
+          recipe_id: recipeId ? recipeId : recipe._id,
+        });
+
+        let recipe_Item_Idx;
+        if (recipe_item_idx_check) {
+          recipe_Item_Idx = await app.models.Recipe_Item_Idx.findOneAndUpdate(
+            {
+              _id: recipe_item_idx_check._id,
+            },
+            newRecipe_Item_Idx
+          );
+        } else {
+          recipe_Item_Idx = new app.models.Recipe_Item_Idx(newRecipe_Item_Idx);
+          await recipe_Item_Idx.save();
+        }
         recipe_item_idx_ids.push(recipe_Item_Idx._id);
       }
       // Update recipe with the new Ids : `recipe_item_idx_ids`
-      await app.models.Recipe.updateOne(
-        { _id: recipe._id },
+      await app.models.Recipe.findOneAndUpdate(
+        { _id: recipeId ? recipeId : recipe._id },
         { items: recipe_item_idx_ids }
       );
       const currentRecipe = await app.models.Recipe.findOne({
-        _id: recipe._id,
+        _id: recipeId ? recipeId : recipe._id,
       });
       res.status(201).send(currentRecipe);
     } catch (err) {
+      console.log(err);
       res.status(400).send({ error: "recipe.post failed", message: err });
     }
   });

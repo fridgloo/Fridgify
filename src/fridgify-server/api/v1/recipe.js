@@ -368,14 +368,6 @@ module.exports = (app) => {
     }
   );
 
-  // edit recipe
-  // { -----------------------------
-  // find recipe
-  // find recipe_item_idx
-  // update ^
-  // return
-  // ----------------------------- }
-
   // delete recipe
   // { -----------------------------
   // delete recipe item idx

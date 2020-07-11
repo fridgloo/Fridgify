@@ -3,6 +3,9 @@ let Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 const quantity = require("../../model/quantity");
 const fridge = require("../../model/fridge");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = (app) => {
   /**
@@ -299,6 +302,55 @@ module.exports = (app) => {
       res.status(400).send(err);
     }
   });
+
+  app.get("/v1/recipe/image/:recipeId", async (req, res) => {
+    try {
+      res.sendFile(
+        path.resolve(`public/recipe_images/${req.params.recipeId}.png`)
+      );
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
+
+  const upload = multer({
+    dest: path.resolve("public/multer_upload"),
+    // you might also want to set some limits: https://github.com/expressjs/multer#limits
+  });
+
+  // upload image
+  app.post(
+    "/v1/recipe/image/upload/:recipeId",
+    upload.single("image" /* name attribute of <file> element in your form */),
+    (req, res) => {
+      const tempPath = req.file.path;
+      try {
+        if (path.extname(req.file.originalname).toLowerCase() === ".png") {
+          fs.rename(
+            tempPath,
+            path.resolve(`public/recipe_images/${req.params.recipeId}.png`),
+            (err) => {
+              if (err) {
+                res.status(400).send(err);
+              }
+              res.status(200).contentType("file").end("File uploaded!");
+            }
+          );
+        } else {
+          fs.unlink(tempPath, (err) => {
+            if (err) return handleError(err, res);
+
+            res
+              .status(403)
+              .contentType("text/plain")
+              .end("Only .png files are allowed!");
+          });
+        }
+      } catch (err) {
+        res.status(400).send(err);
+      }
+    }
+  );
 
   // edit recipe
   // { -----------------------------

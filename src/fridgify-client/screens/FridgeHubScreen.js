@@ -1,20 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  FlatList,
-  Image,
-  TextInput,
-  ImageBackground,
-  TouchableOpacity,
-} from "react-native";
-import Modal from "react-native-modal";
-import Icon from "react-native-vector-icons/FontAwesome";
+import { StyleSheet, Text, View, Button, FlatList } from "react-native";
 
 import Screen from "../components/Screen";
 import LogoText from "../components/LogoText";
@@ -29,7 +14,6 @@ export default function FridgeHubScreen({ navigation }) {
 
   const getFridges = async () => {
     getFridgesApi.request();
-    console.log(getFridgesApi.data);
   };
 
   useEffect(() => {

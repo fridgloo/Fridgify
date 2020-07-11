@@ -36,7 +36,7 @@ module.exports = (app) => {
 
       const token = user.generateAuthToken();
 
-      res.header("x-auth-token", token).send(201, {
+      res.header("x-auth-token", token).status(201).send({
         username: req.body.username,
         password: req.body.email,
       });

@@ -11,10 +11,10 @@ export default function ProfileScreen() {
 
   return (
     <Screen>
-      <LogoText style={styles.profiletitle}>{user.user.username}</LogoText>
+      <LogoText style={styles.profiletitle}>{user.username}</LogoText>
       <ProfileInfo>Your Fridges:</ProfileInfo>
       <ProfileInfo>Password:</ProfileInfo>
-      <ProfileInfo>Email: {user.user.email}</ProfileInfo>
+      <ProfileInfo>Email: {user.email}</ProfileInfo>
       <AuthButton
         title="Dark Mode"
         onPress={() => console.log("Dark Mode was pressed")}

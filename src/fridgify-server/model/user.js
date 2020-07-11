@@ -46,7 +46,7 @@ userSchema.method("authenticate", function (plainText) {
 });
 
 userSchema.methods.generateAuthToken = function () {
-  const token = jwt.sign({ user: this.user }, "secretkey");
+  const token = jwt.sign({ user: this }, "secretkey");
   return token;
 };
 

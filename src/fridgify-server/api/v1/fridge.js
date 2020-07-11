@@ -14,6 +14,7 @@ module.exports = (app) => {
     auth,
     asyncMiddleware(async (req, res) => {
       const fridgeCheck = await app.models.Fridge.findOne({
+        name: req.body.name.toLowerCase(),
         owner: req.user._id,
       });
       if (fridgeCheck) {
@@ -23,7 +24,7 @@ module.exports = (app) => {
 
       let newFridge = {
         owner: req.user._id,
-        name: req.user.name,
+        name: req.body.name,
         created: Date.now(),
         items: [],
       };
@@ -76,9 +77,12 @@ module.exports = (app) => {
    */
   app.get(
     "/v1/fridge",
+    auth,
     asyncMiddleware(async (req, res) => {
-      const fridges = await app.models.Fridge.find().sort("-primary");
-      res.send(fridges);
+      const fridges = await app.models.Fridge.find({
+        owner: req.user._id,
+      }).sort("-primary");
+      res.status(200).send(fridges);
     })
   );
 

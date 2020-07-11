@@ -2,6 +2,7 @@
 let Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
 const quantity = require("../../model/quantity");
+const fridge = require("../../model/fridge");
 
 module.exports = (app) => {
   /**
@@ -252,14 +253,52 @@ module.exports = (app) => {
 
   // check what ingredients from recipe the user doesn't have.
   // specific / separate endpoint to not waste time on multiple recipes.
-  // { -----------------------------
-  // get user fridge items
-  // find item_idx equivalent
-  // maybe we should implement item revision before?
-  // build array of ^
-  // cross check against recipe items
-  // return missing item list
-  // ----------------------------- }
+  app.get("/v1/recipe/checkMissingItems/:recipeId", async (req, res) => {
+    const recipeId = req.params.recipeId;
+    const token = req.header("x-auth-token");
+
+    try {
+      jwt.verify(token, "secretkey", async (err, decoded) => {
+        if (err) {
+          res.status(400).send(err);
+          return;
+        }
+
+        // valid user
+        const user_obj = decoded.user;
+        const user_fridges = await app.models.Fridge.find({
+          owner: user_obj._id,
+        });
+
+        let user_fridge_ids = [];
+        user_fridges.forEach((fridge) => {
+          user_fridge_ids.push(fridge._id);
+        });
+
+        const recipe_item_query_res = await app.models.Recipe_Item_Idx.find({
+          recipe_id: recipeId,
+        })
+          .select({ item_idx_id: 1 })
+          .populate("item_idx_id");
+
+        const fridge_query_res = await app.models.Item.find({
+          fridge: { $in: user_fridge_ids },
+        });
+
+        // filter based on string names. must be perfect match: broccoli =/- broccolis
+        // returns a list of recipe ingredients that users do not have in fridge
+        var filtered_res = recipe_item_query_res.filter(function (o1) {
+          return !fridge_query_res.some(function (o2) {
+            return o1.item_idx_id.name === o2.name;
+          });
+        });
+
+        res.status(200).send(filtered_res);
+      });
+    } catch (err) {
+      res.status(400).send(err);
+    }
+  });
 
   // edit recipe
   // { -----------------------------

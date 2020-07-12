@@ -4,6 +4,10 @@ export default {
   white: "#fff",
 
   primaryColor: "#2D82FF",
+  secondaryColor: "#FF7F23",
+
+  primaryDisabled: "#A7CBFF",
+  secondaryDisabled: "#FFAD71",
 
   textGray: "#8b90a0",
 

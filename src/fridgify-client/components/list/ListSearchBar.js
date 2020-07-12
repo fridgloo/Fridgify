@@ -1,32 +1,44 @@
-import { SearchBar } from "react-native-elements";
-
 import React from "react";
-import { View, Text } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { FontAwesome5, FontAwesome } from "@expo/vector-icons";
 
-searchFilterFunction = (text) => {
-  // this.setState({
-  //   value: text,
-  // });
-  // const newData = this.arrayholder.filter((item) => {
-  //   const itemData = `${item.name.title.toUpperCase()} ${item.name.first.toUpperCase()} ${item.name.last.toUpperCase()}`;
-  //   const textData = text.toUpperCase();
-  //   return itemData.indexOf(textData) > -1;
-  // });
-  // this.setState({
-  //   data: newData,
-  // });
-};
-
-const ListSearchBar = () => {
+export default function ListSearchBar({ search, onChangeSearch, clearSearch }) {
   return (
-    <SearchBar
-      placeholder="Search"
-      lightTheme
-      round
-      onChangeText={(text) => this.searchFilterFunction(text)}
-      autoCorrect={false}
-    />
+    <View style={styles.container}>
+      <FontAwesome5 name={"search"} size={15} />
+      <TextInput
+        style={styles.input}
+        numberOfLines={1}
+        placeholder={"Search item..."}
+        value={search}
+        onChangeText={(value) => onChangeSearch(value)}
+      />
+      <TouchableOpacity onPress={() => clearSearch()}>
+        <FontAwesome name={"times-circle"} size={15} />
+      </TouchableOpacity>
+    </View>
   );
-};
+}
 
-export default ListSearchBar;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#CBCBCB",
+    borderWidth: 1,
+    borderRadius: 15,
+    padding: 8,
+  },
+  input: {
+    flex: 1,
+    fontSize: 15,
+    paddingHorizontal: 10,
+  },
+});

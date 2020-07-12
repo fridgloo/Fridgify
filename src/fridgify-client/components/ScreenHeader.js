@@ -1,30 +1,53 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import LogoText from "./LogoText";
 
 export default function ScreenHeader({
-  fridge,
+  name,
+  primary,
   children,
   style,
   ...otherProps
 }) {
-  console.log(fridge);
   return (
     <View style={[styles.container, style]} {...otherProps}>
-      <LogoText style={{ fontSize: 40 }} numberOfLines={1}>
-        Basement Basement
-      </LogoText>
+      <View style={styles.title}>
+        <LogoText
+          style={{ fontSize: name?.length > 10 ? 26 : 40 }}
+          numberOfLines={1}
+        >
+          {name}
+        </LogoText>
+        {primary ? (
+          <FontAwesome5
+            style={{ paddingLeft: 10 }}
+            name={"igloo"}
+            size={26}
+            color={"black"}
+          />
+        ) : null}
+      </View>
+      <View style={styles.buttons}>{children}</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    height: "10%",
     flexDirection: "row",
+    paddingTop: 10,
     paddingHorizontal: 20,
+  },
+  title: {
+    flex: 3,
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "green",
+  },
+  buttons: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
   },
 });

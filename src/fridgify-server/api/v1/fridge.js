@@ -129,7 +129,6 @@ module.exports = (app) => {
             .status(400)
             .send({ error: "fridge.delete jwt verify error" });
         }
-
         await app.models.User.updateOne(
           { _id: decoded.user._id },
           { $pull: { fridges: req.body._id } }

@@ -351,9 +351,12 @@ module.exports = (app) => {
             path.resolve(`public/recipe_images/${req.params.recipeId}.png`),
             (err) => {
               if (err) {
-                res.status(400).send(err);
+                res.status(400).send({ message: "Error in file upload." });
               }
-              res.status(200).contentType("file").end("File uploaded!");
+              res
+                .status(200)
+                .contentType("file")
+                .end({ message: "File uploaded!" });
             }
           );
         } else {
@@ -363,19 +366,58 @@ module.exports = (app) => {
             res
               .status(403)
               .contentType("text/plain")
-              .end("Only .png files are allowed!");
+              .end({ message: "Only .png files are allowed!" });
           });
         }
       } catch (err) {
-        res.status(400).send(err);
+        res.status(400).send({ message: "error in image upload." });
       }
     }
   );
 
   // delete recipe
-  // { -----------------------------
-  // delete recipe item idx
-  // delete recipe
-  // return
-  // ----------------------------- }
+  app.delete("/v1/recipe/delete/:recipeId", async (req, res) => {
+    try {
+      const recipeId = req.params.recipeId;
+
+      // check if recipe exists;
+      const recipeCheck = await app.models.Recipe.findOne({ _id: recipeId });
+      if (!recipeCheck) {
+        res.status(400).send({ message: "recipe with id not found." });
+        return;
+      }
+
+      // delete recipe-item-idx
+      await app.models.Recipe_Item_Idx.deleteMany(
+        { recipe_id: recipeId },
+        (err) => {
+          if (err) {
+            console.log(err);
+            res.status(400).send({ message: "recipe_item_idx deletion error" });
+            return;
+          }
+        }
+      );
+
+      // delete recipe
+      await app.models.Recipe.findByIdAndDelete(recipeId, (err) => {
+        if (err) {
+          console.log(err);
+          res.status(400).send({ message: "recipe deletion error" });
+          return;
+        }
+      });
+
+      // delete image
+      fs.unlinkSync(path.resolve(`public/recipe_images/${recipeId}.png`));
+      res
+        .status(200)
+        .send({ message: `recipe_id: ${recipeId} deleted! Image deleted.` });
+    } catch (err) {
+      if (err) {
+        console.log(err);
+      }
+      res.status(400).send({ message: "Invalid recipeId" });
+    }
+  });
 };

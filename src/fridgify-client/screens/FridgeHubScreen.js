@@ -1,21 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  Dimensions,
-  StyleSheet,
-  Text,
-  View,
-  Button,
-  FlatList,
-  Image,
-  TextInput,
-  ImageBackground,
-  TouchableOpacity,
-} from "react-native";
-import Modal from "react-native-modal";
-import * as SecureStore from "expo-secure-store";
-import Icon from "react-native-vector-icons/FontAwesome";
+import { StyleSheet, Text, View, Button, FlatList } from "react-native";
 
 import Screen from "../components/Screen";
 import LogoText from "../components/LogoText";
@@ -24,18 +8,16 @@ import routes from "../navigation/routes";
 
 import fridgesApi from "../api/fridge";
 import useApi from "../hooks/useApi";
-import authStorage from "../auth/storage";
 
 export default function FridgeHubScreen({ navigation }) {
   const getFridgesApi = useApi(fridgesApi.getFridges);
 
-  const getTokenAndFridges = async () => {
-    const authToken = await authStorage.getToken();
-    getFridgesApi.request(authToken);
+  const getFridges = async () => {
+    getFridgesApi.request();
   };
 
   useEffect(() => {
-    getTokenAndFridges();
+    getFridges();
   }, []);
 
   return (
@@ -45,7 +27,7 @@ export default function FridgeHubScreen({ navigation }) {
         <FlatList
           horizontal
           showsHorizontalScrollIndicator={false}
-          data={getFridgesApi.data.fridges}
+          data={getFridgesApi.data}
           keyExtractor={(fridge) => fridge._id}
           renderItem={({ item }) => (
             <Fridge

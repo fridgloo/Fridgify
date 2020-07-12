@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Button, FlatList, Text, StyleSheet, View, Alert } from "react-native";
 import Screen from "../components/Screen";
 import fridgesApi from "../api/fridge";
-import authStorage from "../auth/storage";
 import LogoText from "../components/LogoText";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -30,8 +29,7 @@ function FridgeDetailsScreen({ navigation, route }) {
   const fridge = route.params;
 
   const deleteFridge = async () => {
-    const authToken = await authStorage.getToken();
-    const result = await fridgesApi.deleteFridge(fridge._id, authToken);
+    const result = await fridgesApi.deleteFridge(fridge._id);
     if (result.ok) {
       navigation.navigate("FridgeHub");
     } else {
@@ -40,7 +38,6 @@ function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const setPrimary = async () => {
-    const authToken = await authStorage.getToken();
     const result = await fridgesApi.editFridge(fridge, authToken);
     if (result.ok) {
       navigation.navigate("FridgeHub");

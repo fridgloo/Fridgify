@@ -2,22 +2,20 @@ import client from "./client";
 
 const endpoint = "/fridge";
 
-const getFridges = (token) => client.get(`${endpoint}/${token}`);
+const getFridges = () => client.get(endpoint);
 
 const getFridgeById = (fridgeId) => client.get(`${endpoint}/id/${fridgeId}`);
 
-export const addFridge = (fridgeName, token) => {
-  return client.post(`${endpoint}/${token}`, fridgeName);
+export const addFridge = (fridgeName) => {
+  return client.post(endpoint, fridgeName);
 };
 
-export const deleteFridge = (fridgeId, token) => {
-  const obj = { data: { _id: fridgeId } };
-  return client.delete(`${endpoint}/${token}`, {}, obj);
+export const deleteFridge = (fridgeId) => {
+  return client.delete(endpoint, {}, fridgeId);
 };
 
-export const editFridge = (fridgeId, token) => {
-  const obj = { data: { primary: true }, _id: fridgeId };
-  return client.put(`${endpoint}/${token}`, obj);
+export const editFridge = (data) => {
+  return client.put(endpoint, data);
 };
 
 export default {

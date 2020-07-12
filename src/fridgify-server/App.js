@@ -1,10 +1,13 @@
 const path = require("path");
 const express = require("express");
-//const session = require("express-session");
 const cors = require("cors");
 const bodyparser = require("body-parser");
 const mongoose = require("mongoose");
 const envConfig = require("simple-env-config");
+const morgan = require("morgan");
+const helmet = require("helmet");
+const error = require("./middleware/error");
+const notFound = require("./middleware/notFound");
 
 const env = process.env.NODE_ENV ? process.env.NODE_ENV : "dev";
 
@@ -13,14 +16,20 @@ const setupServer = async () => {
   const port = process.env.PORT ? process.env.PORT : conf.port;
 
   // Setup our Express pipeline
-  let app = express();
+  const app = express();
+
+  app.use(helmet());
 
   app.use(cors());
-  // middleware
   app.use(cors({ origin: `${conf.url}:${conf.expo_port}` }));
 
   app.use(bodyparser.json());
   app.use(bodyparser.urlencoded({ extended: false }));
+
+  if (env === "dev") {
+    app.use(morgan("dev"));
+    console.log("[DEV] Morgan Enabled");
+  }
 
   // Connect to MongoDB
   try {
@@ -88,6 +97,9 @@ const setupServer = async () => {
   app.get("/", (req, res) => {
     res.status(200).json({ message: "FRIDGIFY SERVER WORKS" });
   });
+
+  app.use(notFound);
+  app.use(error);
 
   let server = app.listen(port, () => {
     console.log(`${env} listening on: ${server.address().port}`);

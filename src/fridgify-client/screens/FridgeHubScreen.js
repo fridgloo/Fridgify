@@ -10,7 +10,6 @@ import FridgeHubModal from "../components/modals/FridgeHubModal";
 
 import routes from "../navigation/routes";
 import fridgesApi from "../api/fridge";
-import authStorage from "../auth/storage";
 
 export default function FridgeHubScreen({ navigation }) {
   const [fridges, setFridges] = useState([]);

@@ -20,7 +20,6 @@ import colors from "../constants/colors";
 
 import fridgesApi from "../api/fridge";
 import itemsApi from "../api/item";
-import authStorage from "../auth/storage";
 import LogoText from "../components/LogoText";
 import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 import { SwipeListView } from "react-native-swipe-list-view";
@@ -52,9 +51,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   }, []);
 
   const getTokenAndFridge = async () => {
-    const authToken = await authStorage.getToken();
     await itemsApi
-      .getFridgeItems(route.params._id, authToken)
+      .getFridgeItems(route.params._id)
       .then((response) => {
         if (response.ok) {
           setFridge((prevState) => ({
@@ -72,9 +70,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const deleteFridge = async () => {
-    const authToken = await authStorage.getToken();
     await fridgesApi
-      .deleteFridge(fridge._id, authToken)
+      .deleteFridge(fridge._id)
       .then((response) => {
         if (response.ok) {
           navigation.navigate("FridgeHub");
@@ -86,9 +83,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const clearFridge = async () => {
-    const authToken = await authStorage.getToken();
     await itemsApi
-      .deleteFridgeItem({ fridge: fridge._id, items: fridge.items }, authToken)
+      .deleteFridgeItem({ fridge: fridge._id, items: fridge.items })
       .then((response) => {
         if (response.ok) {
           setFridge((prevState) => ({
@@ -103,9 +99,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const setPrimary = async () => {
-    const authToken = await authStorage.getToken();
     await fridgesApi
-      .editFridge({ data: { primary: true }, _id: fridge._id }, authToken)
+      .editFridge({ data: { primary: true }, _id: fridge._id })
       .then((response) => {
         if (response.ok) {
           setFridge((prevState) => ({ ...prevState, primary: true }));
@@ -117,9 +112,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const setItemElement = async (value, option) => {
-    const authToken = await authStorage.getToken();
     await itemsApi
-      .editItem({ data: { [option]: value }, _id: modal.value._id }, authToken)
+      .editItem({ data: { [option]: value }, _id: modal.value._id })
       .then((response) => {
         if (response.ok) {
           const index = fridge.items.findIndex((e) => e._id == modal.value._id);
@@ -134,20 +128,16 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const addItem = async (item) => {
-    const authToken = await authStorage.getToken();
     await itemsApi
-      .addFridgeItem(
-        {
-          data: {
-            name: item.name,
-            type: item.type,
-            exp_date: item.exp_date,
-            bought_date: new Date(),
-          },
-          fridge: fridge._id,
+      .addFridgeItem({
+        data: {
+          name: item.name,
+          type: item.type,
+          exp_date: item.exp_date,
+          bought_date: new Date(),
         },
-        authToken
-      )
+        fridge: fridge._id,
+      })
       .then((response) => {
         if (response.ok) {
           setFridge((prevState) => ({
@@ -162,9 +152,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   };
 
   const deleteItem = async (item) => {
-    const authToken = await authStorage.getToken();
     await itemsApi
-      .deleteFridgeItem({ fridge: fridge._id, items: [item] }, authToken)
+      .deleteFridgeItem({ fridge: fridge._id, items: [item] })
       .then((response) => {
         if (response.ok) {
           const index = fridge.items.findIndex((e) => e._id == item._id);

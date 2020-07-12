@@ -36,7 +36,7 @@ export default function SignInScreen({ navigation }) {
     const result = await authApi.signIn(username, password);
     if (!result.ok) return setSignInFailed(true);
     setSignInFailed(false);
-    auth.signIn(result.data.token);
+    auth.signIn(result.data);
   };
 
   return (

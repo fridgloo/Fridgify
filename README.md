@@ -4,7 +4,7 @@
 
 - Expo hot reloading means any saved changes you make within **fridgify-client** will instantly reload the client to display the change.
 
-- Our express-backend server does not have hot-reload. To show the changes made in **fridgify-server**, restart the server manually.
+- Our express-backend server now supports hot-reload. To show the changes made in **fridgify-server** in real time, run the server with *npm run dev*
 
 Port numbers:
 
@@ -61,6 +61,23 @@ Expected output:
 
 > MongoDB connected: mongodb://localhost:32768  
 > dev listening on: 3200
+
+To enable hot reload on server (Auto restart server when you make changes)
+
+    npm run dev
+
+Expected output:
+
+> [nodemon] *version_number*
+> [nodemon] to restart at any time, enter `rs`
+> [nodemon] watching path(s): *.*
+> [nodemon] watching extensions: js,mjs,json
+> [nodemon] starting `node App.js`
+> Rest is same as above.
+
+If you are having problems installing nodemon, use
+
+    sudo npm install -g nodemon
 
 To stop the server: ctrl + c
 

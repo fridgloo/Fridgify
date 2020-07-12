@@ -2,6 +2,8 @@
 
 const crypto = require("crypto");
 const mongoose = require("mongoose");
+const Joi = require("@hapi/joi");
+const jwt = require("jsonwebtoken");
 const Schema = mongoose.Schema;
 
 /***************** User Model *******************/
@@ -13,18 +15,16 @@ const encryptPassword = (salt, password) =>
 
 const reservedNames = ["password"];
 
-let User = new Schema({
+const userSchema = new Schema({
   username: { type: String, required: true, index: { unique: true } },
   email: { type: String, required: true, index: { unique: true } },
-  first_name: { type: String, default: "" },
-  last_name: { type: String, default: "" },
   hash: { type: String, required: true },
   salt: { type: String, required: true },
   fridges: [{ type: Schema.Types.ObjectId, ref: "Fridge" }],
   glists: [{ type: Schema.Types.ObjectId, ref: "Glist" }],
 });
 
-User.path("username").validate(function (value) {
+userSchema.path("username").validate(function (value) {
   if (!value) return false;
   if (reservedNames.indexOf(value) !== -1) return false;
   return (
@@ -32,26 +32,44 @@ User.path("username").validate(function (value) {
   );
 }, "invalid username");
 
-User.path("email").validate(function (value) {
+userSchema.path("email").validate(function (value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }, "malformed address");
 
-User.virtual("password").set(function (password) {
+userSchema.virtual("password").set(function (password) {
   this.salt = makeSalt();
   this.hash = encryptPassword(this.salt, password);
 });
 
-User.method("authenticate", function (plainText) {
+userSchema.method("authenticate", function (plainText) {
   return encryptPassword(this.salt, plainText) === this.hash;
 });
 
-User.pre("save", function (next) {
+userSchema.methods.generateAuthToken = function () {
+  const token = jwt.sign(
+    { _id: this._id, username: this.username, email: this.email },
+    "secretkey"
+  );
+  return token;
+};
+
+userSchema.pre("save", function (next) {
   // Sanitize strings
   this.username = this.username.toLowerCase();
   this.email = this.email.toLowerCase();
-  this.first_name = this.first_name.replace(/<(?:.|\n)*?>/gm, "");
-  this.last_name = this.last_name.replace(/<(?:.|\n)*?>/gm, "");
   next();
 });
 
-module.exports = mongoose.model("User", User);
+function validateUser(user) {
+  const schema = Joi.object().keys({
+    username: Joi.string().lowercase().alphanum().min(3).max(32).required(),
+    email: Joi.string().lowercase().email().required(),
+    password: Joi.string().min(8).required(),
+  });
+  return schema.validate(user);
+}
+
+const User = mongoose.model("User", userSchema);
+
+module.exports = User;
+module.exports.validate = validateUser;

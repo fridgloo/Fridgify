@@ -6,6 +6,7 @@ const fridge = require("../../model/fridge");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const escapeStringRegexp = require("escape-string-regexp");
 
 module.exports = (app) => {
   // create recipe
@@ -155,6 +156,7 @@ module.exports = (app) => {
     return cleanedRes;
   }
 
+  // get recipe by id
   app.get("/v1/recipe/view/:recipeId/:viewSetting?", async (req, res) => {
     try {
       const viewSetting = req.params.viewSetting;
@@ -184,32 +186,34 @@ module.exports = (app) => {
     }
   });
 
-  // get recipe by name
-  app.get(
-    "/v1/recipe/view/name/:recipeName/:viewSetting?",
-    async (req, res) => {
-      try {
-        const viewSetting = req.params.viewSetting;
-        const recipeName = req.params.recipeName;
-        let recipes = await app.models.Recipe.find({ name: recipeName });
+  // get recipe by keyword
+  app.get("/v1/recipe/view/name/:keyword/:viewSetting?", async (req, res) => {
+    try {
+      const viewSetting = req.params.viewSetting;
+      const keyword = req.params.keyword.replace(/%20/g, " ");
+      let recipes = await app.models.Recipe.find(
+        {
+          $text: { $search: keyword },
+        },
+        { score: { $meta: "textScore" } }
+      ).sort({ score: { $meta: "textScore" } });
 
-        if (viewSetting === undefined || viewSetting === "default") {
-          res.status(200).send(recipes);
-        }
-        if (viewSetting === "detailed") {
-          const finalRes = await expandRecipe(recipes);
-          res.status(200).send(finalRes);
-        }
-        if (viewSetting === "namesOnly") {
-          const finalRes = simplifyRecipe(recipes);
-          res.status(200).send(finalRes);
-        }
-      } catch (err) {
-        console.log(err);
-        res.status(400).send({ error: "recipe.get failed", message: err });
+      if (viewSetting === undefined || viewSetting === "default") {
+        res.status(200).send(recipes);
       }
+      if (viewSetting === "detailed") {
+        const finalRes = await expandRecipe(recipes);
+        res.status(200).send(finalRes);
+      }
+      if (viewSetting === "namesOnly") {
+        const finalRes = simplifyRecipe(recipes);
+        res.status(200).send(finalRes);
+      }
+    } catch (err) {
+      console.log(err);
+      res.status(400).send({ error: "recipe.get failed", message: err });
     }
-  );
+  });
 
   // get recipe by ingredient
   app.post("/v1/recipe/view/:viewSetting?", async (req, res) => {

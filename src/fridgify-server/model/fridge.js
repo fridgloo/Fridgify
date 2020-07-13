@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 /***************** Fridge Model *******************/
 [];
 
-let Fridge = new Schema({
+const Fridge = new Schema({
   owner: { type: Schema.ObjectId, ref: "User", required: true },
   name: { type: String },
   created: { type: Date },

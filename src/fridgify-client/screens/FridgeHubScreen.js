@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  Button,
+} from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 import Screen from "../components/Screen";
@@ -11,43 +18,28 @@ import HubModal from "../components/modals/HubModal";
 
 import routes from "../navigation/routes";
 import fridgesApi from "../api/fridge";
+import useApi from "../hooks/useApi";
 
 export default function FridgeHubScreen({ navigation, route }) {
-  const [fridges, setFridges] = useState([]);
+  const getFridgesApi = useApi(fridgesApi.getFridges);
+  const [fridges, setFridges] = useState();
   const [modal, setModal] = useState({
     visible: false,
     option: "",
   });
 
   useEffect(() => {
-    getFridges();
-  }, [route.params?.changed]);
-
-  const getFridges = async () => {
-    await fridgesApi
-      .getFridges()
-      .then((response) => {
-        if (response.ok) {
-          return response.data;
-        } else {
-          throw new Error("getFridges fetch error");
-        }
-      })
-      .then((data) => setFridges(data))
-      .catch((error) => console.log(error));
-  };
+    getFridgesApi.request();
+    setFridges(getFridgesApi.data);
+  }, [route.params?.changed, fridges]);
 
   const handleAddFridge = async (newName) => {
-    await fridgesApi
-      .addFridge({ name: newName })
-      .then((response) => {
-        if (response.ok) {
-          setFridges((prevState) => [...prevState, response.data]);
-        } else {
-          throw new Error("handleAddFridge fetch error");
-        }
-      })
-      .catch((error) => console.log(error));
+    const result = await fridgesApi.addFridge({ name: newName });
+    if (result.ok) setFridges((prev) => [...prev, result.data]);
+    else {
+      console.log("Could not add Fridges", result.data);
+      alert("Could not add fridge!");
+    }
   };
 
   const onToggleModal = (option, value) => {
@@ -60,6 +52,12 @@ export default function FridgeHubScreen({ navigation, route }) {
 
   return (
     <Screen style={styles.screen}>
+      {getFridgesApi.error && (
+        <>
+          <Text>Couldn't retrieve fridges.</Text>
+          <Button title="Retry" onPress={getFridgesApi.request} />
+        </>
+      )}
       <HubModal
         modalState={modal}
         toggleModal={onToggleModal}
@@ -106,7 +104,7 @@ export default function FridgeHubScreen({ navigation, route }) {
       </ScreenContent>
       <ScreenContent header={"Your Fridges"}>
         <FridgeList
-          fridges={fridges}
+          fridges={getFridgesApi.data}
           onPress={(fridge) =>
             navigation.navigate(routes.FRIDGE_DETAILS, fridge)
           }

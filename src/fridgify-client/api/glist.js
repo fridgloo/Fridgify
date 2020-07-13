@@ -2,7 +2,9 @@ import client from "./client";
 
 const endpoint = "/glist";
 
-const getGlists = () => client.get(endpoint);
+const getGlists = () => {
+  return client.get(endpoint);
+};
 
 const getGlistById = (glistId) => client.get(`${endpoint}/id/${glistId}`);
 
@@ -11,7 +13,8 @@ export const addGlist = (glistName) => {
 };
 
 export const deleteGlist = (glistId) => {
-  return client.delete(endpoint, {}, glistId);
+  const obj = { data: glistId };
+  return client.delete(endpoint, {}, obj);
 };
 
 export const editGlist = (newGlist) => {
@@ -28,4 +31,5 @@ export default {
   addGlist,
   deleteGlist,
   editGlist,
+  submitGlist,
 };

@@ -2,7 +2,9 @@ import client from "./client";
 
 const endpoint = "/fridge";
 
-const getFridges = () => client.get(endpoint);
+const getFridges = () => {
+  return client.get(endpoint);
+};
 
 const getFridgeById = (fridgeId) => client.get(`${endpoint}/id/${fridgeId}`);
 
@@ -11,7 +13,8 @@ export const addFridge = (fridgeName) => {
 };
 
 export const deleteFridge = (fridgeId) => {
-  return client.delete(endpoint, {}, fridgeId);
+  const obj = { data: fridgeId };
+  return client.delete(endpoint, {}, obj);
 };
 
 export const editFridge = (data) => {

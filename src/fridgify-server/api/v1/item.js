@@ -13,19 +13,18 @@ module.exports = (app) => {
     asyncMiddleware(async (req, res) => {
       const newItem = {
         fridge: req.body.fridge,
-        name: req.body.data?.name,
-        bought_date: req.body.data?.bought_date,
-        exp_date: req.body.data?.exp_date,
-        type: req.body.data?.type,
-        note: req.body.data?.note,
+        name: req.body.item?.name,
+        bought_date: req.body.item?.bought_date,
+        exp_date: req.body.item?.exp_date,
+        type: req.body.item?.type,
+        note: req.body.item?.note,
       };
       let item = new app.models.Item(newItem);
       await item.save();
+
       const query = { $push: { items: item._id } };
       await app.models.Fridge.updateOne({ _id: req.body.fridge }, query);
-      res.status(201).send({
-        item: item,
-      });
+      res.status(201).send({ item: item });
     })
   );
 
@@ -37,7 +36,8 @@ module.exports = (app) => {
     "/v1/item/glist",
     auth,
     asyncMiddleware(async (req, res) => {
-      req.body.data.items.map(async (item) => {
+      let added_items = [];
+      req.body.items.map(async (item) => {
         const newItemData = {
           glist: req.body.glist,
           name: item?.name,
@@ -47,12 +47,13 @@ module.exports = (app) => {
           note: item?.note,
         };
         let newItem = new app.models.Item(newItemData);
+        added_items.push(newItem);
         await newItem.save();
+
         const query = { $push: { items: newItem._id } };
         await app.models.Glist.updateOne({ _id: req.body.glist }, query);
       });
-
-      res.status(201).send({});
+      res.status(201).send({ items: added_items });
     })
   );
 

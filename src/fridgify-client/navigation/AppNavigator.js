@@ -21,6 +21,7 @@ export default function AppNavigator() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="cart" color={color} size={size} />
           ),
+          unmountOnBlur: true,
         }}
       />
       <Tab.Screen
@@ -31,6 +32,7 @@ export default function AppNavigator() {
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="fridge" color={color} size={size} />
           ),
+          unmountOnBlur: true,
         }}
       />
       <Tab.Screen
@@ -45,6 +47,7 @@ export default function AppNavigator() {
               size={size}
             />
           ),
+          unmountOnBlur: true,
         }}
       />
     </Tab.Navigator>

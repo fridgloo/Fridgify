@@ -1,24 +1,44 @@
 import React from "react";
-import { View, StyleSheet, TouchableWithoutFeedback } from "react-native";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-function ListItemDeleteAction({ onPress }) {
+export default function ListItemDeleteAction({ closeRow, deleteItem }) {
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
-      <View style={styles.container}>
-        <MaterialCommunityIcons name="trash-can" size={35} color={"white"} />
-      </View>
-    </TouchableWithoutFeedback>
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => {
+          closeRow();
+          deleteItem();
+        }}
+      >
+        <Text style={styles.deleteText}>Delete</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "red",
-    width: 70,
-    justifyContent: "center",
     alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingLeft: 15,
+    borderBottomColor: "#CBCBCB",
+    borderBottomWidth: 1,
+    backgroundColor: "red",
+  },
+  deleteButton: {
+    alignItems: "center",
+    bottom: 0,
+    justifyContent: "center",
+    position: "absolute",
+    top: 0,
+    width: 75,
+    right: 0,
+  },
+  deleteText: {
+    color: "white",
   },
 });
-
-export default ListItemDeleteAction;

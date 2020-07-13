@@ -4,6 +4,14 @@ export default {
   white: "#fff",
 
   primaryColor: "#2D82FF",
+  secondaryColor: "#FF7F23",
+
+  primaryDisabled: "#A7CBFF",
+  secondaryDisabled: "#FFAD71",
+
+  border: "#CBCBCB",
+
+  backgroundGray: "#F1F3F6",
 
   textGray: "#8b90a0",
 

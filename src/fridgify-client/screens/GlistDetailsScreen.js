@@ -4,9 +4,10 @@ import {
   TouchableHighlight,
   StyleSheet,
   Text,
-  View,
 } from "react-native";
+
 import Screen from "../components/Screen";
+import ScreenHeader from "../components/ScreenHeader";
 import BackHeader from "../components/BackHeader";
 import ScreenModal from "../components/modals/ScreenModal";
 import ItemList from "../components/ItemList";
@@ -14,51 +15,62 @@ import ItemList from "../components/ItemList";
 import colors from "../constants/colors";
 import routes from "../navigation/routes";
 
-import fridgesApi from "../api/fridge";
 import glistsApi from "../api/glist";
 import itemsApi from "../api/item";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import LogoText from "../components/LogoText";
+import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
 
-export default function ShoppingCartScreen({ navigation, route }) {
+export default function GlistDetailsScreen({ navigation, route }) {
   const [glist, setGlist] = useState({
     _id: "",
     items: [],
-    checked: [],
+    name: "",
     filter: {},
   });
   const [modal, setModal] = useState({
     visible: false,
     option: "",
     value: "",
-    newName: "",
-    newType: "",
-    fridges: [],
   });
 
   useEffect(() => {
-    getShoppingCartItems();
+    getGlistItems();
   }, []);
 
-  const getShoppingCartItems = async () => {
+  const getGlistItems = async () => {
     await itemsApi
-      .getGlistItems(route.params._id)
+      .getGlistItems(route.params.glist._id)
       .then((response) => {
         if (response.ok) {
           setGlist((prevState) => ({
             ...prevState,
-            _id: route.params._id,
+            _id: route.params.glist._id,
             items: response.data.items,
-            name: route.params.name,
+            name: route.params.glist.name,
           }));
         } else {
-          throw new Error("getShoppingCartItems fetch error");
+          throw new Error("getGlistItems fetch error");
         }
       })
       .catch((error) => console.log(error));
   };
 
-  const clearShoppingCart = async () => {
+  const deleteGlist = async () => {
+    await glistsApi
+      .deleteGlist({ _id: glist._id })
+      .then((response) => {
+        if (response.ok) {
+          const changed = new Date();
+          navigation.navigate(routes.GLIST_HUB, {
+            changed: changed.toString(),
+          });
+        } else {
+          throw new Error("deleteGlist fetch error");
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const clearGlist = async () => {
     await itemsApi
       .deleteGlistItem({ glist: glist._id, items: glist.items })
       .then((response) => {
@@ -68,7 +80,7 @@ export default function ShoppingCartScreen({ navigation, route }) {
             items: [],
           }));
         } else {
-          throw new Error("clearShoppingCart fetch error");
+          throw new Error("clearGlist fetch error");
         }
       })
       .catch((error) => console.log(error));
@@ -137,42 +149,17 @@ export default function ShoppingCartScreen({ navigation, route }) {
       .catch((error) => console.log(error));
   };
 
-  const submitToFridge = async (fridge_id) => {
-    await glistsApi
-      .submitGlist({
-        items: glist.checked,
-        fridge: fridge_id,
-        glist: glist._id,
-      })
+  const sendToCart = async (id) => {
+    await itemsApi
+      .getGlistItems(id)
       .then((response) => {
         if (response.ok) {
-          setGlist((prevState) => ({
-            ...prevState,
-            items: prevState.items.filter(
-              (item) => !prevState.checked.includes(item._id)
-            ),
-            checked: [],
-          }));
+          itemsApi.addGlistItem({
+            items: response.data.items,
+            glist: route.params.cart,
+          });
         } else {
-          throw new Error("submitToFridge");
-        }
-      })
-      .catch((error) => console.log(error));
-  };
-
-  const loadSubmitModal = async () => {
-    await fridgesApi
-      .getFridges()
-      .then((response) => {
-        if (response.ok) {
-          setModal((prevState) => ({
-            ...prevState,
-            visible: true,
-            option: "submit",
-            fridges: response.data,
-          }));
-        } else {
-          throw new Error("loadSubmitModal fetch error");
+          throw new Error("handleSend fetch error");
         }
       })
       .catch((error) => console.log(error));
@@ -211,35 +198,6 @@ export default function ShoppingCartScreen({ navigation, route }) {
     }));
   };
 
-  const checkItem = (item) => {
-    const { checked } = glist;
-
-    if (!checked.includes(item)) {
-      setGlist((prevState) => ({
-        ...prevState,
-        checked: [...prevState.checked, item],
-      }));
-    } else {
-      setGlist((prevState) => ({
-        ...prevState,
-        checked: prevState.checked.filter((a) => a !== item),
-      }));
-    }
-  };
-
-  const checkAll = () => {
-    const resultArray = [];
-    if (glist.checked.length < glist.items.length) {
-      glist.items.map((item) => {
-        resultArray.push(item._id);
-      });
-    }
-    setGlist((prevState) => ({
-      ...prevState,
-      checked: resultArray,
-    }));
-  };
-
   const onToggleModal = (option, value) => {
     setModal((prevState) => ({
       ...prevState,
@@ -256,28 +214,29 @@ export default function ShoppingCartScreen({ navigation, route }) {
         toggleModal={onToggleModal}
         setItemElement={setItemElement}
         addItem={addItem}
-        clearContainer={clearShoppingCart}
-        submitToFridge={submitToFridge}
-        container={"shopping cart"}
+        clearContainer={clearGlist}
+        deleteContainer={deleteGlist}
+        sendToCart={() => sendToCart(glist._id)}
+        container={"grocery list"}
       />
       <BackHeader navigation={navigation} destination={routes.GLIST_HUB} />
-      <LogoText style={styles.header}>Shopping Cart</LogoText>
+      <ScreenHeader name={glist.name}>
+        <TouchableOpacity onPress={() => onToggleModal("send")}>
+          <FontAwesome name={"send"} size={20} color={colors.primaryColor} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.buttonSpace}
+          onPress={() => onToggleModal("delete")}
+        >
+          <FontAwesome name={"trash"} size={25} color={colors.primaryColor} />
+        </TouchableOpacity>
+      </ScreenHeader>
       <ItemList
         items={glist.items}
         deleteItem={deleteItem}
-        showCheckBox={true}
-        checked={glist.checked}
-        checkItem={checkItem}
         sortByAndSet={sortByAndSet}
         onToggleModal={onToggleModal}
       >
-        <TouchableOpacity style={styles.buttonSpace} onPress={() => checkAll()}>
-          <MaterialCommunityIcons
-            name={"check-all"}
-            size={25}
-            color={colors.secondaryColor}
-          />
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.buttonSpace}
           onPress={() => onToggleModal("clear")}
@@ -285,32 +244,17 @@ export default function ShoppingCartScreen({ navigation, route }) {
           <MaterialCommunityIcons
             name={"playlist-remove"}
             size={30}
-            color={colors.secondaryColor}
+            color={colors.primaryColor}
           />
         </TouchableOpacity>
       </ItemList>
-      <View style={{ flexDirection: "row" }}>
-        <TouchableHighlight
-          style={styles.addItem}
-          underlayColor={colors.secondaryDisabled}
-          onPress={() => onToggleModal("add_nt")}
-        >
-          <Text style={styles.addItemText}>Add Item</Text>
-        </TouchableHighlight>
-        <TouchableHighlight
-          style={[
-            styles.addItem,
-            glist.checked.length === 0
-              ? { backgroundColor: colors.secondaryDisabled }
-              : null,
-          ]}
-          underlayColor={colors.secondaryDisabled}
-          onPress={() => loadSubmitModal()}
-          disabled={glist.checked.length === 0}
-        >
-          <Text style={styles.addItemText}>Submit To...</Text>
-        </TouchableHighlight>
-      </View>
+      <TouchableHighlight
+        style={styles.addItem}
+        underlayColor={colors.primaryDisabled}
+        onPress={() => onToggleModal("add_nt")}
+      >
+        <Text style={styles.addItemText}>Add Item</Text>
+      </TouchableHighlight>
     </Screen>
   );
 }
@@ -319,22 +263,18 @@ const styles = StyleSheet.create({
   screen: {
     backgroundColor: "white",
   },
-  header: {
-    fontSize: 36,
-    color: colors.secondaryColor,
+  fridgeName: {
+    fontSize: 40,
     textAlign: "center",
   },
   buttonSpace: {
     paddingLeft: 15,
   },
   addItem: {
-    width: "50%",
-    borderColor: "white",
-    borderWidth: 0.5,
     justifyContent: "center",
     alignItems: "center",
     paddingVertical: 15,
-    backgroundColor: colors.secondaryColor,
+    backgroundColor: colors.primaryColor,
   },
   addItemText: {
     fontSize: 18,

@@ -21,11 +21,13 @@ export const addGlistItem = (data) => {
 };
 
 export const deleteFridgeItem = (data) => {
-  return client.delete(`${itemFridgeEndpoint}`, {}, data);
+  const obj = { data: data };
+  return client.delete(`${itemFridgeEndpoint}`, {}, obj);
 };
 
 export const deleteGlistItem = (data) => {
-  return client.delete(`${itemGlistEndpoint}`, {}, data);
+  const obj = { data: data };
+  return client.delete(`${itemGlistEndpoint}`, {}, obj);
 };
 
 export const editItem = (data) => {

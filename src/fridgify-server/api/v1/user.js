@@ -32,6 +32,29 @@ module.exports = (app) => {
       if (user) return res.status(400).send("Email already in use");
 
       user = new app.models.User(req.body);
+
+      // glist 0 as shopping cart
+      const shopping_cart = {
+        owner: user._id,
+        name: user._id.toString(),
+        created: Date.now(),
+        items: [],
+      };
+      let glist = new app.models.Glist(shopping_cart);
+      await glist.save();
+
+      // default fridge
+      let default_fridge = {
+        owner: user._id,
+        name: "Default",
+        created: Date.now(),
+        items: [],
+      };
+      let fridge = new app.models.Fridge(default_fridge);
+      await fridge.save();
+
+      user.glists = [glist._id];
+      user.fridges = [fridge._id];
       await user.save();
 
       const token = user.generateAuthToken();

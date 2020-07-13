@@ -57,6 +57,7 @@ module.exports = (app) => {
    */
   app.get(
     "/v1/fridge/id/:id",
+    auth,
     asyncMiddleware(async (req, res) => {
       // Search database for item
       const fridge = await app.models.Fridge.findById(req.params.id);

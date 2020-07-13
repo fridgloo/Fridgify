@@ -1,35 +1,21 @@
 import React, { useEffect, useState } from "react";
 import {
   TouchableOpacity,
-  Button,
   TouchableHighlight,
-  Picker,
-  TextInput,
   StyleSheet,
   Text,
-  View,
-  SafeAreaView,
-  Dimensions,
 } from "react-native";
 import Screen from "../components/Screen";
 import ScreenHeader from "../components/ScreenHeader";
-import ScreenContent from "../components/ScreenContent";
 import BackHeader from "../components/BackHeader";
 
 import colors from "../constants/colors";
+import routes from "../navigation/routes";
 
 import fridgesApi from "../api/fridge";
 import itemsApi from "../api/item";
-import LogoText from "../components/LogoText";
 import { MaterialCommunityIcons, FontAwesome } from "@expo/vector-icons";
-import { SwipeListView } from "react-native-swipe-list-view";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import {
-  formatDate,
-  getExpirationColor,
-  getItemType,
-} from "../util/ScreenHelpers";
-import FridgeModal from "../components/modals/FridgeModal";
+import ScreenModal from "../components/modals/ScreenModal";
 import ItemList from "../components/ItemList";
 
 export default function FridgeDetailsScreen({ navigation, route }) {
@@ -47,10 +33,10 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   });
 
   useEffect(() => {
-    getTokenAndFridge();
+    getFridgeItems();
   }, []);
 
-  const getTokenAndFridge = async () => {
+  const getFridgeItems = async () => {
     await itemsApi
       .getFridgeItems(route.params._id)
       .then((response) => {
@@ -63,7 +49,7 @@ export default function FridgeDetailsScreen({ navigation, route }) {
             primary: route.params.primary,
           }));
         } else {
-          throw new Error("getTokenAndItems fetch error");
+          throw new Error("getFridgeItems fetch error");
         }
       })
       .catch((error) => console.log(error));
@@ -71,10 +57,13 @@ export default function FridgeDetailsScreen({ navigation, route }) {
 
   const deleteFridge = async () => {
     await fridgesApi
-      .deleteFridge(fridge._id)
+      .deleteFridge({ _id: fridge._id })
       .then((response) => {
         if (response.ok) {
-          navigation.navigate("FridgeHub");
+          const changed = new Date();
+          navigation.navigate(routes.FRIDGE_HUB, {
+            changed: changed.toString(),
+          });
         } else {
           throw new Error("deleteFridge fetch error");
         }
@@ -103,7 +92,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
       .editFridge({ data: { primary: true }, _id: fridge._id })
       .then((response) => {
         if (response.ok) {
-          setFridge((prevState) => ({ ...prevState, primary: true }));
+          const changed = new Date();
+          navigation.navigate("FridgeHub", { changed: changed.toString() });
         } else {
           throw new Error("setPrimary fetch error");
         }
@@ -111,14 +101,14 @@ export default function FridgeDetailsScreen({ navigation, route }) {
       .catch((error) => console.log(error));
   };
 
-  const setItemElement = async (value, option) => {
+  const setItemElement = async (value) => {
     await itemsApi
-      .editItem({ data: { [option]: value }, _id: modal.value._id })
+      .editItem({ data: { [modal.option]: value }, _id: modal.value._id })
       .then((response) => {
         if (response.ok) {
           const index = fridge.items.findIndex((e) => e._id == modal.value._id);
           let newItems = fridge.items;
-          newItems[index] = { ...newItems[index], [option]: value };
+          newItems[index] = { ...newItems[index], [modal.option]: value };
           setFridge((prevState) => ({ ...prevState, items: newItems }));
         } else {
           throw new Error("setItemElement fetch error");
@@ -130,7 +120,7 @@ export default function FridgeDetailsScreen({ navigation, route }) {
   const addItem = async (item) => {
     await itemsApi
       .addFridgeItem({
-        data: {
+        item: {
           name: item.name,
           type: item.type,
           exp_date: item.exp_date,
@@ -140,10 +130,22 @@ export default function FridgeDetailsScreen({ navigation, route }) {
       })
       .then((response) => {
         if (response.ok) {
-          setFridge((prevState) => ({
-            ...prevState,
-            items: [...prevState.items, response.data.item],
-          }));
+          const option = Object.keys(fridge.filter);
+          if (option.length === 1) {
+            setFridge((prevState) => ({
+              ...prevState,
+              items: sortBy(
+                option[0],
+                [...prevState.items, response.data.item],
+                !prevState.filter[option[0]]
+              ),
+            }));
+          } else {
+            setFridge((prevState) => ({
+              ...prevState,
+              items: [...prevState.items, response.data.item],
+            }));
+          }
         } else {
           throw new Error("addItem fetch error");
         }
@@ -163,42 +165,67 @@ export default function FridgeDetailsScreen({ navigation, route }) {
         } else {
           throw new Error("deleteItem fetch error");
         }
-      });
+      })
+      .catch((error) => console.log(error));
   };
 
-  const sortBy = (option) => {
-    const items = fridge.items;
-    console.log(fridge.filter);
-    items.sort((a, b) =>
-      a[option] < b[option]
-        ? fridge.filter[option]
-          ? -1
-          : 1
-        : a[option] > b[option]
-        ? fridge.filter[option]
-          ? 1
-          : -1
-        : 0
-    );
+  const sortBy = (option, items, filter) => {
+    const sorted_items = items;
+    sorted_items.sort((a, b) => {
+      a = a[option];
+      b = b[option];
+      if (option === "name") {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+      } else if (option === "exp_date") {
+        if (a === null) {
+          a = new Date(0);
+        }
+        if (b === null) {
+          b = new Date(0);
+        }
+        a = a.toString();
+        b = b.toString();
+      }
+      return a > b ? (filter ? -1 : 1) : a < b ? (filter ? 1 : -1) : 0;
+    });
+    return sorted_items;
+  };
+
+  const sortByAndSet = (option) => {
     setFridge((prevState) => ({
       ...prevState,
-      items: items,
+      items: sortBy(option, fridge.items, prevState.filter[option]),
       filter: {
         [option]: !prevState.filter[option],
       },
     }));
   };
 
-  const toggleModal = () => {
-    setModal((prevState) => ({ ...prevState, visible: !prevState.visible }));
+  const onToggleModal = (option, value) => {
+    setModal((prevState) => ({
+      ...prevState,
+      option: option,
+      value: value,
+      visible: !prevState.visible,
+    }));
   };
-
   return (
     <Screen style={styles.screen}>
-      <BackHeader navigation={navigation} />
+      <ScreenModal
+        modalState={modal}
+        toggleModal={onToggleModal}
+        setItemElement={setItemElement}
+        addItem={addItem}
+        setPrimary={setPrimary}
+        clearContainer={clearFridge}
+        deleteContainer={deleteFridge}
+        container={"fridge"}
+      />
+      <BackHeader navigation={navigation} destination={routes.FRIDGE_HUB} />
       <ScreenHeader name={fridge.name} primary={fridge.primary}>
         <TouchableOpacity
-          onPress={() => setPrimary()}
+          onPress={() => onToggleModal("primary")}
           disabled={fridge.primary}
         >
           <FontAwesome
@@ -210,8 +237,8 @@ export default function FridgeDetailsScreen({ navigation, route }) {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ paddingLeft: 15 }}
-          onPress={() => deleteFridge()}
+          style={styles.buttonSpace}
+          onPress={() => onToggleModal("delete")}
         >
           <FontAwesome name={"trash"} size={25} color={colors.primaryColor} />
         </TouchableOpacity>
@@ -220,9 +247,13 @@ export default function FridgeDetailsScreen({ navigation, route }) {
         items={fridge.items}
         deleteItem={deleteItem}
         showExpiration={true}
-        sortBy={sortBy}
+        sortByAndSet={sortByAndSet}
+        onToggleModal={onToggleModal}
       >
-        <TouchableOpacity style={{ paddingLeft: 15 }}>
+        <TouchableOpacity
+          style={styles.buttonSpace}
+          onPress={() => onToggleModal("clear")}
+        >
           <MaterialCommunityIcons
             name={"playlist-remove"}
             size={30}
@@ -230,7 +261,13 @@ export default function FridgeDetailsScreen({ navigation, route }) {
           />
         </TouchableOpacity>
       </ItemList>
-      <Button title={"Add Item"}></Button>
+      <TouchableHighlight
+        style={styles.addItem}
+        underlayColor={colors.primaryDisabled}
+        onPress={() => onToggleModal("add_nte")}
+      >
+        <Text style={styles.addItemText}>Add Item</Text>
+      </TouchableHighlight>
     </Screen>
   );
 }
@@ -242,5 +279,18 @@ const styles = StyleSheet.create({
   fridgeName: {
     fontSize: 40,
     textAlign: "center",
+  },
+  buttonSpace: {
+    paddingLeft: 15,
+  },
+  addItem: {
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 15,
+    backgroundColor: colors.primaryColor,
+  },
+  addItemText: {
+    fontSize: 18,
+    color: "white",
   },
 });

@@ -7,7 +7,7 @@ const Fridge = createStackNavigator();
 
 export default function FridgeNavigator() {
   return (
-    <Fridge.Navigator mode="modal" screenOptions={{ headerShown: false }}>
+    <Fridge.Navigator mode="card" screenOptions={{ headerShown: false }}>
       <Fridge.Screen name="FridgeHub" component={FridgeHubScreen} />
       <Fridge.Screen name="FridgeDetails" component={FridgeDetailsScreen} />
     </Fridge.Navigator>

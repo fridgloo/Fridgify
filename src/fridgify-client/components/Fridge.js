@@ -2,21 +2,22 @@ import React from "react";
 import {
   View,
   Text,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   StyleSheet,
   Dimensions,
 } from "react-native";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 export default function Fridge({ name, onPress }) {
   return (
-    <TouchableWithoutFeedback onPress={onPress}>
+    <TouchableOpacity onPress={onPress}>
       <View style={styles.fridge}>
         <Text style={styles.name} numberOfLines={2}>
           {name}
         </Text>
         <View style={styles.handle} />
       </View>
-    </TouchableWithoutFeedback>
+    </TouchableOpacity>
   );
 }
 
@@ -34,6 +35,7 @@ const styles = StyleSheet.create({
   },
   name: {
     paddingVertical: 10,
+    paddingHorizontal: 5,
     textAlign: "center",
   },
   handle: {

@@ -1,22 +1,14 @@
 import React from "react";
 import {
   TouchableOpacity,
-  TouchableHighlight,
   Picker,
-  Button,
   TextInput,
   StyleSheet,
   Text,
   View,
-  SafeAreaView,
-  Dimensions,
 } from "react-native";
-import Modal from "react-native-modal";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { SwipeListView } from "react-native-swipe-list-view";
-import * as SecureStore from "expo-secure-store";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import FontAwesome from "react-native-vector-icons/FontAwesome";
+import colors from "../../constants/colors";
 
 export function Confirmation(props) {
   return (
@@ -39,8 +31,8 @@ export function Name(props) {
   return (
     <View
       style={{
-        flex: 1,
         width: "90%",
+        paddingVertical: 20,
         justifyContent: "center",
       }}
     >
@@ -49,24 +41,20 @@ export function Name(props) {
           {props.children}
         </Text>
       ) : null}
-      <View
+
+      <TextInput
         style={{
+          fontSize: 16,
           borderRadius: 12,
           borderWidth: 1,
           borderColor: "#CBCBCB",
           paddingHorizontal: 10,
           paddingVertical: 10,
         }}
-      >
-        <TextInput
-          style={{
-            fontSize: 16,
-          }}
-          numberOfLines={1}
-          placeholder={"Name..."}
-          onChangeText={(val) => props.onChangeText(val, "name")}
-        />
-      </View>
+        numberOfLines={1}
+        placeholder={"Name..."}
+        onChangeText={(val) => props.onChangeText(val, "name")}
+      />
     </View>
   );
 }
@@ -75,8 +63,8 @@ export function Type(props) {
   return (
     <View
       style={{
-        flex: 1,
         width: "90%",
+        paddingVertical: 10,
         justifyContent: "center",
       }}
     >
@@ -90,9 +78,7 @@ export function Type(props) {
           fontSize: 16,
         }}
         onValueChange={(val) => {
-          if (val !== "0") {
-            props.onChangeText(val, "type");
-          }
+          props.onChangeText(val, "type");
         }}
       >
         <Picker.Item
@@ -113,19 +99,36 @@ export function ExpDate(props) {
   return (
     <View
       style={{
-        flex: 2.4,
         width: "90%",
         paddingVertical: 10,
+        justifyContent: "center",
       }}
     >
-      <View
-        style={{
-          justifyContent: "center",
-        }}
-      >
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         {props.children ? (
-          <Text style={{ fontSize: 16 }}>{props.children}</Text>
+          <Text style={{ paddingBottom: 10, fontSize: 16 }}>
+            {props.children}
+          </Text>
         ) : null}
+        <TouchableOpacity
+          style={{ paddingBottom: 10 }}
+          onPress={() =>
+            props.newVal
+              ? props.onChangeText(null, "exp_date")
+              : props.onChangeText(new Date(), "exp_date")
+          }
+        >
+          <Text
+            style={{
+              fontSize: 16,
+              color: colors.primaryColor,
+            }}
+          >
+            Toggle Date
+          </Text>
+        </TouchableOpacity>
+      </View>
+      {props.newVal ? (
         <DateTimePicker
           testID="dateTimePicker"
           value={props.newVal}
@@ -135,11 +138,10 @@ export function ExpDate(props) {
             const currentDate = selectedDate || props.newVal;
             props.onChangeText(currentDate, "exp_date");
           }}
-          style={{
-            flex: 1,
-          }}
         />
-      </View>
+      ) : (
+        <Text style={{ textAlign: "center" }}>No Date</Text>
+      )}
     </View>
   );
 }
@@ -160,7 +162,7 @@ export function Cancel(props) {
           justifyContent: "center",
           alignItems: "center",
         }}
-        onPress={() => props.toggleModal()}
+        onPress={() => props.toggleModal("", "")}
       >
         <Text style={{ fontSize: 16, color: "#2D82FF" }}>{props.children}</Text>
       </TouchableOpacity>
@@ -172,7 +174,7 @@ export function Save(props) {
   return (
     <View
       style={{
-        backgroundColor: !props.changed ? "#A7CBFF" : "#2D82FF",
+        backgroundColor: props.value === "" ? "#A7CBFF" : "#2D82FF",
         width: "50%",
         justifyContent: "center",
         borderBottomEndRadius: 12,
@@ -186,9 +188,9 @@ export function Save(props) {
         }}
         onPress={() => {
           props.onPress();
-          props.toggleModal();
+          props.toggleModal("", "");
         }}
-        disabled={!props.changed}
+        disabled={props.value === ""}
       >
         <Text style={{ fontSize: 16, color: "white" }}>{props.children}</Text>
       </TouchableOpacity>
@@ -201,31 +203,16 @@ export function Message(props) {
     <View
       style={{
         width: "85%",
-        height: "90%",
-        flex: 1,
+        paddingVertical: 20,
         justifyContent: "center",
       }}
     >
       <Text
         numberOfLines={props.numberOfLines}
-        style={{ textAlign: "center", fontSize: 20 }}
+        style={{ textAlign: "center", fontSize: 18, fontWeight: "300" }}
       >
         {props.children}
       </Text>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  optionContainer: {
-    width: "80%",
-    backgroundColor: "white",
-    alignItems: "center",
-    borderRadius: 12,
-  },
-});

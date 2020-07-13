@@ -71,19 +71,14 @@ module.exports = (app) => {
    */
   app.get(
     "/v1/glist",
+    auth,
     asyncMiddleware(async (req, res) => {
-      const user = await app.models.User.findOne({
-        username: req.user.username,
-      });
-
-      const glists = await app.models.Glist.find({ owner: user._id });
+      const glists = await app.models.Glist.find({ owner: req.user._id });
 
       if (!glists) {
         return res.status(404).send({ error: "glist.get - Glist not found" });
       } else {
-        res.status(200).send({
-          glists: glists,
-        });
+        res.status(200).send(glists);
       }
     })
   );
@@ -135,7 +130,7 @@ module.exports = (app) => {
     asyncMiddleware(async (req, res) => {
       req.body.items.map(async (item) => {
         await app.models.Item.updateOne(
-          { _id: item._id },
+          { _id: item },
           {
             $set: { glist: undefined, fridge: req.body.fridge },
           }

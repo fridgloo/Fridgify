@@ -12,9 +12,8 @@ export default function TabHeader({ children, style, ...otherProps }) {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 50,
+    fontSize: 55,
     textAlign: "center",
-    paddingTop: "5%",
-    height: "15%",
+    paddingVertical: 25,
   },
 });

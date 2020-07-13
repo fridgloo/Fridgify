@@ -1,66 +1,88 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 import Screen from "../components/Screen";
 import TabHeader from "../components/TabHeader";
 import ScreenContent from "../components/ScreenContent";
+import LogoText from "../components/LogoText";
 import FridgeList from "../components/FridgeList";
-import FridgeHubModal from "../components/modals/FridgeHubModal";
+import HubModal from "../components/modals/HubModal";
 
 import routes from "../navigation/routes";
 import fridgesApi from "../api/fridge";
 
-export default function FridgeHubScreen({ navigation }) {
+export default function FridgeHubScreen({ navigation, route }) {
   const [fridges, setFridges] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [modal, setModal] = useState({
+    visible: false,
+    option: "",
+  });
 
   useEffect(() => {
-    getTokenAndFridges();
-  }, []);
+    getFridges();
+  }, [route.params?.changed]);
 
-  const getTokenAndFridges = async () => {
-    const authToken = await authStorage.getToken();
+  const getFridges = async () => {
     await fridgesApi
-      .getFridges(authToken)
+      .getFridges()
       .then((response) => {
         if (response.ok) {
           return response.data;
         } else {
-          throw new Error("getTokenAndFridges fetch error");
+          throw new Error("getFridges fetch error");
         }
       })
-      .then((data) => setFridges(data.fridges))
+      .then((data) => setFridges(data))
       .catch((error) => console.log(error));
   };
 
   const handleAddFridge = async (newName) => {
-    const authToken = await authStorage.getToken();
     await fridgesApi
-      .addFridge({ name: newName }, authToken)
+      .addFridge({ name: newName })
       .then((response) => {
         if (response.ok) {
-          return response.data;
+          setFridges((prevState) => [...prevState, response.data]);
         } else {
           throw new Error("handleAddFridge fetch error");
         }
       })
-      .then((data) => setFridges((prevState) => [...prevState, data]))
       .catch((error) => console.log(error));
   };
 
-  const toggleModal = () => {
-    setModalVisible((prevState) => !prevState);
+  const onToggleModal = (option, value) => {
+    setModal((prevState) => ({
+      ...prevState,
+      visible: !prevState.visible,
+      option: option,
+    }));
   };
 
   return (
     <Screen style={styles.screen}>
-      <FridgeHubModal
-        visible={modalVisible}
-        toggleModal={toggleModal}
+      <HubModal
+        modalState={modal}
+        toggleModal={onToggleModal}
         handleSubmit={handleAddFridge}
+        container={"Fridge"}
       />
-      <TabHeader>Fridge Hub</TabHeader>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Image
+          style={{
+            height: 55,
+            width: 55,
+          }}
+          resizeMode="center"
+          source={require("../assets/images/iglooIcon.png")}
+        />
+        <TabHeader style={{ paddingLeft: 25 }}>Fridgloo</TabHeader>
+      </View>
       <ScreenContent header={"Expiration Overview"}>
         <TouchableOpacity style={styles.expiration}>
           <View style={styles.overview}>
@@ -88,7 +110,7 @@ export default function FridgeHubScreen({ navigation }) {
           onPress={(fridge) =>
             navigation.navigate(routes.FRIDGE_DETAILS, fridge)
           }
-          toggleModal={toggleModal}
+          toggleModal={onToggleModal}
         />
       </ScreenContent>
     </Screen>
@@ -106,7 +128,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     borderRadius: 20,
     backgroundColor: "#F1F3F6",
-    width: "90%",
+    width: "85%",
     height: "100%",
     paddingHorizontal: 20,
   },

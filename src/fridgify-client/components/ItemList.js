@@ -14,7 +14,11 @@ export default function ItemList({
   items,
   deleteItem,
   showExpiration,
-  sortBy,
+  showCheckBox,
+  checked,
+  checkItem,
+  sortByAndSet,
+  onToggleModal,
 }) {
   const [search, setSearch] = useState("");
 
@@ -42,13 +46,24 @@ export default function ItemList({
         />
         {children}
       </View>
-      <ListLabels showExpiration={showExpiration} sortBy={sortBy} />
+      <ListLabels
+        showCheckBox={showCheckBox}
+        showExpiration={showExpiration}
+        sortByAndSet={sortByAndSet}
+      />
       <SwipeListView
         data={items.filter((item) =>
           item.name.toLowerCase().includes(search.toLowerCase())
         )}
         renderItem={(data, rowMap) => (
-          <ListItem data={data} showExpiration={showExpiration} />
+          <ListItem
+            data={data}
+            checked={checked}
+            checkItem={checkItem}
+            showCheckBox={showCheckBox}
+            showExpiration={showExpiration}
+            onToggleModal={onToggleModal}
+          />
         )}
         renderHiddenItem={(data, rowMap) => (
           <ListItemDeleteAction

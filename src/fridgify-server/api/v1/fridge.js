@@ -29,7 +29,11 @@ module.exports = (app) => {
         items: [],
       };
 
-      if (req.user.fridges.length === 0) {
+      const user = await app.models.User.findOne({
+        username: req.user.username,
+      });
+
+      if (user.fridges.length === 0) {
         newFridge["primary"] = true;
       }
 
@@ -82,6 +86,7 @@ module.exports = (app) => {
       const fridges = await app.models.Fridge.find({
         owner: req.user._id,
       }).sort("-primary");
+
       res.status(200).send(fridges);
     })
   );

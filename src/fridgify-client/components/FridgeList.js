@@ -17,7 +17,7 @@ export default function FridgeList({ fridges, onPress, toggleModal }) {
           styles.addFridgeButton,
           fridges.length >= 4 ? styles.buttonDisabled : styles.buttonEnabled,
         ]}
-        onPress={toggleModal}
+        onPress={() => toggleModal("name", "")}
         disabled={fridges.length >= 4}
       >
         <FontAwesome name={"plus"} size={25} color="white" />
@@ -58,8 +58,8 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     width: 60,
     height: 60,
-    marginLeft: 20,
-    marginRight: 10,
+    marginLeft: 30,
+    marginRight: 20,
     justifyContent: "center",
     alignItems: "center",
     alignSelf: "center",

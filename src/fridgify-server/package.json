@@ -19,7 +19,7 @@
     "express-session": "^1.17.1",
     "helmet": "^3.23.3",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.9.22",
+    "mongoose": "^5.9.24",
     "pug": "^3.0.0",
     "simple-env-config": "^1.0.1"
   },

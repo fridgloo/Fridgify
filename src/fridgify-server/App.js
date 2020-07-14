@@ -1,7 +1,7 @@
-const path = require("path");
+//const path = require("path");
 const express = require("express");
 const cors = require("cors");
-const bodyparser = require("body-parser");
+//const bodyparser = require("body-parser");
 const mongoose = require("mongoose");
 const envConfig = require("simple-env-config");
 const morgan = require("morgan");
@@ -31,8 +31,8 @@ const setupServer = async () => {
   app.use(helmet());
   app.use(cors());
   app.use(cors({ origin: `${conf.url}:${conf.expo_port}` }));
-  app.use(bodyparser.json());
-  app.use(bodyparser.urlencoded({ extended: false }));
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
 
   if (env === "dev") {
     app.use(morgan("dev"));

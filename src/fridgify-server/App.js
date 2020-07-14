@@ -15,6 +15,16 @@ const setupServer = async () => {
   const conf = await envConfig("../../config/config.json", env);
   const port = process.env.PORT ? process.env.PORT : conf.port;
 
+  process.on("uncaughtException", function (ex) {
+    console.log("UNCAUGHT EXCEPTION CAUGHT", ex);
+    //process.exit(1);
+  });
+
+  process.on("unhandledRejection", function (err) {
+    console.log("UNHANDLED REJECTION CAUGHT", err);
+    //process.exit(1);
+  });
+
   // Setup our Express pipeline
   const app = express();
 

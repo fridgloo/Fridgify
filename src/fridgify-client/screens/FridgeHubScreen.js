@@ -30,15 +30,14 @@ export default function FridgeHubScreen({ navigation, route }) {
 
   useEffect(() => {
     getFridgesApi.request();
-    //setFridges(getFridgesApi.data);
   }, [route.params?.changed, fridges]);
 
   const handleAddFridge = async (newName) => {
     const result = await fridgesApi.addFridge({ name: newName });
     if (result.ok) setFridges((prev) => [...prev, result.data]);
     else {
-      console.log("Could not add Fridges", result.data);
-      alert("Could not add fridge!");
+      console.log(result.data.error);
+      alert(`Could not add fridge - ${result.data.error}`);
     }
   };
 

@@ -19,14 +19,14 @@ export default function ScreenHeader({
         >
           {name}
         </LogoText>
-        {primary ? (
+        {primary && (
           <FontAwesome5
             style={{ paddingLeft: 10 }}
             name={"igloo"}
             size={26}
             color={"black"}
           />
-        ) : null}
+        )}
       </View>
       <View style={styles.buttons}>{children}</View>
     </View>

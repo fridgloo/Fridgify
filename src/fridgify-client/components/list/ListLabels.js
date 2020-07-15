@@ -7,8 +7,8 @@ export default function ListLabels({
   sortByAndSet,
 }) {
   return (
-    <View style={[styles.container, showCheckBox ? { paddingLeft: 0 } : null]}>
-      {showCheckBox ? <View style={styles.checkbox} /> : null}
+    <View style={[styles.container, showCheckBox && { paddingLeft: 0 }]}>
+      {showCheckBox && <View style={styles.checkbox} />}
       <TouchableOpacity
         style={styles.name}
         onPress={() => sortByAndSet("name")}
@@ -21,14 +21,14 @@ export default function ListLabels({
       >
         <Text style={{ fontSize: 14, fontWeight: "bold" }}>Type</Text>
       </TouchableOpacity>
-      {showExpiration ? (
+      {showExpiration && (
         <TouchableOpacity
           style={styles.exp}
           onPress={() => sortByAndSet("exp_date")}
         >
           <Text style={{ fontSize: 14, fontWeight: "bold" }}>Expiration</Text>
         </TouchableOpacity>
-      ) : null}
+      )}
     </View>
   );
 }

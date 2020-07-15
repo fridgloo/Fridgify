@@ -25,7 +25,7 @@ export default function ListItem({
         showCheckBox ? { paddingLeft: 0 } : null,
       ]}
     >
-      {showCheckBox ? (
+      {showCheckBox && (
         <View style={styles.checkBox}>
           <CheckBox
             center
@@ -34,7 +34,7 @@ export default function ListItem({
             checkedColor={colors.primaryColor}
           />
         </View>
-      ) : null}
+      )}
       <TouchableOpacity
         style={styles.name}
         onPress={() => onToggleModal("name", data.item)}
@@ -49,7 +49,7 @@ export default function ListItem({
       >
         <FontAwesome5 name={getItemType(data.item.type)} size={20} />
       </TouchableOpacity>
-      {showExpiration ? (
+      {showExpiration && (
         <View style={styles.expiration}>
           <FontAwesome
             style={styles.expirationIndicator}
@@ -67,7 +67,7 @@ export default function ListItem({
             )}
           </TouchableOpacity>
         </View>
-      ) : null}
+      )}
     </View>
   );
 }

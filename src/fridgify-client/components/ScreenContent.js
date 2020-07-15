@@ -15,14 +15,14 @@ export default function ScreenContent({
     <View style={[styles.container, style]} {...otherProps}>
       <View style={styles.header}>
         <LogoText style={styles.headerTitle}>{header}</LogoText>
-        {toggleModal ? (
+        {toggleModal && (
           <TouchableOpacity
             style={styles.button}
             onPress={() => toggleModal("name", "")}
           >
             <FontAwesome5 name={"plus"} size={10} color="white" />
           </TouchableOpacity>
-        ) : null}
+        )}
       </View>
       {children}
     </View>

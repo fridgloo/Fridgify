@@ -30,7 +30,7 @@ export default function FridgeHubScreen({ navigation, route }) {
 
   useEffect(() => {
     getFridgesApi.request();
-    setFridges(getFridgesApi.data);
+    //setFridges(getFridgesApi.data);
   }, [route.params?.changed, fridges]);
 
   const handleAddFridge = async (newName) => {

@@ -35,7 +35,7 @@ module.exports = (app) => {
 
   function validate(req) {
     const schema = Joi.object().keys({
-      username: Joi.string().lowercase().required(),
+      username: Joi.string().required(),
       password: Joi.string().required(),
     });
     return schema.validate(req);

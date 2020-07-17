@@ -1,13 +1,9 @@
 "use strict";
-let Joi = require("@hapi/joi");
 const jwt = require("jsonwebtoken");
-const quantity = require("../../model/quantity");
-const fridge = require("../../model/fridge");
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
-const escapeStringRegexp = require("escape-string-regexp");
-
+const pluralize = require("pluralize");
 module.exports = (app) => {
   // create recipe
   app.post("/v1/recipe/edit/:recipeId?", async (req, res) => {
@@ -40,7 +36,7 @@ module.exports = (app) => {
       // find and get item id
       for (const item of req.body.items) {
         // check if item exists
-        item.name = item.name.toLowerCase();
+        item.name = pluralize(item.name, 1).toLowerCase();
         const itemCheck = await app.models.Item_Idx.findOne({
           name: item.name,
         });

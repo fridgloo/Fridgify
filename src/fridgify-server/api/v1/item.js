@@ -6,7 +6,7 @@ const pluralize = require("pluralize");
 module.exports = (app) => {
   // take in item obj (from req). check if item exists in item_idx. else create and return id.
   const getItemIdxId = async (item) => {
-    const singular_item_name = pluralize(item.name, 1);
+    const singular_item_name = pluralize(item.name, 1).toLowerCase();
     const item_idx_check = await app.models.Item_Idx.findOne({
       name: singular_item_name,
     });

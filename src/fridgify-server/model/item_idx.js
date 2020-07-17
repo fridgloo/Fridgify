@@ -3,7 +3,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-/***************** Item_Idx Model *******************/
+/***************** Item_Idx Model ********************/
 [];
 
 let Item_Idx = new Schema({

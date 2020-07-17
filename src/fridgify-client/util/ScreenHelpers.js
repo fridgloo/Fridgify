@@ -16,7 +16,7 @@ const formatDate = (date) => {
 
 const getExpirationColor = (date) => {
   if (!date) {
-    return "#CBCBCB";
+    return "white";
   }
   date = new Date(date);
   if (date < Date.now()) {
@@ -55,6 +55,8 @@ function optionHeight(option) {
       return "32%";
     case "add_nte":
       return "60%";
+    case "add_nt":
+      return "32%";
     case "delete":
       return "15%";
     case "clear":
@@ -64,4 +66,4 @@ function optionHeight(option) {
   }
 }
 
-export {formatDate, getExpirationColor, getItemType, optionHeight };
+export { formatDate, getExpirationColor, getItemType, optionHeight };

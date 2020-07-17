@@ -1,33 +1,58 @@
 import React from "react";
-import {Image, ScrollView, Text, View, SafeAreaView, TouchableOpacity, StyleSheet} from "react-native";
+import {Image, FlatList, Text, View, SafeAreaView, TouchableOpacity, StyleSheet} from "react-native";
 import Styles from '../constants/Styles';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
+import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import WebView from 'react-native-webview';
 
 export default function RecipeDetailsScreen (props) {
+    let dummyHTML = '<p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p>'
+    let htmlStyle = 
+    `<style>
+    p {
+      font-family: Avenir;
+      padding-left: 8%;
+      padding-right: 8%;
+      font-size: 1.5em;
+    }
+    </style>`
+
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.pictureContainer}>
           <Image
-            style={styles.picture}
-            resizeMode='contain'
-            source={require('../assets/images/arm.jpg')} //igloo25Bot.png
-          />
+              style={styles.picture}
+              resizeMode='contain'
+              source={require('../assets/images/arm.jpg')}
+            />
         </View>
+
+        <View style={{position: 'absolute', top: '8%', left: '2.5%'}}>
+          <TouchableOpacity>
+            <FontAwesome5 name={"chevron-left"} size={22} color={"#2D82FF"} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.webviewContainer}>
+            <Text style={styles.descTitle}>Ingredients:</Text>
+            <Text style={styles.desc}> Ingredients that will be imported... </Text>
+            <Text style={styles.descTitle}>Instructions:</Text>
+            <WebView style={styles.webview} source={{html: dummyHTML + htmlStyle}} />
         
-        <View style={styles.scrollviewContainer}>
-          <ScrollView style={styles.scrollview}>
-              <Text style={styles.descTitle}>Ingredients:</Text>
-              <Text style={styles.desc}> Will </Text>
-  
-              <Text style={styles.descTitle}> Directions:</Text>
-              <Text style={styles.desc}> Just take Will and have his arm </Text>
-  
-              <Text style={styles.descTitle}> Random Text:</Text>
-              <Text style={styles.desc}>Dissuade ecstatic and properly saw entirely sir why laughter endeavor. In on my jointure horrible margaret suitable he followed speedily. Indeed vanity excuse or mr lovers of on. By offer scale an stuff. Blush be sorry no sight. Sang lose of hour then he left find. 
-                                        Him rendered may attended concerns jennings reserved now. Sympathize did now preference unpleasing mrs few. Mrs for hour game room want are fond dare. For detract charmed add talking age. Shy resolution instrument unreserved man few. She did open find pain some out. If we landlord stanhill mr whatever pleasure supplied concerns so. Exquisite by it admitting cordially september newspaper an. Acceptance middletons am it favourable. It it oh happen lovers afraid. 
-                                        Greatly hearted has who believe. 
-              </Text>
-          </ScrollView>
+
+         {/* Option with flatlist- incomplete */}
+          {/* <FlatList 
+            style={styles.flatlist}
+            renderItem={() => (
+              <View>
+                <Text style={styles.descTitle}>Ingredients:</Text>
+                <Text style={styles.desc}> Ingredients that will be imported </Text>
+                <Text style={styles.descTitle}>Instructions:</Text>
+                <WebView style={styles.webview} source={{html: dummyHTML + htmlStyle}} />
+              </View>
+            )}
+            >
+          </FlatList> */}
         </View>
   
         <View style={styles.titleContainer}>
@@ -39,11 +64,11 @@ export default function RecipeDetailsScreen (props) {
         
   
         <TouchableOpacity style={styles.addGlistEnabled}>
-              <FontAwesome
-                name={"star"}
-                size={25}
-                color={true ? "yellow" : "white"} //hardcoded for now
-              />
+          <FontAwesome
+            name={"star"}
+            size={25}
+            color={true ? "yellow" : "white"} //hardcoded for now
+          />
         </TouchableOpacity>
       </SafeAreaView>
     
@@ -63,33 +88,41 @@ export default function RecipeDetailsScreen (props) {
        backgroundColor: 'white',
        opacity: 0.7,
     },
-    scrollviewContainer: {
+    webviewContainer: {
       width: '100%',
       height: '60%',
       top: 100,
-      //borderWidth: 2,
-      //borderColor: 'black',
+      // borderWidth: 2,
+      // borderColor: 'red',
     },
-    scrollview: {
+    flatlist: {
       position: 'absolute',
       paddingLeft: 10,
       paddingRight: 10,
       bottom: 0,
       width: '100%',
       height: '100%',
+      borderWidth: 2,
+      borderColor: 'red',
     },
     descTitle: {
+      fontFamily: 'Avenir',
       fontStyle: 'normal',
       fontWeight: 'normal',
       fontSize: 18,
       paddingTop: '10%',
-      fontWeight: 'bold'
+      paddingLeft: '4%',
+      fontWeight: 'bold',
+      // borderWidth: 2,
+      // borderColor: 'blue',
     },
     
     desc: {
+      fontFamily: 'Avenir',
       fontStyle: 'normal',
       fontWeight: 'normal',
-      paddingTop: '2%'
+      paddingTop: '2%',
+      paddingLeft: '8%'
     },
     pictureContainer: {
       position: 'absolute',
@@ -99,12 +132,12 @@ export default function RecipeDetailsScreen (props) {
       top: 25,
       width: '100%',
       height: '35%',
-       //borderWidth: 2,
+      //  borderWidth: 2,
       // borderColor: 'black',
     },
   
     picture: {
-       //borderWidth: 2,
+      // borderWidth: 2,
       // borderColor: 'red',
       height: '100%',  
       flex:1,
@@ -131,6 +164,7 @@ export default function RecipeDetailsScreen (props) {
     title: {
       position: 'absolute',
       color: 'white',
+      fontWeight: 'bold',
       fontSize: 30,
       fontFamily: Styles.text.fontFamily,
       top: 5,
@@ -175,6 +209,26 @@ export default function RecipeDetailsScreen (props) {
       backgroundColor: "#2D82FF",
       justifyContent: "center",
       alignItems: "center",
+    },
+    webview: {
+      // borderWidth: 2,
+      // borderColor: 'red',
+      height: '100%',
+      width: '100%',
+      position: 'relative',
+      flex: 0,
+      resizeMode: 'cover',
+      
+    },
+    scrollview: {
+      // borderWidth: 2,
+      // borderColor: 'red',
+      height: '100%',
+      width: '100%',
+      position: 'relative',
+      flex: 0,
+      resizeMode: 'cover',
+      
     },
   
   });

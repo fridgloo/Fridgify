@@ -4,6 +4,29 @@ const jwt = require("jsonwebtoken");
 const pluralize = require("pluralize");
 
 module.exports = (app) => {
+  // take in item obj (from req). check if item exists in item_idx. else create and return id.
+  const getItemIdxId = async (item) => {
+    const singular_item_name = pluralize(item.name, 1);
+    const item_idx_check = await app.models.Item_Idx.findOne({
+      name: singular_item_name,
+    });
+
+    let newItemIdxId;
+    if (item_idx_check) {
+      newItemIdxId = item_idx_check._id;
+    } else {
+      let newItemIdx = {
+        name: singular_item_name,
+        type: item?.type,
+      };
+
+      let itemIdx = new app.models.Item_Idx(newItemIdx);
+      await itemIdx.save();
+      newItemIdxId = itemIdx._id;
+    }
+    return newItemIdxId;
+  };
+
   /**
    * Create grocery item from fridge
    *
@@ -17,6 +40,9 @@ module.exports = (app) => {
             .status(400)
             .send({ error: "item.fridge.post jwt verify error" });
         }
+        // check if item_idx exists for specific item and add reference.
+        let newItemIdxId = await getItemIdxId(req.body.data);
+
         const newItem = {
           fridge: req.body.fridge,
           name: req.body.data?.name,
@@ -24,6 +50,7 @@ module.exports = (app) => {
           exp_date: req.body.data?.exp_date,
           type: req.body.data?.type,
           note: req.body.data?.note,
+          item_idx_id: newItemIdxId,
         };
         let item = new app.models.Item(newItem);
         await item.save();
@@ -53,6 +80,9 @@ module.exports = (app) => {
             .send({ error: "item.glist.post jwt verify error" });
         }
         req.body.data.items.map(async (item) => {
+          // check if item_idx exists for specific item and add reference.
+          let newItemIdxId = await getItemIdxId(item);
+
           const newItemData = {
             glist: req.body.glist,
             name: item?.name,
@@ -60,6 +90,7 @@ module.exports = (app) => {
             exp_date: item?.exp_date,
             type: item?.type,
             note: item?.note,
+            item_idx_id: newItemIdxId,
           };
           let newItem = new app.models.Item(newItemData);
           await newItem.save();

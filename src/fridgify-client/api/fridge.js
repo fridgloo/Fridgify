@@ -2,12 +2,11 @@ import client from "./client";
 
 const endpoint = "/fridge";
 
-const getFridges = () => {
-  return client.get(endpoint);
-};
+const getFridges = () => client.get(endpoint);
 
 const getFridgeById = (fridgeId) => client.get(`${endpoint}/id/${fridgeId}`);
 
+//Probably easier to just make the object here?
 export const addFridge = (fridgeName) => {
   return client.post(endpoint, fridgeName);
 };

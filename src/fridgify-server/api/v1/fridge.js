@@ -22,7 +22,7 @@ module.exports = (app) => {
         return res.status(400).send({ error: "Fridge name already used" });
       }
 
-      let newFridge = {
+      const newFridge = {
         owner: req.user._id,
         name: req.body.name,
         created: Date.now(),

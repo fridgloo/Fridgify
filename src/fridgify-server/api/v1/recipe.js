@@ -156,7 +156,7 @@ module.exports = (app) => {
     return cleanedRes;
   }
 
-  // get recipe by id
+  // get recipe by id or put 'all' for all recipes
   app.get("/v1/recipe/view/:recipeId/:viewSetting?", async (req, res) => {
     try {
       const viewSetting = req.params.viewSetting;
@@ -322,7 +322,7 @@ module.exports = (app) => {
     }
   });
 
-  app.get("/v1/recipe/image/:recipeId", async (req, res) => {
+  app.get("/v1/recipe/image/download/:recipeId", async (req, res) => {
     try {
       res.sendFile(
         path.resolve(`public/recipe_images/${req.params.recipeId}.png`)
@@ -343,6 +343,7 @@ module.exports = (app) => {
     "/v1/recipe/image/upload/:recipeId",
     upload.single("image" /* name attribute of <file> element in your form */),
     (req, res) => {
+      console.log("got here");
       const tempPath = req.file.path;
       try {
         if (path.extname(req.file.originalname).toLowerCase() === ".png") {
@@ -353,10 +354,7 @@ module.exports = (app) => {
               if (err) {
                 res.status(400).send({ message: "Error in file upload." });
               }
-              res
-                .status(200)
-                .contentType("file")
-                .end({ message: "File uploaded!" });
+              res.status(200).send({ message: `Upload successful.` });
             }
           );
         } else {

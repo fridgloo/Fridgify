@@ -6,4 +6,5 @@ module.exports = (app) => {
   require("./v1/fridge")(app);
   require("./v1/glist")(app);
   require("./v1/item")(app);
+  require("./v1/recipe")(app);
 };

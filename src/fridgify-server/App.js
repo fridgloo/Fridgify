@@ -53,6 +53,9 @@ const setupServer = async () => {
     Item: require("./model/item"),
     Glist: require("./model/glist"),
     Quantity: require("./model/quantity"),
+    Recipe: require("./model/recipe"),
+    Item_Idx: require("./model/item_idx"),
+    Recipe_Item_Idx: require("./model/recipe_item_idx"),
   };
 
   // Import our routes

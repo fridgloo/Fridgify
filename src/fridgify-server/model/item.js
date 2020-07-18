@@ -16,6 +16,7 @@ let Item = new Schema({
   exp_date: { type: Date },
   type: { type: String },
   note: { type: String },
+  item_idx_id: { type: Schema.ObjectId, ref: "Item_Idx" },
 });
 
 Item.pre("validate", function (next) {

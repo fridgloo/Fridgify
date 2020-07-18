@@ -4,6 +4,8 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const pluralize = require("pluralize");
+const auth = require("../../middleware/auth");
+const asyncMiddleware = require("../../middleware/async");
 module.exports = (app) => {
   // create recipe
   app.post("/v1/recipe/edit/:recipeId?", async (req, res) => {
@@ -226,7 +228,7 @@ module.exports = (app) => {
       let item_idx_list = [];
       for (let i in item_names) {
         const item_idx = await app.models.Item_Idx.findOne({
-          name: item_names[i],
+          name: pluralize(item_names[i], 1),
         });
         // ignore if null
         if (item_idx) {
@@ -271,52 +273,42 @@ module.exports = (app) => {
 
   // check what ingredients from recipe the user doesn't have.
   // specific / separate endpoint to not waste time on multiple recipes.
-  app.get("/v1/recipe/checkMissingItems/:recipeId", async (req, res) => {
-    const recipeId = req.params.recipeId;
-    const token = req.header("x-auth-token");
+  app.get(
+    "/v1/recipe/checkMissingItems/:recipeId",
+    auth,
+    asyncMiddleware(async (req, res) => {
+      const recipeId = req.params.recipeId;
 
-    try {
-      jwt.verify(token, "secretkey", async (err, decoded) => {
-        if (err) {
-          res.status(400).send(err);
-          return;
-        }
-
-        // valid user
-        const user_obj = decoded.user;
-        const user_fridges = await app.models.Fridge.find({
-          owner: user_obj._id,
-        });
-
-        let user_fridge_ids = [];
-        user_fridges.forEach((fridge) => {
-          user_fridge_ids.push(fridge._id);
-        });
-
-        const recipe_item_query_res = await app.models.Recipe_Item_Idx.find({
-          recipe_id: recipeId,
-        })
-          .select({ item_idx_id: 1 })
-          .populate("item_idx_id");
-
-        const fridge_query_res = await app.models.Item.find({
-          fridge: { $in: user_fridge_ids },
-        });
-
-        // filter based on string names. must be perfect match: broccoli =/- broccolis
-        // returns a list of recipe ingredients that users do not have in fridge
-        var filtered_res = recipe_item_query_res.filter(function (o1) {
-          return !fridge_query_res.some(function (o2) {
-            return o1.item_idx_id.name === o2.name;
-          });
-        });
-
-        res.status(200).send(filtered_res);
+      const user_fridges = await app.models.Fridge.find({
+        owner: req.user._id,
       });
-    } catch (err) {
-      res.status(400).send(err);
-    }
-  });
+
+      let user_fridge_ids = [];
+      user_fridges.forEach((fridge) => {
+        user_fridge_ids.push(fridge._id);
+      });
+
+      const recipe_item_query_res = await app.models.Recipe_Item_Idx.find({
+        recipe_id: recipeId,
+      })
+        .select({ item_idx_id: 1 })
+        .populate("item_idx_id");
+
+      const fridge_query_res = await app.models.Item.find({
+        fridge: { $in: user_fridge_ids },
+      });
+
+      // filter based on string names. must be perfect match: broccoli =/- broccolis
+      // returns a list of recipe ingredients that users do not have in fridge
+      var filtered_res = recipe_item_query_res.filter(function (o1) {
+        return !fridge_query_res.some(function (o2) {
+          return o1.item_idx_id.name === o2.name;
+        });
+      });
+
+      res.status(200).send(filtered_res);
+    })
+  );
 
   app.get("/v1/recipe/image/download/:recipeId", async (req, res) => {
     try {

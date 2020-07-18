@@ -2,9 +2,7 @@ import client from "./client";
 
 const endpoint = "/glist";
 
-const getGlists = () => {
-  return client.get(endpoint);
-};
+const getGlists = () => client.get(endpoint);
 
 const getGlistById = (glistId) => client.get(`${endpoint}/id/${glistId}`);
 

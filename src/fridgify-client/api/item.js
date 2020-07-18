@@ -4,13 +4,11 @@ const endpoint = "/item";
 const itemFridgeEndpoint = "/item/fridge";
 const itemGlistEndpoint = "/item/glist";
 
-export const getFridgeItems = (fridgeId) => {
-  return client.get(`${itemFridgeEndpoint}/${fridgeId}`);
-};
+const getFridgeItems = (fridgeId) =>
+  client.get(`${itemFridgeEndpoint}/${fridgeId}`);
 
-export const getGlistItems = (glistId) => {
-  return client.get(`${itemGlistEndpoint}/${glistId}`);
-};
+const getGlistItems = (glistId) =>
+  client.get(`${itemGlistEndpoint}/${glistId}`);
 
 export const addFridgeItem = (data) => {
   return client.post(`${itemFridgeEndpoint}`, data);

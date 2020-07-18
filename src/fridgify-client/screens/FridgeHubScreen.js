@@ -12,7 +12,6 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import Screen from "../components/Screen";
 import TabHeader from "../components/TabHeader";
 import ScreenContent from "../components/ScreenContent";
-import LogoText from "../components/LogoText";
 import FridgeList from "../components/FridgeList";
 import HubModal from "../components/modals/HubModal";
 

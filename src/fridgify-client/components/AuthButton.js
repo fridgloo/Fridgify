@@ -3,11 +3,6 @@ import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
 
 import colors from "../constants/colors";
 
-// In case you're wondering : https://reactnative.dev/docs/touchableopacity
-
-//prop passed in: title - the text that will be displayed on the button.
-//                onPress - the function that will run when the button is pressed.
-//                color - color of the button. Default = primaryColor
 function AuthButton({ title, onPress, color = "primaryColor" }) {
   return (
     <TouchableOpacity
@@ -21,7 +16,6 @@ function AuthButton({ title, onPress, color = "primaryColor" }) {
 
 const styles = StyleSheet.create({
   button: {
-    // Will follow whatever color scheme is in the constants folder
     backgroundColor: colors.primaryColor,
     borderRadius: 3,
     justifyContent: "center",
@@ -33,7 +27,7 @@ const styles = StyleSheet.create({
     marginRight: "20%",
   },
   text: {
-    color: colors.white, //comes from color.js file
+    color: colors.white,
     fontSize: 14,
     fontWeight: "600",
     fontStyle: "normal",

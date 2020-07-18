@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 
@@ -13,6 +13,8 @@ import glistsApi from "../api/glist";
 import itemsApi from "../api/item";
 
 export default function GlistHubScreen({ navigation, route }) {
+  const getGlistsApi = useApi(glistsApi.getGlists);
+  const getGlistItemsApi = useApi(itemsApi.getGlistItems);
   const [glists, setGlists] = useState([]);
   const [modal, setModal] = useState({
     visible: false,
@@ -20,51 +22,30 @@ export default function GlistHubScreen({ navigation, route }) {
     value: "",
   });
 
-  React.useEffect(() => {
-    getGlists();
-  }, [route.params?.changed]);
-
-  const getGlists = async () => {
-    await glistsApi
-      .getGlists()
-      .then((response) => {
-        if (response.ok) {
-          return response.data;
-        } else {
-          throw new Error("getGlists fetch error");
-        }
-      })
-      .then((data) => setGlists(data))
-      .catch((error) => console.log(error));
-  };
+  useEffect(() => {
+    getGlistsApi.request();
+  }, [route.params?.changed, glists]);
 
   const handleAddGlist = async (newName) => {
-    await glistsApi
-      .addGlist({ name: newName })
-      .then((response) => {
-        if (response.ok) {
-          setGlists((prevState) => [...prevState, response.data]);
-        } else {
-          throw new Error("handleAddGlists fetch error");
-        }
-      })
-      .catch((error) => console.log(error));
+    const result = await glistsApi.addGlist({ name: newName });
+    if (result.ok) setGlists((prev) => [...prev, result.data]);
+    else {
+      console.log(result.data.error);
+      alert(`Could not add Grocery List - ${result.data.error}`);
+    }
   };
 
   const handleSend = async (id) => {
-    await itemsApi
-      .getGlistItems(id)
-      .then((response) => {
-        if (response.ok) {
-          itemsApi.addGlistItem({
-            items: response.data.items,
-            glist: glists[0]._id,
-          });
-        } else {
-          throw new Error("handleSend fetch error");
-        }
-      })
-      .catch((error) => console.log(error));
+    getGlistItemsApi.request(id);
+    if (!getGlistItemsApi.error) {
+      itemsApi.addGlistItem({
+        items: getGlistItemsApi.data.items,
+        glist: getGlistItemsApi.data[0]._id,
+      });
+    } else {
+      console.log(getGlistItemsApi.error);
+      alert(`Could not send to Fridge - ${getGlistItemsApi.error}`);
+    }
   };
 
   const onToggleModal = (option, value) => {

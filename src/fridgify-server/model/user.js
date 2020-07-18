@@ -62,7 +62,7 @@ userSchema.pre("save", function (next) {
 
 function validateUser(user) {
   const schema = Joi.object().keys({
-    username: Joi.string().lowercase().alphanum().min(3).max(32).required(),
+    username: Joi.string().alphanum().min(3).max(32).required(),
     email: Joi.string().lowercase().email().required(),
     password: Joi.string().min(8).required(),
   });

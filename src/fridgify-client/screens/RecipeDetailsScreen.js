@@ -1,22 +1,43 @@
-import React from "react";
+import React, {useState} from "react";
 import {Image, FlatList, Text, View, SafeAreaView, TouchableOpacity, StyleSheet} from "react-native";
 import Styles from '../constants/Styles';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
-import WebView from 'react-native-webview';
+import { MarkdownView } from 'react-native-markdown-view'
+import HTML from 'react-native-render-html';
 
 export default function RecipeDetailsScreen (props) {
-    let dummyHTML = '<p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p>'
-    let htmlStyle = 
-    `<style>
-    p {
-      font-family: Avenir;
-      padding-left: 8%;
-      padding-right: 8%;
-      font-size: 1.5em;
-    }
-    </style>`
-
+  //From Daniel's data outline
+    const [recipe, setRecipe] = useState([
+      {
+          "_id": "5f02b1ffc14216acdc765328",
+          "name": "test4",
+          "created": "2020-07-06T05:09:19.742Z",
+          "instructions": "<p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p>",
+          "cuisine": "test cuisine",
+          "items": [
+              {
+                  "recipe_item_idx_id": "5f02b1ffc14216acdc76532a",
+                  "item_name": "broccoli01",
+                  "quantity_val": 1,
+                  "quantity": "lb"
+              },
+              {
+                  "recipe_item_idx_id": "5f02b1ffc14216acdc76532c",
+                  "item_name": "carrot01",
+                  "quantity_val": 2,
+                  "quantity": "kg"
+              },
+              {
+                  "recipe_item_idx_id": "5f02b1ffc14216acdc76532e",
+                  "item_name": "potato10",
+                  "quantity_val": 3,
+                  "quantity": "g"
+              }
+          ]
+      }
+  ]);
+    
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.pictureContainer}>
@@ -33,28 +54,27 @@ export default function RecipeDetailsScreen (props) {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.webviewContainer}>
-            <Text style={styles.descTitle}>Ingredients:</Text>
-            <Text style={styles.desc}> Ingredients that will be imported... </Text>
-            <Text style={styles.descTitle}>Instructions:</Text>
-            <WebView style={styles.webview} source={{html: dummyHTML + htmlStyle}} />
-        
-
-         {/* Option with flatlist- incomplete */}
-          {/* <FlatList 
+        <View style={styles.webviewContainer}>         
+          <FlatList 
             style={styles.flatlist}
-            renderItem={() => (
+            data={recipe}
+            renderItem={({item}) => (
               <View>
-                <Text style={styles.descTitle}>Ingredients:</Text>
-                <Text style={styles.desc}> Ingredients that will be imported </Text>
-                <Text style={styles.descTitle}>Instructions:</Text>
-                <WebView style={styles.webview} source={{html: dummyHTML + htmlStyle}} />
+                <Text style={styles.descTitle}> Ingredients:</Text>
+                <MarkdownView style={styles.desc}>
+                  {item.items.map(ingredient => {
+                      return '\u2022 ' + ingredient.quantity_val + ' ' + ingredient.quantity +  ' ' + ingredient.item_name + '\n';
+                  })}
+                </MarkdownView>
+                <Text style={styles.descTitle}>Instructions: </Text>
+                <HTML
+                  tagsStyles={{p: {fontFamily: 'Avenir', paddingTop: '2%', paddingLeft: '8%', paddingRight: '8%', fontSize: 15}}} 
+                  html={item.instructions} />
               </View>
             )}
-            >
-          </FlatList> */}
+            />
         </View>
-  
+
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Will's Arm</Text>
           <View style={styles.estimate}>
@@ -110,7 +130,7 @@ export default function RecipeDetailsScreen (props) {
       fontStyle: 'normal',
       fontWeight: 'normal',
       fontSize: 18,
-      paddingTop: '10%',
+      paddingTop: '15%',
       paddingLeft: '4%',
       fontWeight: 'bold',
       // borderWidth: 2,
@@ -121,9 +141,12 @@ export default function RecipeDetailsScreen (props) {
       fontFamily: 'Avenir',
       fontStyle: 'normal',
       fontWeight: 'normal',
-      paddingTop: '2%',
-      paddingLeft: '8%'
+      paddingLeft: '8%',
+      fontSize: 15,
+      
+
     },
+
     pictureContainer: {
       position: 'absolute',
       flex: 1,
@@ -210,16 +233,15 @@ export default function RecipeDetailsScreen (props) {
       justifyContent: "center",
       alignItems: "center",
     },
-    webview: {
-      // borderWidth: 2,
-      // borderColor: 'red',
-      height: '100%',
-      width: '100%',
-      position: 'relative',
-      flex: 0,
-      resizeMode: 'cover',
-      
-    },
+    // webview: {
+    //   borderWidth: 2,
+    //   borderColor: 'red',
+    //   height: '100%',
+    //   width: '100%',
+    //   position: 'relative',
+    //   flex: 0,
+    //   resizeMode: 'cover',
+
     scrollview: {
       // borderWidth: 2,
       // borderColor: 'red',

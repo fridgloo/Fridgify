@@ -6,6 +6,8 @@ const path = require("path");
 const pluralize = require("pluralize");
 const auth = require("../../middleware/auth");
 const asyncMiddleware = require("../../middleware/async");
+const convert = require("convert-units");
+
 module.exports = (app) => {
   // create recipe
   app.post("/v1/recipe/edit/:recipeId?", async (req, res) => {
@@ -56,16 +58,12 @@ module.exports = (app) => {
           itemIdx_id = itemCheck._id;
         }
 
-        // find quant instance id
-        const quantCheck = await app.models.Quantity.findOne({
-          symbol: item.unit,
-        });
         // create `recipe_item_idx` instance with current item
         let newRecipe_Item_Idx = {
           recipe_id: recipeId ? recipeId : recipe._id,
           item_idx_id: itemIdx_id,
           quantity_val: item.val,
-          quantity: quantCheck._id,
+          quantity_unit: item.unit,
         };
 
         const recipe_item_idx_check = await app.models.Recipe_Item_Idx.findOne({
@@ -118,15 +116,15 @@ module.exports = (app) => {
         const item_idx_res = await app.models.Item_Idx.findOne({
           _id: recipe_item_idx_res.item_idx_id,
         });
-        const quantity_res = await app.models.Quantity.findOne({
-          _id: recipe_item_idx_res.quantity,
-        });
+        // const quantity_res = await app.models.Quantity.findOne({
+        //   _id: recipe_item_idx_res.quantity,
+        // });
 
         cleanedItemObj = {
           recipe_item_idx_id: item_id,
           item_name: item_idx_res.name,
           quantity_val: Number(recipe_item_idx_res.quantity_val),
-          quantity: quantity_res.symbol,
+          quantity_unit: recipe_item_idx_res.quantity_unit,
         };
 
         recipe_item_idx_list.push(cleanedItemObj);
@@ -279,13 +277,9 @@ module.exports = (app) => {
     asyncMiddleware(async (req, res) => {
       const recipeId = req.params.recipeId;
 
-      const user_fridges = await app.models.Fridge.find({
+      const user_fridge = await app.models.Fridge.findOne({
         owner: req.user._id,
-      });
-
-      let user_fridge_ids = [];
-      user_fridges.forEach((fridge) => {
-        user_fridge_ids.push(fridge._id);
+        primary: true,
       });
 
       const recipe_item_query_res = await app.models.Recipe_Item_Idx.find({
@@ -295,7 +289,7 @@ module.exports = (app) => {
         .populate("item_idx_id");
 
       const fridge_query_res = await app.models.Item.find({
-        fridge: { $in: user_fridge_ids },
+        fridge: user_fridge._id,
       });
 
       // filter based on string names. must be perfect match: broccoli =/- broccolis
@@ -307,6 +301,74 @@ module.exports = (app) => {
       });
 
       res.status(200).send(filtered_res);
+    })
+  );
+
+  // make recipe -- > subtract quantity.
+  // for those w insufficient ingredients -> ignore.
+  //
+  app.get(
+    "/v1/recipe/makeRecipe/:recipeId/:factor?",
+    auth,
+    asyncMiddleware(async (req, res) => {
+      const recipeId = req.params.recipeId;
+      const factor = req.params.factor || 1;
+
+      // get user's primary fridge
+      const user_fridge = await app.models.Fridge.findOne({
+        owner: req.user._id,
+        primary: true,
+      });
+
+      // get recipe item_idxes
+      const recipe_item_query_res = await app.models.Recipe_Item_Idx.find({
+        recipe_id: recipeId,
+      }).select({ item_idx_id: 1, quantity_unit: 1, quantity_val: 1 });
+
+      // per recipe item, update the fridge item
+      for (let i in recipe_item_query_res) {
+        let recipe_item = recipe_item_query_res[i];
+        const user_item = await app.models.Item.findOne({
+          fridge: user_fridge._id,
+          item_idx_id: recipe_item.item_idx_id,
+        });
+
+        // if user doesn't have the item, move on
+        if (!user_item) {
+          continue;
+        }
+
+        // convert both to g.
+        let user_item_val_as_g = convert(Number(user_item.quantity_val))
+          .from(user_item.quantity_unit)
+          .to("g");
+        let recipe_item_val_as_g = convert(Number(recipe_item.quantity_val))
+          .from(recipe_item.quantity_unit)
+          .to("g");
+
+        // apply factor
+        recipe_item_val_as_g *= factor;
+
+        // subtract and set to 0 if item is beyond 0.
+        user_item_val_as_g -= recipe_item_val_as_g;
+
+        user_item_val_as_g = user_item_val_as_g > 0 ? user_item_val_as_g : 0;
+
+        // convert new value back to proper unit.
+        let user_item_val = convert(user_item_val_as_g)
+          .from("g")
+          .to(user_item.quantity_unit);
+        user_item_val = convert(user_item_val)
+          .from(user_item.quantity_unit)
+          .toBest({ exclude: ["mcg", "mg"] }); // returns obj: {val, unit, singular, plural}
+
+        // update item
+        user_item.quantity_unit = user_item_val.unit;
+        user_item.quantity_val = user_item_val.val.toFixed(2);
+        // console.log("user", Number(user_item.quantity_val), user_item_val.val);
+        await user_item.save();
+      }
+      res.status(200).send("done");
     })
   );
 

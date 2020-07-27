@@ -46,6 +46,8 @@ module.exports = (app) => {
         type: req.body.item?.type,
         note: req.body.item?.note,
         item_idx_id: newItemIdxId,
+        quantity_unit: req.body.item?.quantity_unit,
+        quantity_val: req.body.item?.quantity_val,
       };
       let item = new app.models.Item(newItem);
       await item.save();
@@ -77,6 +79,8 @@ module.exports = (app) => {
           type: item?.type,
           note: item?.note,
           item_idx_id: newItemIdxId,
+          quantity_unit: req.body.item?.quantity_unit,
+          quantity_val: req.body.item?.quantity_val,
         };
         let newItem = new app.models.Item(newItemData);
         added_items.push(newItem);

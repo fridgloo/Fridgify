@@ -1,12 +1,16 @@
-import React, {useState} from "react";
-import {Image, FlatList, Text, View, SafeAreaView, TouchableOpacity, StyleSheet} from "react-native";
+import React, {useState, useEffect} from "react";
+import {Image, FlatList, Text, View, SafeAreaView, TouchableOpacity, StyleSheet, TextInput} from "react-native";
 import Styles from '../constants/Styles';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import { MarkdownView } from 'react-native-markdown-view'
 import HTML from 'react-native-render-html';
 
+
 export default function RecipeDetailsScreen (props) {
+  let [servingSize, onChangeText] = useState('');
+  let [ingredientSize, onChangeIngredient] = useState('');
+  
   //From Daniel's data outline
     const [recipe, setRecipe] = useState([
       {
@@ -37,35 +41,41 @@ export default function RecipeDetailsScreen (props) {
           ]
       }
   ]);
-    
+
+  // function updateServingSize(text, quantity_val) {
+  //   // onChangeText({[servingSize]: parseInt(text) / quantity_val})
+  //   servingSize = parseInt(text) / quantity_val;
+  //   ingredientSize = parseInt(text);
+  //   // console.log(servingSize)
+  // }
+
+  function RenderIngredients() {
+    return recipe[0].items.map(ingredient => {
+      return (
+      <View style={{flexDirection:'row', flexWrap:'wrap'}}>
+        <Text>{'\u2022'}</Text>
+        <TextInput value={ingredientSize} style={{fontSize: 15}} numberOfLines={1} onChangeText={text => onChangeIngredient(text)}  /> 
+        <Text>{ingredient.quantity_val * servingSize} {ingredient.quantity} {ingredient.item_name} </Text>
+        {/* <TextInput value={servingSize} style={{fontSize: 15}} numberOfLines={1} onChangeText={text => updateServingSize(text, ingredient.quantity_val) } />  */}
+      </View>
+      );
+    });
+  }
+  
+  useEffect(() => {
+    // onChangeText(); 
+  }, [recipe])
+
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.pictureContainer}>
-          <Image
-              style={styles.picture}
-              resizeMode='contain'
-              source={require('../assets/images/arm.jpg')}
-            />
-        </View>
-
-        <View style={{position: 'absolute', top: '8%', left: '2.5%'}}>
-          <TouchableOpacity>
-            <FontAwesome5 name={"chevron-left"} size={22} color={"#2D82FF"} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.webviewContainer}>         
+        <View style={styles.flatlistContainer}>         
           <FlatList 
             style={styles.flatlist}
             data={recipe}
             renderItem={({item}) => (
               <View>
                 <Text style={styles.descTitle}> Ingredients:</Text>
-                <MarkdownView style={styles.desc}>
-                  {item.items.map(ingredient => {
-                      return '\u2022 ' + ingredient.quantity_val + ' ' + ingredient.quantity +  ' ' + ingredient.item_name + '\n';
-                  })}
-                </MarkdownView>
+                <RenderIngredients/>          
                 <Text style={styles.descTitle}>Instructions: </Text>
                 <HTML
                   tagsStyles={{p: {fontFamily: 'Avenir', paddingTop: '2%', paddingLeft: '8%', paddingRight: '8%', fontSize: 15}}} 
@@ -75,10 +85,36 @@ export default function RecipeDetailsScreen (props) {
             />
         </View>
 
+        <View style={styles.pictureContainer}>
+          <Image
+              style={styles.picture}
+              source={require('../assets/images/grocery.jpg')}
+            />
+        </View>
+
+        <View style={{position: 'absolute', top: '8%', left: '2.5%'}}>
+          <TouchableOpacity>
+            <FontAwesome5 name={"chevron-left"} size={22} color={"white"} />
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Will's Arm</Text>
           <View style={styles.estimate}>
             <Text>Estimated Time 10 mins</Text>
+            <View style={{flexDirection:'row', flexWrap:'wrap'}}>
+              <Text>Serving Size: </Text>
+              <TextInput
+                style={{
+                  fontSize: 15,
+                }}
+                numberOfLines={1}
+                placeholder={"Enter Amount"}
+                onChangeText={text => onChangeText(text)}
+                value={servingSize}
+              />
+            </View>
+            
           </View>
         </View>
         
@@ -106,12 +142,11 @@ export default function RecipeDetailsScreen (props) {
        left: 0,
        right: 0,
        backgroundColor: 'white',
-       opacity: 0.7,
     },
-    webviewContainer: {
+    flatlistContainer: {
       width: '100%',
       height: '60%',
-      top: 100,
+      top: '14%',
       // borderWidth: 2,
       // borderColor: 'red',
     },
@@ -122,8 +157,8 @@ export default function RecipeDetailsScreen (props) {
       bottom: 0,
       width: '100%',
       height: '100%',
-      borderWidth: 2,
-      borderColor: 'red',
+      // borderWidth: 2,
+      // borderColor: 'red',
     },
     descTitle: {
       fontFamily: 'Avenir',
@@ -152,16 +187,16 @@ export default function RecipeDetailsScreen (props) {
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center', 
-      top: 25,
+      top: '5%',
       width: '100%',
       height: '35%',
       //  borderWidth: 2,
-      // borderColor: 'black',
+      // borderColor: 'red',
     },
   
     picture: {
       // borderWidth: 2,
-      // borderColor: 'red',
+      //  borderColor: 'red',
       height: '100%',  
       flex:1,
       width: '100%',
@@ -179,10 +214,13 @@ export default function RecipeDetailsScreen (props) {
        alignItems: 'center',
        justifyContent: 'center', 
        width: '60%',
-       height: '8%',
-       top: '35%',
+       height: 80,
+       top: '33%',
        backgroundColor: '#2D82FF',
        borderRadius: 15,
+       paddingBottom: 10
+      //  borderWidth: 2,
+      // borderColor: 'red',
     },
     title: {
       position: 'absolute',
@@ -191,6 +229,7 @@ export default function RecipeDetailsScreen (props) {
       fontSize: 30,
       fontFamily: Styles.text.fontFamily,
       top: 5,
+      
   
     },
   
@@ -205,8 +244,8 @@ export default function RecipeDetailsScreen (props) {
       letterSpacing: 1,
       backgroundColor: 'white',
       borderRadius: 15,
-      //padding: 10,
-      bottom: -10,
+      padding: 2,
+      bottom: 0,
       alignItems: 'center',
       shadowOffset: {width:0, height:5},
       shadowColor: 'black',
@@ -233,26 +272,7 @@ export default function RecipeDetailsScreen (props) {
       justifyContent: "center",
       alignItems: "center",
     },
-    // webview: {
-    //   borderWidth: 2,
-    //   borderColor: 'red',
-    //   height: '100%',
-    //   width: '100%',
-    //   position: 'relative',
-    //   flex: 0,
-    //   resizeMode: 'cover',
 
-    scrollview: {
-      // borderWidth: 2,
-      // borderColor: 'red',
-      height: '100%',
-      width: '100%',
-      position: 'relative',
-      flex: 0,
-      resizeMode: 'cover',
-      
-    },
-  
   });
   
   

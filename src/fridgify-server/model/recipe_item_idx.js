@@ -10,8 +10,8 @@ const Schema = mongoose.Schema;
 let Recipe_Item_Idx = new Schema({
   recipe_id: { type: Schema.ObjectId, ref: "Recipe" },
   item_idx_id: { type: Schema.ObjectId, ref: "Item_Idx" },
-  quantity_val: { type: mongoose.Types.Decimal128 },
-  quantity: { type: Schema.ObjectId, ref: "Quantity" },
+  quantity_val: { type: Number },
+  quantity_unit: { type: String },
 });
 
 Recipe_Item_Idx.pre("validate", function (next) {

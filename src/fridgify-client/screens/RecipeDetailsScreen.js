@@ -8,9 +8,8 @@ import HTML from 'react-native-render-html';
 
 
 export default function RecipeDetailsScreen (props) {
-  let [servingSize, onChangeText] = useState('');
-  let [ingredientSize, onChangeIngredient] = useState('');
-  
+  let [servingSize, setServingSize] = useState(1);
+
   //From Daniel's data outline
     const [recipe, setRecipe] = useState([
       {
@@ -19,6 +18,7 @@ export default function RecipeDetailsScreen (props) {
           "created": "2020-07-06T05:09:19.742Z",
           "instructions": "<p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p><p> Cook this </p><p> Cook that </p>",
           "cuisine": "test cuisine",
+          "serving_size": 1,
           "items": [
               {
                   "recipe_item_idx_id": "5f02b1ffc14216acdc76532a",
@@ -42,29 +42,19 @@ export default function RecipeDetailsScreen (props) {
       }
   ]);
 
-  // function updateServingSize(text, quantity_val) {
-  //   // onChangeText({[servingSize]: parseInt(text) / quantity_val})
-  //   servingSize = parseInt(text) / quantity_val;
-  //   ingredientSize = parseInt(text);
-  //   // console.log(servingSize)
-  // }
-
   function RenderIngredients() {
-    return recipe[0].items.map(ingredient => {
+    return recipe[0].items.map((ingredient, idx) => {
       return (
-      <View style={{flexDirection:'row', flexWrap:'wrap'}}>
+      <View key={idx} style={{flexDirection:'row', flexWrap:'wrap'}}>
         <Text>{'\u2022'}</Text>
-        <TextInput value={ingredientSize} style={{fontSize: 15}} numberOfLines={1} onChangeText={text => onChangeIngredient(text)}  /> 
+        <TextInput style={{ backgroundColor: '#ededed', color:'black', width: 30, fontSize: 15 }} numberOfLines={1} 
+        onChangeText={text => setServingSize((parseInt(text) / ingredient.quantity_val))}  
+        /> 
         <Text>{ingredient.quantity_val * servingSize} {ingredient.quantity} {ingredient.item_name} </Text>
-        {/* <TextInput value={servingSize} style={{fontSize: 15}} numberOfLines={1} onChangeText={text => updateServingSize(text, ingredient.quantity_val) } />  */}
       </View>
       );
     });
   }
-  
-  useEffect(() => {
-    // onChangeText(); 
-  }, [recipe])
 
     return (
       <SafeAreaView style={styles.container}>
@@ -110,11 +100,10 @@ export default function RecipeDetailsScreen (props) {
                 }}
                 numberOfLines={1}
                 placeholder={"Enter Amount"}
-                onChangeText={text => onChangeText(text)}
-                value={servingSize}
+                onChangeText = {text => setServingSize(parseInt(text))}
+                value={servingSize.toFixed(2)} // we need toFixed for changes in ingredient sizes to reflect upon the serving size value
               />
             </View>
-            
           </View>
         </View>
         
